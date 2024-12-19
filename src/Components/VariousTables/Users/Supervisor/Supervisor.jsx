@@ -652,12 +652,14 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { Autocomplete } from "@mui/material";
+import Export from "./ExportSupervisor";
 import {
   FormControl,
   IconButton,
@@ -1036,16 +1038,16 @@ export const Supervisor = () => {
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "Supervisor.xlsx");
-  };
+  // const handleExport = () => {
+  //   const dataToExport = filteredRows.map((row) => {
+  //     const { isSelected, ...rowData } = row;
+  //     return rowData;
+  //   });
+  //   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   XLSX.writeFile(workbook, "Supervisor.xlsx");
+  // };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -1762,9 +1764,11 @@ export const Supervisor = () => {
           >
             Import
           </Button>
-          <Button variant="contained" color="primary" onClick={handleExport}>
+          {/* <Button variant="contained" color="primary" onClick={handleExport}>
             Export
-          </Button>
+          </Button> */}
+          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"SUPERVISOR DETAIL LIST"} pdfFilename={"Supervisor.pdf"} excelFilename={"Supervisor.xlsx"}/>
+
         </div>
         <div
           style={{

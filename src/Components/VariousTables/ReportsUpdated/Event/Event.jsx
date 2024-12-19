@@ -23,6 +23,9 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
@@ -33,6 +36,7 @@ import { saveAs } from 'file-saver'; // Save file to the user's machine
 // import * as XLSX from 'xlsx'; // To process and convert the excel file to JSON
 //import { TextField } from '@mui/material';
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "../../Export";
 import Select from "react-select";
 const style = {
   position: "absolute",
@@ -272,16 +276,6 @@ export const Event = () => {
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "Event.xlsx");
-  };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -1052,13 +1046,9 @@ const [selectedNotification, setSelectedNotification] = useState("allEvents");
             <ImportExportIcon />
             Column Visibility
           </Button>
-        
-        
+
          
-         
-          <Button variant="contained" color="error" onClick={handleExport}>
-            Export
-          </Button>
+          <Export filteredRows={filteredRows} COLUMNS={COLUMNS} columnVisibility={columnVisibility}  pdfTitle={"EVENTS REPORT"} pdfFilename={"EventsReport.pdf"} excelFilename={"EventsReport.xlsx"}/>
         </div>
        
      <div

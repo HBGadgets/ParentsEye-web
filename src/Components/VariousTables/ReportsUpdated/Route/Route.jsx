@@ -34,6 +34,7 @@ import { saveAs } from 'file-saver'; // Save file to the user's machine
 //import { TextField } from '@mui/material';
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
 import Select from "react-select";
+import Export from "../../Export";
 const style = {
   position: "absolute",
   top: "50%",
@@ -78,11 +79,11 @@ export const Route = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  
- 
 
 
-  
+
+
+
 
   useEffect(() => {
     fetchData();
@@ -92,13 +93,13 @@ export const Route = () => {
     filterData(filterText);
   }, [filterText]);
 
- 
+
   const handleChangeRowsPerPage = (event) => {
     const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage === -1 ? sortedData.length : newRowsPerPage); // Set to all rows if -1
     setPage(0); // Reset to the first page
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -108,10 +109,10 @@ export const Route = () => {
     setFilterText(text);
   };
 
- 
+
   const filterData = (text) => {
     let dataToFilter = originalRows;
-  
+
     // Apply date filter
     if (startDate && endDate) {
       dataToFilter = dataToFilter.filter((row) => {
@@ -119,7 +120,7 @@ export const Route = () => {
         return rowDate >= new Date(startDate) && rowDate <= new Date(endDate);
       });
     }
-  
+
     // Apply text filter
     if (text === "") {
       setFilteredRows(dataToFilter); // Reset to full filtered data
@@ -133,11 +134,11 @@ export const Route = () => {
           )
         )
         .map((row) => ({ ...row, isSelected: false }));
-      
+
       setFilteredRows(filteredData); // Update filtered rows
     }
   };
-  
+
   const requestSort = (key) => {
     let direction = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -250,16 +251,6 @@ export const Route = () => {
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "Route.xlsx");
-  };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -314,68 +305,68 @@ export const Route = () => {
     });
   };
 
- 
 
 
-const handleEditSubmit = async () => {
-  const apiUrl = `https://rocketsalestracker.com/api/server`; // Ensure this is correct
-  const username = "test";
-  const password = "123456";
-  const token = btoa(`${username}:${password}`);
 
-  // Ensure formData contains the full structure with nested attributes
-  const updatedData = {
-    ...formData, // formData should have the same structure as the object you are retrieving
-    isSelected: false,
-    attributes: {
-      ...formData.attributes,
-      speedUnit: "kmh", // Ensure this is updated correctly
+  const handleEditSubmit = async () => {
+    const apiUrl = `https://rocketsalestracker.com/api/server`; // Ensure this is correct
+    const username = "test";
+    const password = "123456";
+    const token = btoa(`${username}:${password}`);
+
+    // Ensure formData contains the full structure with nested attributes
+    const updatedData = {
+      ...formData, // formData should have the same structure as the object you are retrieving
+      isSelected: false,
+      attributes: {
+        ...formData.attributes,
+        speedUnit: "kmh", // Ensure this is updated correctly
+      }
+    };
+
+    try {
+      console.log("Sending request to:", apiUrl);
+      console.log("Request payload:", JSON.stringify(updatedData, null, 2));
+
+      const response = await fetch(apiUrl, {
+        method: "PUT", // PUT method to update the resource
+        headers: {
+          "Authorization": `Basic ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData), // Convert updatedData to JSON
+      });
+
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
+
+      if (!response.ok) {
+        const errorResult = await response.json();
+        console.error("Error response:", errorResult);
+        throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorResult.message}`);
+      }
+
+      const result = await response.json();
+      console.log("Update successful:", result);
+      alert("Updated successfully");
+
+      // Update filteredRows in state
+      const updatedRows = filteredRows.map((row) =>
+        row.id === selectedRow.id
+          ? { ...row, ...updatedData, isSelected: false } // Ensure the updated data includes nested fields
+          : row
+      );
+      setFilteredRows(updatedRows);
+
+      handleModalClose();
+      fetchData(); // Refetch data to ensure the UI is up-to-date
+    } catch (error) {
+      console.error("Error updating row:", error.message, error.stack);
+      alert("Error updating data");
     }
   };
 
-  try {
-    console.log("Sending request to:", apiUrl);
-    console.log("Request payload:", JSON.stringify(updatedData, null, 2));
 
-    const response = await fetch(apiUrl, {
-      method: "PUT", // PUT method to update the resource
-      headers: {
-        "Authorization": `Basic ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedData), // Convert updatedData to JSON
-    });
-
-    console.log("Response status:", response.status);
-    console.log("Response headers:", response.headers);
-
-    if (!response.ok) {
-      const errorResult = await response.json();
-      console.error("Error response:", errorResult);
-      throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorResult.message}`);
-    }
-
-    const result = await response.json();
-    console.log("Update successful:", result);
-    alert("Updated successfully");
-
-    // Update filteredRows in state
-    const updatedRows = filteredRows.map((row) =>
-      row.id === selectedRow.id
-        ? { ...row, ...updatedData, isSelected: false } // Ensure the updated data includes nested fields
-        : row
-    );
-    setFilteredRows(updatedRows);
-
-    handleModalClose();
-    fetchData(); // Refetch data to ensure the UI is up-to-date
-  } catch (error) {
-    console.error("Error updating row:", error.message, error.stack);
-    alert("Error updating data");
-  }
-};
-
- 
   const handleAddSubmit = async () => {
     try {
       const newRow = {
@@ -396,7 +387,7 @@ const handleEditSubmit = async () => {
         }
       );
       alert('record created successfully');
-    
+
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -480,7 +471,7 @@ const handleEditSubmit = async () => {
   const [selectedDevice, setSelectedDevice] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('');
   const [apiUrl, setApiUrl] = useState('');
-  
+
   const handleShowClick = () => {
     const formattedStartDate = formatToUTC(startDate);
     const formattedEndDate = formatToUTC(endDate);
@@ -492,7 +483,7 @@ const handleEditSubmit = async () => {
 
     // Construct the API URL
     const url = `https://rocketsalestracker.com/api/reports/route?from=${encodeURIComponent(formattedStartDate)}&to=${encodeURIComponent(formattedEndDate)}&deviceId=${encodeURIComponent(selectedDevice)}`;
-    
+
     setApiUrl(url); // Update the state with the generated URL
     fetchData(url); // Call fetchData with the generated URL
   };
@@ -502,346 +493,346 @@ const handleEditSubmit = async () => {
     const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
     return utcDate.toISOString();
   };
-  
-  
-// const fetchData = async (url) => {
-//   console.log('Fetching report...');
-//   setLoading(true);
 
-//   try {
-//     const username = "schoolmaster";
-//     const password = "123456";
-//     const token = btoa(`${username}:${password}`);
 
-//     const response = await axios.get(url, {
-//       headers: {
-//         Authorization: `Basic ${token}`,
-//       },
-//       responseType: 'blob', // Downloading as binary data
-//     });
+  // const fetchData = async (url) => {
+  //   console.log('Fetching report...');
+  //   setLoading(true);
 
-//     // Log the content type of the response
-//     console.log('Content-Type:', response.headers['content-type']);
-//     const deviceIdToNameMap = devices.reduce((acc, device) => {
-//       acc[device.id] = device.name; // Use device.id and device.name as key-value pair
-//       return acc;
-//     }, {});
-//     // Handle JSON response
-//     if (response.headers['content-type'] === 'application/json') {
-//       const text = await response.data.text(); // Convert Blob to text
-//       console.log('JSON Response:', text); // Log JSON response
-//       const jsonResponse = JSON.parse(text); // Parse JSON
-//       // Process the JSON response
-//       console.log('Processed JSON Data:', jsonResponse);
+  //   try {
+  //     const username = "schoolmaster";
+  //     const password = "123456";
+  //     const token = btoa(`${username}:${password}`);
 
-//       // Example: Set filtered rows and total responses from JSON data
-//       setFilteredRows(jsonResponse.map(data => ({
-//         deviceId: data.deviceId || 'N/A',
-//         eventTime: data.fixTime ? new Date(data.fixTime).toLocaleString() : 'N/A',
-//         latitude: data.latitude ? `${data.latitude.toFixed(6)}°` : 'N/A',
-//         longitude: data.longitude ? `${data.longitude.toFixed(6)}°` : 'N/A',
-//         speed : data.speed ? `${data.speed.toFixed(2)} mph` : 'N/A',
+  //     const response = await axios.get(url, {
+  //       headers: {
+  //         Authorization: `Basic ${token}`,
+  //       },
+  //       responseType: 'blob', // Downloading as binary data
+  //     });
 
-//         address: data.address || 'Show Address',
-//         course: data.course > 0 ? '↑' : '↓',
-//         altitude: data.altitude ? `${data.altitude.toFixed(2)} m` : 'N/A',
-//         accuracy: data.accuracy ? `${data.accuracy.toFixed(2)}` : 'N/A',
-//         valid: data.valid ? 'Yes' : 'No',
-//         protocol: data.protocol || 'N/A',
-//         deviceTime: data.deviceTime ? new Date(data.deviceTime).toLocaleString() : 'N/A',
-//         serverTime: data.serverTime ? new Date(data.serverTime).toLocaleString() : 'N/A',
-//         fixTime: data.fixTime ? new Date(data.fixTime).toLocaleString() : 'N/A',
-//         geofences: data.geofenceIds ? data.geofenceIds.join(', ') : 'None',
-//         satellites: data.attributes?.sat || 'N/A',
-//         RSSI: data.attributes?.rssi || 'N/A',
-//         odometer: data.attributes?.odometer ? `${data.attributes.odometer.toFixed(2)} mi` : 'N/A',
-//         batteryLevel: data.attributes?.batteryLevel || 'N/A',
-//         ignition: data.attributes?.ignition ? 'Yes' : 'No',
-//         charge: data.attributes?.charge ? 'Yes' : 'No',
-//         archive: data.attributes?.archive ? 'Yes' : 'No',
-//         distance: data.attributes?.distance ? `${data.attributes.distance.toFixed(2)} mi` : 'N/A',
-//         totalDistance: data.attributes?.totalDistance ? `${data.attributes.totalDistance.toFixed(2)} mi` : 'N/A',
-//         motion: data.attributes?.motion ? 'Yes' : 'No',
-//         blocked: data.attributes?.blocked ? 'Yes' : 'No',
-//         alarm1Status: data.attributes?.alarm1Status || 'N/A',
-//         otherStatus: data.attributes?.otherStatus || 'N/A',
-//         alarm2Status: data.attributes?.alarm2Status || 'N/A',
-//         engineStatus: data.attributes?.engineStatus ? 'On' : 'Off',
-//         adc1: data.attributes?.adc1 ? `${data.attributes.adc1.toFixed(2)} V` : 'N/A'
-        
-//       })));
+  //     // Log the content type of the response
+  //     console.log('Content-Type:', response.headers['content-type']);
+  //     const deviceIdToNameMap = devices.reduce((acc, device) => {
+  //       acc[device.id] = device.name; // Use device.id and device.name as key-value pair
+  //       return acc;
+  //     }, {});
+  //     // Handle JSON response
+  //     if (response.headers['content-type'] === 'application/json') {
+  //       const text = await response.data.text(); // Convert Blob to text
+  //       console.log('JSON Response:', text); // Log JSON response
+  //       const jsonResponse = JSON.parse(text); // Parse JSON
+  //       // Process the JSON response
+  //       console.log('Processed JSON Data:', jsonResponse);
 
-//       setTotalResponses(jsonResponse.length);
+  //       // Example: Set filtered rows and total responses from JSON data
+  //       setFilteredRows(jsonResponse.map(data => ({
+  //         deviceId: data.deviceId || 'N/A',
+  //         eventTime: data.fixTime ? new Date(data.fixTime).toLocaleString() : 'N/A',
+  //         latitude: data.latitude ? `${data.latitude.toFixed(6)}°` : 'N/A',
+  //         longitude: data.longitude ? `${data.longitude.toFixed(6)}°` : 'N/A',
+  //         speed : data.speed ? `${data.speed.toFixed(2)} mph` : 'N/A',
 
-//     } else if (response.headers['content-type'] === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-//       // Handle Excel response
-//       const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-//       saveAs(blob, 'report.xlsx'); // Save the file to the user's system
+  //         address: data.address || 'Show Address',
+  //         course: data.course > 0 ? '↑' : '↓',
+  //         altitude: data.altitude ? `${data.altitude.toFixed(2)} m` : 'N/A',
+  //         accuracy: data.accuracy ? `${data.accuracy.toFixed(2)}` : 'N/A',
+  //         valid: data.valid ? 'Yes' : 'No',
+  //         protocol: data.protocol || 'N/A',
+  //         deviceTime: data.deviceTime ? new Date(data.deviceTime).toLocaleString() : 'N/A',
+  //         serverTime: data.serverTime ? new Date(data.serverTime).toLocaleString() : 'N/A',
+  //         fixTime: data.fixTime ? new Date(data.fixTime).toLocaleString() : 'N/A',
+  //         geofences: data.geofenceIds ? data.geofenceIds.join(', ') : 'None',
+  //         satellites: data.attributes?.sat || 'N/A',
+  //         RSSI: data.attributes?.rssi || 'N/A',
+  //         odometer: data.attributes?.odometer ? `${data.attributes.odometer.toFixed(2)} mi` : 'N/A',
+  //         batteryLevel: data.attributes?.batteryLevel || 'N/A',
+  //         ignition: data.attributes?.ignition ? 'Yes' : 'No',
+  //         charge: data.attributes?.charge ? 'Yes' : 'No',
+  //         archive: data.attributes?.archive ? 'Yes' : 'No',
+  //         distance: data.attributes?.distance ? `${data.attributes.distance.toFixed(2)} mi` : 'N/A',
+  //         totalDistance: data.attributes?.totalDistance ? `${data.attributes.totalDistance.toFixed(2)} mi` : 'N/A',
+  //         motion: data.attributes?.motion ? 'Yes' : 'No',
+  //         blocked: data.attributes?.blocked ? 'Yes' : 'No',
+  //         alarm1Status: data.attributes?.alarm1Status || 'N/A',
+  //         otherStatus: data.attributes?.otherStatus || 'N/A',
+  //         alarm2Status: data.attributes?.alarm2Status || 'N/A',
+  //         engineStatus: data.attributes?.engineStatus ? 'On' : 'Off',
+  //         adc1: data.attributes?.adc1 ? `${data.attributes.adc1.toFixed(2)} V` : 'N/A'
 
-//       // Process the file to extract data
-//       const reader = new FileReader();
-//       reader.onload = (e) => {
-//         const data = new Uint8Array(e.target.result);
-//         const reportWorkbook = XLSX.read(data, { type: 'array' });
+  //       })));
 
-//         const firstSheetName = reportWorkbook.SheetNames[0];
-//         const reportWorksheet = reportWorkbook.Sheets[firstSheetName];
-        
-//         // Convert worksheet data to JSON
-//         const jsonData = XLSX.utils.sheet_to_json(reportWorksheet);
+  //       setTotalResponses(jsonResponse.length);
 
-//         console.log('Extracted JSON Data from Excel:', jsonData);
+  //     } else if (response.headers['content-type'] === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+  //       // Handle Excel response
+  //       const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  //       saveAs(blob, 'report.xlsx'); // Save the file to the user's system
 
-//         // Process the data
-//         const processedEvents = jsonData.map(data => ({
-//           deviceId: data.deviceId,
-//           eventTime: new Date(data.fixTime).toLocaleString(),
-//           latitude: `${data.latitude.toFixed(6)}°`,
-//           longitude: `${data.longitude.toFixed(6)}°`,
-//           speed: `${data.speed.toFixed(2)} mph`,
-//           address: data.address || 'Show Address',
-//           course: data.course > 0 ? '↑' : '↓',
-//           altitude: `${data.altitude.toFixed(2)} m`,
-//           accuracy: `${data.accuracy.toFixed(2)}`,
-//           valid: data.valid ? 'Yes' : 'No',
-//           protocol: data.protocol,
-//           deviceTime: new Date(data.deviceTime).toLocaleString(),
-//           serverTime: new Date(data.serverTime).toLocaleString(),
-//           geofences: data.geofenceIds ? data.geofenceIds.join(', ') : 'None',
-//           satellites: data.attributes.sat || '',
-//           RSSI: data.attributes.rssi || '',
-//           odometer: `${(data.attributes.odometer || 0).toFixed(2)} mi`,
-//           batteryLevel: data.attributes.batteryLevel || '',
-//           ignition: data.attributes.ignition ? 'Yes' : 'No',
-//           charge: data.attributes.charge ? 'Yes' : 'No',
-//           archive: data.attributes.archive ? 'Yes' : 'No',
-//           distance: `${(data.attributes.distance || 0).toFixed(2)} mi`,
-//           totalDistance: `${(data.attributes.totalDistance || 0).toFixed(2)} mi`,
-//           motion: data.attributes.motion ? 'Yes' : 'No',
-//           blocked: data.attributes.blocked ? 'Yes' : 'No',
-//           alarm1Status: data.attributes.alarm1Status || '',
-//           otherStatus: data.attributes.otherStatus || '',
-//           alarm2Status: data.attributes.alarm2Status || '',
-//           engineStatus: data.attributes.engineStatus ? 'On' : 'Off',
-//           adc1: data.attributes.adc1 ? `${data.attributes.adc1.toFixed(2)} V` : ''
-//         }));
+  //       // Process the file to extract data
+  //       const reader = new FileReader();
+  //       reader.onload = (e) => {
+  //         const data = new Uint8Array(e.target.result);
+  //         const reportWorkbook = XLSX.read(data, { type: 'array' });
 
-//         console.log('Processed Events:', processedEvents);
+  //         const firstSheetName = reportWorkbook.SheetNames[0];
+  //         const reportWorksheet = reportWorkbook.Sheets[firstSheetName];
 
-//         // setFilteredRows(processedEvents.map(event => ({
-//         //   ...event,
-//         //   isSelected: false
-//         // })));
-//         // setOriginalRows(processedEvents.map((row) => ({ ...row, isSelected: false })));
-//         setFilteredRows(
-//           processedEvents.map((row) => ({ ...row, isSelected: false }))
-//         );
-//         setOriginalRows(processedEvents.map((row) => ({ ...row, isSelected: false })));
-        
-//         setTotalResponses(processedEvents.length);
+  //         // Convert worksheet data to JSON
+  //         const jsonData = XLSX.utils.sheet_to_json(reportWorksheet);
 
-//         // Optionally export the processed data back to an Excel file
-//         const outputWorksheet = XLSX.utils.json_to_sheet(processedEvents);
-//         const outputWorkbook = XLSX.utils.book_new();
-//         XLSX.utils.book_append_sheet(outputWorkbook, outputWorksheet, 'Processed Report');
+  //         console.log('Extracted JSON Data from Excel:', jsonData);
 
-//         // Trigger file download
-//         XLSX.writeFile(outputWorkbook, 'processed_report.xlsx');
-//       };
+  //         // Process the data
+  //         const processedEvents = jsonData.map(data => ({
+  //           deviceId: data.deviceId,
+  //           eventTime: new Date(data.fixTime).toLocaleString(),
+  //           latitude: `${data.latitude.toFixed(6)}°`,
+  //           longitude: `${data.longitude.toFixed(6)}°`,
+  //           speed: `${data.speed.toFixed(2)} mph`,
+  //           address: data.address || 'Show Address',
+  //           course: data.course > 0 ? '↑' : '↓',
+  //           altitude: `${data.altitude.toFixed(2)} m`,
+  //           accuracy: `${data.accuracy.toFixed(2)}`,
+  //           valid: data.valid ? 'Yes' : 'No',
+  //           protocol: data.protocol,
+  //           deviceTime: new Date(data.deviceTime).toLocaleString(),
+  //           serverTime: new Date(data.serverTime).toLocaleString(),
+  //           geofences: data.geofenceIds ? data.geofenceIds.join(', ') : 'None',
+  //           satellites: data.attributes.sat || '',
+  //           RSSI: data.attributes.rssi || '',
+  //           odometer: `${(data.attributes.odometer || 0).toFixed(2)} mi`,
+  //           batteryLevel: data.attributes.batteryLevel || '',
+  //           ignition: data.attributes.ignition ? 'Yes' : 'No',
+  //           charge: data.attributes.charge ? 'Yes' : 'No',
+  //           archive: data.attributes.archive ? 'Yes' : 'No',
+  //           distance: `${(data.attributes.distance || 0).toFixed(2)} mi`,
+  //           totalDistance: `${(data.attributes.totalDistance || 0).toFixed(2)} mi`,
+  //           motion: data.attributes.motion ? 'Yes' : 'No',
+  //           blocked: data.attributes.blocked ? 'Yes' : 'No',
+  //           alarm1Status: data.attributes.alarm1Status || '',
+  //           otherStatus: data.attributes.otherStatus || '',
+  //           alarm2Status: data.attributes.alarm2Status || '',
+  //           engineStatus: data.attributes.engineStatus ? 'On' : 'Off',
+  //           adc1: data.attributes.adc1 ? `${data.attributes.adc1.toFixed(2)} V` : ''
+  //         }));
 
-//       reader.readAsArrayBuffer(blob); // Read the Blob as an ArrayBuffer
-//     } else {
-//       throw new Error('Unexpected content type: ' + response.headers['content-type']);
-//     }
-//   } catch (error) {
-//     console.error('Error fetching the report:', error);
-//     alert("please select device and date");
-//   } finally {
-//     setLoading(false);
-//   }
-// };
+  //         console.log('Processed Events:', processedEvents);
 
-const fetchData = async (url) => {
-  console.log('Fetching report...');
-  setLoading(true);
+  //         // setFilteredRows(processedEvents.map(event => ({
+  //         //   ...event,
+  //         //   isSelected: false
+  //         // })));
+  //         // setOriginalRows(processedEvents.map((row) => ({ ...row, isSelected: false })));
+  //         setFilteredRows(
+  //           processedEvents.map((row) => ({ ...row, isSelected: false }))
+  //         );
+  //         setOriginalRows(processedEvents.map((row) => ({ ...row, isSelected: false })));
 
-  try {
-    const username = "schoolmaster";
-    const password = "123456";
-    const token = btoa(`${username}:${password}`);
+  //         setTotalResponses(processedEvents.length);
 
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Basic ${token}`,
-      },
-      responseType: 'blob', // Downloading as binary data
-    });
+  //         // Optionally export the processed data back to an Excel file
+  //         const outputWorksheet = XLSX.utils.json_to_sheet(processedEvents);
+  //         const outputWorkbook = XLSX.utils.book_new();
+  //         XLSX.utils.book_append_sheet(outputWorkbook, outputWorksheet, 'Processed Report');
 
-    // Log the content type of the response
-    console.log('Content-Type:', response.headers['content-type']);
+  //         // Trigger file download
+  //         XLSX.writeFile(outputWorkbook, 'processed_report.xlsx');
+  //       };
 
-    const deviceIdToNameMap = devices.reduce((acc, device) => {
-      acc[device.id] = device.name; // Use device.id and device.name as key-value pair
-      return acc;
-    }, {});
+  //       reader.readAsArrayBuffer(blob); // Read the Blob as an ArrayBuffer
+  //     } else {
+  //       throw new Error('Unexpected content type: ' + response.headers['content-type']);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching the report:', error);
+  //     alert("please select device and date");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-    // Handle JSON response
-    if (response.headers['content-type'] === 'application/json') {
-      const text = await response.data.text(); // Convert Blob to text
-      console.log('JSON Response:', text); // Log JSON response
-      const jsonResponse = JSON.parse(text); // Parse JSON
+  const fetchData = async (url) => {
+    console.log('Fetching report...');
+    setLoading(true);
 
-      // Process the JSON response
-      console.log('Processed JSON Data:', jsonResponse);
+    try {
+      const username = "schoolmaster";
+      const password = "123456";
+      const token = btoa(`${username}:${password}`);
 
-      // Example: Set filtered rows and total responses from JSON data
-      setFilteredRows(jsonResponse.map(data => ({
-        deviceId: data.deviceId || 'N/A',
-        deviceName: deviceIdToNameMap[data.deviceId] || 'Unknown Device', // Fetch device name based on deviceId
-        eventTime: data.fixTime ? new Date(data.fixTime).toLocaleString() : 'N/A',
-        latitude: data.latitude ? `${data.latitude.toFixed(6)}°` : 'N/A',
-        longitude: data.longitude ? `${data.longitude.toFixed(6)}°` : 'N/A',
-        speed: data.speed ? `${data.speed.toFixed(2)} mph` : 'N/A',
-        address: data.address || 'Show Address',
-        course: data.course > 0 ? '↑' : '↓',
-        altitude: data.altitude ? `${data.altitude.toFixed(2)} m` : 'N/A',
-        accuracy: data.accuracy ? `${data.accuracy.toFixed(2)}` : 'N/A',
-        valid: data.valid ? 'Yes' : 'No',
-        protocol: data.protocol || 'N/A',
-        deviceTime: data.deviceTime ? new Date(data.deviceTime).toLocaleString() : 'N/A',
-        serverTime: data.serverTime ? new Date(data.serverTime).toLocaleString() : 'N/A',
-        fixTime: data.fixTime ? new Date(data.fixTime).toLocaleString() : 'N/A',
-        geofences: data.geofenceIds ? data.geofenceIds.join(', ') : 'None',
-        satellites: data.attributes?.sat || 'N/A',
-        RSSI: data.attributes?.rssi || 'N/A',
-        odometer: data.attributes?.odometer ? `${data.attributes.odometer.toFixed(2)} mi` : 'N/A',
-        batteryLevel: data.attributes?.batteryLevel || 'N/A',
-        ignition: data.attributes?.ignition ? 'Yes' : 'No',
-        charge: data.attributes?.charge ? 'Yes' : 'No',
-        archive: data.attributes?.archive ? 'Yes' : 'No',
-        distance: data.attributes?.distance ? `${data.attributes.distance.toFixed(2)} mi` : 'N/A',
-        totalDistance: data.attributes?.totalDistance ? `${data.attributes.totalDistance.toFixed(2)} mi` : 'N/A',
-        motion: data.attributes?.motion ? 'Yes' : 'No',
-        blocked: data.attributes?.blocked ? 'Yes' : 'No',
-        alarm1Status: data.attributes?.alarm1Status || 'N/A',
-        otherStatus: data.attributes?.otherStatus || 'N/A',
-        alarm2Status: data.attributes?.alarm2Status || 'N/A',
-        engineStatus: data.attributes?.engineStatus ? 'On' : 'Off',
-        adc1: data.attributes?.adc1 ? `${data.attributes.adc1.toFixed(2)} V` : 'N/A'
-      })));
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Basic ${token}`,
+        },
+        responseType: 'blob', // Downloading as binary data
+      });
 
-      setTotalResponses(jsonResponse.length);
+      // Log the content type of the response
+      console.log('Content-Type:', response.headers['content-type']);
 
-    } else if (response.headers['content-type'] === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-      // Handle Excel response
-      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      saveAs(blob, 'report.xlsx'); // Save the file to the user's system
+      const deviceIdToNameMap = devices.reduce((acc, device) => {
+        acc[device.id] = device.name; // Use device.id and device.name as key-value pair
+        return acc;
+      }, {});
 
-      // Process the file to extract data
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result);
-        const reportWorkbook = XLSX.read(data, { type: 'array' });
+      // Handle JSON response
+      if (response.headers['content-type'] === 'application/json') {
+        const text = await response.data.text(); // Convert Blob to text
+        console.log('JSON Response:', text); // Log JSON response
+        const jsonResponse = JSON.parse(text); // Parse JSON
 
-        const firstSheetName = reportWorkbook.SheetNames[0];
-        const reportWorksheet = reportWorkbook.Sheets[firstSheetName];
-        
-        // Convert worksheet data to JSON
-        const jsonData = XLSX.utils.sheet_to_json(reportWorksheet);
+        // Process the JSON response
+        console.log('Processed JSON Data:', jsonResponse);
 
-        console.log('Extracted JSON Data from Excel:', jsonData);
-
-        // Process the data
-        const processedEvents = jsonData.map(data => ({
-          deviceId: data.deviceId,
+        // Example: Set filtered rows and total responses from JSON data
+        setFilteredRows(jsonResponse.map(data => ({
+          deviceId: data.deviceId || 'N/A',
           deviceName: deviceIdToNameMap[data.deviceId] || 'Unknown Device', // Fetch device name based on deviceId
-          eventTime: new Date(data.fixTime).toLocaleString(),
-          latitude: `${data.latitude.toFixed(6)}°`,
-          longitude: `${data.longitude.toFixed(6)}°`,
-          speed: `${data.speed.toFixed(2)} mph`,
+          eventTime: data.fixTime ? new Date(data.fixTime).toLocaleString() : 'N/A',
+          latitude: data.latitude ? `${data.latitude.toFixed(6)}°` : 'N/A',
+          longitude: data.longitude ? `${data.longitude.toFixed(6)}°` : 'N/A',
+          speed: data.speed ? `${data.speed.toFixed(2)} mph` : 'N/A',
           address: data.address || 'Show Address',
           course: data.course > 0 ? '↑' : '↓',
-          altitude: `${data.altitude.toFixed(2)} m`,
-          accuracy: `${data.accuracy.toFixed(2)}`,
+          altitude: data.altitude ? `${data.altitude.toFixed(2)} m` : 'N/A',
+          accuracy: data.accuracy ? `${data.accuracy.toFixed(2)}` : 'N/A',
           valid: data.valid ? 'Yes' : 'No',
-          protocol: data.protocol,
-          deviceTime: new Date(data.deviceTime).toLocaleString(),
-          serverTime: new Date(data.serverTime).toLocaleString(),
+          protocol: data.protocol || 'N/A',
+          deviceTime: data.deviceTime ? new Date(data.deviceTime).toLocaleString() : 'N/A',
+          serverTime: data.serverTime ? new Date(data.serverTime).toLocaleString() : 'N/A',
+          fixTime: data.fixTime ? new Date(data.fixTime).toLocaleString() : 'N/A',
           geofences: data.geofenceIds ? data.geofenceIds.join(', ') : 'None',
-          satellites: data.attributes.sat || '',
-          RSSI: data.attributes.rssi || '',
-          odometer: `${(data.attributes.odometer || 0).toFixed(2)} mi`,
-          batteryLevel: data.attributes.batteryLevel || '',
-          ignition: data.attributes.ignition ? 'Yes' : 'No',
-          charge: data.attributes.charge ? 'Yes' : 'No',
-          archive: data.attributes.archive ? 'Yes' : 'No',
-          distance: `${(data.attributes.distance || 0).toFixed(2)} mi`,
-          totalDistance: `${(data.attributes.totalDistance || 0).toFixed(2)} mi`,
-          motion: data.attributes.motion ? 'Yes' : 'No',
-          blocked: data.attributes.blocked ? 'Yes' : 'No',
-          alarm1Status: data.attributes.alarm1Status || '',
-          otherStatus: data.attributes.otherStatus || '',
-          alarm2Status: data.attributes.alarm2Status || '',
-          engineStatus: data.attributes.engineStatus ? 'On' : 'Off',
-          adc1: data.attributes.adc1 ? `${data.attributes.adc1.toFixed(2)} V` : ''
-        }));
+          satellites: data.attributes?.sat || 'N/A',
+          RSSI: data.attributes?.rssi || 'N/A',
+          odometer: data.attributes?.odometer ? `${data.attributes.odometer.toFixed(2)} mi` : 'N/A',
+          batteryLevel: data.attributes?.batteryLevel || 'N/A',
+          ignition: data.attributes?.ignition ? 'Yes' : 'No',
+          charge: data.attributes?.charge ? 'Yes' : 'No',
+          archive: data.attributes?.archive ? 'Yes' : 'No',
+          distance: data.attributes?.distance ? `${data.attributes.distance.toFixed(2)} mi` : 'N/A',
+          totalDistance: data.attributes?.totalDistance ? `${data.attributes.totalDistance.toFixed(2)} mi` : 'N/A',
+          motion: data.attributes?.motion ? 'Yes' : 'No',
+          blocked: data.attributes?.blocked ? 'Yes' : 'No',
+          alarm1Status: data.attributes?.alarm1Status || 'N/A',
+          otherStatus: data.attributes?.otherStatus || 'N/A',
+          alarm2Status: data.attributes?.alarm2Status || 'N/A',
+          engineStatus: data.attributes?.engineStatus ? 'On' : 'Off',
+          adc1: data.attributes?.adc1 ? `${data.attributes.adc1.toFixed(2)} V` : 'N/A'
+        })));
 
-        console.log('Processed Events:', processedEvents);
+        setTotalResponses(jsonResponse.length);
 
-        setFilteredRows(
-          processedEvents.map((row) => ({ ...row, isSelected: false }))
-        );
-        setOriginalRows(processedEvents.map((row) => ({ ...row, isSelected: false })));
-        
-        setTotalResponses(processedEvents.length);
+      } else if (response.headers['content-type'] === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        // Handle Excel response
+        const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(blob, 'report.xlsx'); // Save the file to the user's system
 
-        // Optionally export the processed data back to an Excel file
-        const outputWorksheet = XLSX.utils.json_to_sheet(processedEvents);
-        const outputWorkbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(outputWorkbook, outputWorksheet, 'Processed Report');
+        // Process the file to extract data
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const data = new Uint8Array(e.target.result);
+          const reportWorkbook = XLSX.read(data, { type: 'array' });
 
-        // Trigger file download
-        XLSX.writeFile(outputWorkbook, 'processed_report.xlsx');
-      };
+          const firstSheetName = reportWorkbook.SheetNames[0];
+          const reportWorksheet = reportWorkbook.Sheets[firstSheetName];
 
-      reader.readAsArrayBuffer(blob); // Read the Blob as an ArrayBuffer
-    } else {
-      throw new Error('Unexpected content type: ' + response.headers['content-type']);
+          // Convert worksheet data to JSON
+          const jsonData = XLSX.utils.sheet_to_json(reportWorksheet);
+
+          console.log('Extracted JSON Data from Excel:', jsonData);
+
+          // Process the data
+          const processedEvents = jsonData.map(data => ({
+            deviceId: data.deviceId,
+            deviceName: deviceIdToNameMap[data.deviceId] || 'Unknown Device', // Fetch device name based on deviceId
+            eventTime: new Date(data.fixTime).toLocaleString(),
+            latitude: `${data.latitude.toFixed(6)}°`,
+            longitude: `${data.longitude.toFixed(6)}°`,
+            speed: `${data.speed.toFixed(2)} mph`,
+            address: data.address || 'Show Address',
+            course: data.course > 0 ? '↑' : '↓',
+            altitude: `${data.altitude.toFixed(2)} m`,
+            accuracy: `${data.accuracy.toFixed(2)}`,
+            valid: data.valid ? 'Yes' : 'No',
+            protocol: data.protocol,
+            deviceTime: new Date(data.deviceTime).toLocaleString(),
+            serverTime: new Date(data.serverTime).toLocaleString(),
+            geofences: data.geofenceIds ? data.geofenceIds.join(', ') : 'None',
+            satellites: data.attributes.sat || '',
+            RSSI: data.attributes.rssi || '',
+            odometer: `${(data.attributes.odometer || 0).toFixed(2)} mi`,
+            batteryLevel: data.attributes.batteryLevel || '',
+            ignition: data.attributes.ignition ? 'Yes' : 'No',
+            charge: data.attributes.charge ? 'Yes' : 'No',
+            archive: data.attributes.archive ? 'Yes' : 'No',
+            distance: `${(data.attributes.distance || 0).toFixed(2)} mi`,
+            totalDistance: `${(data.attributes.totalDistance || 0).toFixed(2)} mi`,
+            motion: data.attributes.motion ? 'Yes' : 'No',
+            blocked: data.attributes.blocked ? 'Yes' : 'No',
+            alarm1Status: data.attributes.alarm1Status || '',
+            otherStatus: data.attributes.otherStatus || '',
+            alarm2Status: data.attributes.alarm2Status || '',
+            engineStatus: data.attributes.engineStatus ? 'On' : 'Off',
+            adc1: data.attributes.adc1 ? `${data.attributes.adc1.toFixed(2)} V` : ''
+          }));
+
+          console.log('Processed Events:', processedEvents);
+
+          setFilteredRows(
+            processedEvents.map((row) => ({ ...row, isSelected: false }))
+          );
+          setOriginalRows(processedEvents.map((row) => ({ ...row, isSelected: false })));
+
+          setTotalResponses(processedEvents.length);
+
+          // Optionally export the processed data back to an Excel file
+          const outputWorksheet = XLSX.utils.json_to_sheet(processedEvents);
+          const outputWorkbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(outputWorkbook, outputWorksheet, 'Processed Report');
+
+          // Trigger file download
+          XLSX.writeFile(outputWorkbook, 'processed_report.xlsx');
+        };
+
+        reader.readAsArrayBuffer(blob); // Read the Blob as an ArrayBuffer
+      } else {
+        throw new Error('Unexpected content type: ' + response.headers['content-type']);
+      }
+    } catch (error) {
+      console.error('Error fetching the report:', error);
+      alert("please select device and date");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error fetching the report:', error);
-    alert("please select device and date");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-const options = devices.map((device) => ({
-  value: device.id,
-  label: device.name,
-}));
+  const options = devices.map((device) => ({
+    value: device.id,
+    label: device.name,
+  }));
 
-const handleChange = (selectedOption) => {
-  setSelectedDevice(selectedOption ? selectedOption.value : null);
-};
-const [searchText, setSearchText] = useState("");
-const filteredDevices = Array.isArray(devices)
-  ? devices.filter((device) =>
+  const handleChange = (selectedOption) => {
+    setSelectedDevice(selectedOption ? selectedOption.value : null);
+  };
+  const [searchText, setSearchText] = useState("");
+  const filteredDevices = Array.isArray(devices)
+    ? devices.filter((device) =>
       device.name.toLowerCase().includes(searchText.toLowerCase())
     )
-  : [];
-// const sortedData = React.useMemo(() => {
-//   if (!sortConfig.key) return data;
-//   return [...data].sort((a, b) => {
-//     if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'ascending' ? -1 : 1;
-//     if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'ascending' ? 1 : -1;
-//     return 0;
-//   });
-// }, [data, sortConfig]);
+    : [];
+  // const sortedData = React.useMemo(() => {
+  //   if (!sortConfig.key) return data;
+  //   return [...data].sort((a, b) => {
+  //     if (a[sortConfig.key] < b[sortConfig.key]) return sortConfig.direction === 'ascending' ? -1 : 1;
+  //     if (a[sortConfig.key] > b[sortConfig.key]) return sortConfig.direction === 'ascending' ? 1 : -1;
+  //     return 0;
+  //   });
+  // }, [data, sortConfig]);
   return (
     <>
       <h1 style={{ textAlign: "center", marginTop: "80px" }}>
-       Route 
+        Route
       </h1>
       <div>
         <div
@@ -851,104 +842,99 @@ const filteredDevices = Array.isArray(devices)
             marginBottom: "10px",
           }}
         >
-       <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Smaller width
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Set a fixed height to reduce it
-        padding: '0px', // Reduce padding to shrink height
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position
-        fontSize: '14px', // Slightly smaller label font
-      }
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
-          style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
-          }}
-        />
-      ),
-    }}
-  />
-             <Button
-  onClick={() => setModalOpen(true)}
-  sx={{
-    backgroundColor: "rgb(85, 85, 85)",
-    color: "white",
-    fontWeight: "bold",
-    marginRight: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    "&:hover": {
-      fontWeight: "bolder", // Make text even bolder on hover
-      backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
-    },
-  }}
->
-  <ImportExportIcon />
-  Column Visibility
-</Button>
-         
-         
-         
-         
-<Button variant="contained" color="error" onClick={handleExport}>
-            Export
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Smaller width
+              '& .MuiOutlinedInput-root': {
+                height: '36px', // Set a fixed height to reduce it
+                padding: '0px', // Reduce padding to shrink height
+              },
+              '& .MuiInputLabel-root': {
+                top: '-6px', // Adjust label position
+                fontSize: '14px', // Slightly smaller label font
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
+          <Button
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              "&:hover": {
+                fontWeight: "bolder", // Make text even bolder on hover
+                backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
           </Button>
-        </div>
-       
-     <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        marginBottom: "10px",
-      }}
-    >
-      <div
-  style={{
-    width: "250px",
-    position: "relative",
-    zIndex: "10",
-    border: "1px solid #000", // Add a black border
-    
-  }}
->
-  <Select
-    options={options}
-    value={options.find((option) => option.value === selectedDevice) || null}
-    onChange={handleChange}
-    placeholder="Select Device"
-    isClearable
-    styles={{
-      control: (provided) => ({
-        ...provided,
-        border: "none", // Remove react-select's default border if necessary
-        boxShadow: "none", // Remove default focus outline
-      }),
-      dropdownIndicator: (provided) => ({
-        ...provided,
-        color: "#000", // Set the dropdown arrow to black
-      }),
-      clearIndicator: (provided) => ({
-        ...provided,
-        color: "#000", // Set the clear icon to black
-      }),
-    }}
-  />
-</div>
 
-      {/* <select
+          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"ROUTE REPORT"} pdfFilename={"RouteReport.pdf"} excelFilename={"RouteReport.xlsx"}/>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "10px",
+          }}
+        >
+          <div
+            style={{
+              width: "250px",
+              position: "relative",
+              zIndex: "10",
+              border: "1px solid #000", // Add a black border
+
+            }}
+          >
+            <Select
+              options={options}
+              value={options.find((option) => option.value === selectedDevice) || null}
+              onChange={handleChange}
+              placeholder="Select Device"
+              isClearable
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  border: "none", // Remove react-select's default border if necessary
+                  boxShadow: "none", // Remove default focus outline
+                }),
+                dropdownIndicator: (provided) => ({
+                  ...provided,
+                  color: "#000", // Set the dropdown arrow to black
+                }),
+                clearIndicator: (provided) => ({
+                  ...provided,
+                  color: "#000", // Set the clear icon to black
+                }),
+              }}
+            />
+          </div>
+
+          {/* <select
         value={selectedGroup}
         onChange={(e) => setSelectedGroup(e.target.value)}
         style={{ marginRight: "10px", padding: "5px" }}
@@ -959,36 +945,36 @@ const filteredDevices = Array.isArray(devices)
         ))}
       </select> */}
 
-      <div style={{ marginRight: "10px", padding: "5px" }}>
-        <label htmlFor="start-date">Start Date & Time:</label>
-        <input
-          id="start-date"
-          type="datetime-local"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          style={{ marginRight: "10px", padding: "5px" }}
-        />
-        
-        <label htmlFor="end-date">End Date & Time:</label>
-        <input
-          id="end-date"
-          type="datetime-local"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          style={{ padding: "5px" }}
-        />
-      </div>
+          <div style={{ marginRight: "10px", padding: "5px" }}>
+            <label htmlFor="start-date">Start Date & Time:</label>
+            <input
+              id="start-date"
+              type="datetime-local"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              style={{ marginRight: "10px", padding: "5px" }}
+            />
 
-      <button
-        onClick={handleShowClick}
-        style={{
-          padding: "5px 10px",
-        }}
-      >
-        Show
-      </button>
+            <label htmlFor="end-date">End Date & Time:</label>
+            <input
+              id="end-date"
+              type="datetime-local"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              style={{ padding: "5px" }}
+            />
+          </div>
 
-      {/* {apiUrl && (
+          <button
+            onClick={handleShowClick}
+            style={{
+              padding: "5px 10px",
+            }}
+          >
+            Show
+          </button>
+
+          {/* {apiUrl && (
         <div style={{ marginTop: '10px' }}>
           <label htmlFor="api-url">Generated API URL:</label>
           <textarea
@@ -1000,9 +986,9 @@ const filteredDevices = Array.isArray(devices)
           ></textarea>
         </div>
       )} */}
-    </div>
+        </div>
 
-       
+
 
         {loading ? (
           <div
@@ -1024,7 +1010,7 @@ const filteredDevices = Array.isArray(devices)
                 borderRadius: "7px",
               }}
             >
-            
+
               {/* <Table
   stickyHeader
   aria-label="sticky table"
@@ -1151,101 +1137,101 @@ const filteredDevices = Array.isArray(devices)
     )}
   </TableBody>
 </Table> */}
- <Table
-      stickyHeader
-      aria-label="sticky table"
-      style={{ border: "1px solid black" }}
-    >
-      <TableHead>
-        <TableRow
-          style={{
-            borderBottom: "1px solid black",
-            borderTop: "1px solid black",
-          }}
-        >
-          <TableCell
-            padding="checkbox"
-            style={{
-              borderRight: "1px solid #e0e0e0",
-              borderBottom: "2px solid black",
-            }}
-          >
-            <Switch
-              checked={selectAll}
-              onChange={handleSelectAll}
-              color="primary"
-            />
-          </TableCell>
-          {COLUMNS()
-            .filter((col) => columnVisibility[col.accessor])
-            .map((column) => (
-              <TableCell
-                key={column.accessor}
-                align={column.align || 'left'}
-                style={{
-                  minWidth: column.minWidth || '100px',
-                  cursor: "pointer",
-                  borderRight: "1px solid #e0e0e0",
-                  borderBottom: "2px solid black",
-                  padding: "4px 4px",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-                onClick={() => requestSort(column.accessor)}
+              <Table
+                stickyHeader
+                aria-label="sticky table"
+                style={{ border: "1px solid black" }}
               >
-                {column.Header}
-                {sortConfig.key === column.accessor ? (
-                  sortConfig.direction === "ascending" ? (
-                    <ArrowUpwardIcon fontSize="small" />
+                <TableHead>
+                  <TableRow
+                    style={{
+                      borderBottom: "1px solid black",
+                      borderTop: "1px solid black",
+                    }}
+                  >
+                    <TableCell
+                      padding="checkbox"
+                      style={{
+                        borderRight: "1px solid #e0e0e0",
+                        borderBottom: "2px solid black",
+                      }}
+                    >
+                      <Switch
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        color="primary"
+                      />
+                    </TableCell>
+                    {COLUMNS()
+                      .filter((col) => columnVisibility[col.accessor])
+                      .map((column) => (
+                        <TableCell
+                          key={column.accessor}
+                          align={column.align || 'left'}
+                          style={{
+                            minWidth: column.minWidth || '100px',
+                            cursor: "pointer",
+                            borderRight: "1px solid #e0e0e0",
+                            borderBottom: "2px solid black",
+                            padding: "4px 4px",
+                            textAlign: "center",
+                            fontWeight: "bold",
+                          }}
+                          onClick={() => requestSort(column.accessor)}
+                        >
+                          {column.Header}
+                          {sortConfig.key === column.accessor ? (
+                            sortConfig.direction === "ascending" ? (
+                              <ArrowUpwardIcon fontSize="small" />
+                            ) : (
+                              <ArrowDownwardIcon fontSize="small" />
+                            )
+                          ) : null}
+                        </TableCell>
+                      ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sortedData.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={COLUMNS().filter((col) => columnVisibility[col.accessor]).length}
+                        style={{
+                          textAlign: 'center',
+                          padding: '16px',
+                          fontSize: '16px',
+                          color: '#757575',
+                        }}
+                      >
+                        <h4>No Data Available</h4>
+                      </TableCell>
+                    </TableRow>
                   ) : (
-                    <ArrowDownwardIcon fontSize="small" />
-                  )
-                ) : null}
-              </TableCell>
-            ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {sortedData.length === 0 ? (
-          <TableRow>
-            <TableCell
-              colSpan={COLUMNS().filter((col) => columnVisibility[col.accessor]).length}
-              style={{
-                textAlign: 'center',
-                padding: '16px',
-                fontSize: '16px',
-                color: '#757575',
-              }}
-            >
-              <h4>No Data Available</h4>
-            </TableCell>
-          </TableRow>
-        ) : (
-          sortedData
-            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map((row, index) => (
-              <TableRow
-                hover
-                role="checkbox"
-                tabIndex={-1}
-                key={row.deviceId + index} // Ensure uniqueness for the key
-                onClick={() =>
-                  handleRowSelect(page * rowsPerPage + index)
-                }
-                selected={row.isSelected}
-                style={{
-                  backgroundColor:
-                    index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-                  borderBottom: "none",
-                }}
-              >
-                <TableCell
-                  padding="checkbox"
-                  style={{ borderRight: "1px solid #e0e0e0" }}
-                >
-                  <Switch checked={row.isSelected} color="primary" />
-                </TableCell>
-                {/* {COLUMNS()
+                    sortedData
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((row, index) => (
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={row.deviceId + index} // Ensure uniqueness for the key
+                          onClick={() =>
+                            handleRowSelect(page * rowsPerPage + index)
+                          }
+                          selected={row.isSelected}
+                          style={{
+                            backgroundColor:
+                              index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                            borderBottom: "none",
+                          }}
+                        >
+                          <TableCell
+                            padding="checkbox"
+                            style={{ borderRight: "1px solid #e0e0e0" }}
+                          >
+                            <Switch checked={row.isSelected} color="primary" />
+                          </TableCell>
+                          {/* {COLUMNS()
                   .filter((col) => columnVisibility[col.accessor])
                   .map((column) => {
                     const value = column.accessor.split('.').reduce((acc, part) => acc && acc[part], row);
@@ -1268,72 +1254,72 @@ const filteredDevices = Array.isArray(devices)
                       </TableCell>
                     );
                   })} */}
-                  {COLUMNS()
-  .filter((col) => columnVisibility[col.accessor])
-  .map((column) => {
-    // Ensure column.accessor is a string before calling split
-    const accessor = typeof column.accessor === 'string' ? column.accessor : '';
-    const value = accessor.split('.').reduce((acc, part) => acc && acc[part], row);
+                          {COLUMNS()
+                            .filter((col) => columnVisibility[col.accessor])
+                            .map((column) => {
+                              // Ensure column.accessor is a string before calling split
+                              const accessor = typeof column.accessor === 'string' ? column.accessor : '';
+                              const value = accessor.split('.').reduce((acc, part) => acc && acc[part], row);
 
-    return (
-      <TableCell
-        key={accessor}
-        align={column.align || 'left'}
-        style={{
-          borderRight: "1px solid #e0e0e0",
-          paddingTop: "4px",
-          paddingBottom: "4px",
-          borderBottom: "none",
-          backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-          fontSize: "smaller",
-        }}
-      >
-        {column.Cell ? column.Cell({ value }) : value}
-      </TableCell>
-    );
-  })}
+                              return (
+                                <TableCell
+                                  key={accessor}
+                                  align={column.align || 'left'}
+                                  style={{
+                                    borderRight: "1px solid #e0e0e0",
+                                    paddingTop: "4px",
+                                    paddingBottom: "4px",
+                                    borderBottom: "none",
+                                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                                    fontSize: "smaller",
+                                  }}
+                                >
+                                  {column.Cell ? column.Cell({ value }) : value}
+                                </TableCell>
+                              );
+                            })}
 
-              </TableRow>
-            ))
-        )}
-      </TableBody>
-    </Table>
+                        </TableRow>
+                      ))
+                  )}
+                </TableBody>
+              </Table>
             </TableContainer>
             <StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
-              <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '20px',
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -1343,7 +1329,7 @@ const filteredDevices = Array.isArray(devices)
                 />
                 {col.Header}
               </div>
-              
+
             ))}
           </Box>
         </Modal>

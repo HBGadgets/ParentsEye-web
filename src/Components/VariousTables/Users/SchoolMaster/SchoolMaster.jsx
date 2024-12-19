@@ -23,6 +23,7 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
@@ -30,8 +31,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "../../Export"
 
 //import { TextField } from '@mui/material';
+
 
 const style = {
   position: "absolute",
@@ -238,6 +241,8 @@ const SchoolMaster = () => {
   //     setLoading(false); // Set loading to false after fetching completes
   //   }
   // };
+
+  const orangeBtn ={ backgroundColor: "rgb(255, 165, 0)"}
   const fetchData = async (startDate = "", endDate = "") => {
     setLoading(true);
     try {
@@ -556,15 +561,114 @@ const SchoolMaster = () => {
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
+  // const handleExport = () => {
+  //   const dataToExport = filteredRows.map((row) => {
+  //     const { isSelected, ...rowData } = row;
+  //     return rowData;
+  //   });
+  //   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   XLSX.writeFile(workbook, "schools.xlsx");
+  // };
+  console.log("filteredDATA IN School Master ",filteredRows)
+  const handleExport = async () => {
+    const excludedFields = ["isSelected", ]
+    const headerOverrides = {
+      schoolName: "SCHOOL NAME",
+      branchName: "BRANCH NAME",
+      username: "USER NAME",
+      schoolMobile: "PHONE",
+      email: "EMAIL",
+      password: "PASSWORD",
+    };
+   const fieldOrder = [
+    "schoolName",
+    "branchName",
+    "username",
+    "schoolMobile",
+    "email",
+    "password",
+  ];
+
+  // Filter, map, and reorder data
+  const dataToExport = filteredRows.map((row) => {
+    const filteredRow = {};
+    for (const field of fieldOrder) {
+      if (!excludedFields.includes(field) && row[field] !== undefined) {
+        filteredRow[headerOverrides[field] || field.toUpperCase()] = row[field];
+      }
+    }
+    return filteredRow;
+  });
+
+    // Create a workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Sheet1");
+
+    // Add headers to the worksheet
+    const headers = Object.keys(dataToExport[0] || {}).map((key) => ({
+      header: key,
+      key,
+      width: Math.max(
+        key.length + 5, // Header length with padding
+        ...dataToExport.map((row) => String(row[key] || "").length + 5) // Max data length with padding
+      ),
+    }));
+    worksheet.columns = headers;
+
+    // Add data rows
+    dataToExport.forEach((row, index) => {
+      const addedRow = worksheet.addRow(row);
+
+      // Apply alternate row styling
+      if (index % 2 === 1) {
+        addedRow.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "F9F9F9" }, // Light gray background for alternate rows
+        };
+      }
+      addedRow.eachCell((cell) => {
+        cell.alignment = { vertical: "middle", horizontal: "left" };
+      });
     });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "schools.xlsx");
+
+
+    // Style the headers
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FFFFFF" } }; // Bold and white font
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "4F81BD" }, // Blue background for headers
+      };
+      cell.alignment = { vertical: "middle", horizontal: "center" }; // Center alignment
+
+    });
+    //BORDERS FOR ALL COLUMNS
+    const totalRows = worksheet.rowCount;
+    const totalCols = headers.length;
+
+    for (let row = 1; row <= totalRows; row++) {
+      for (let col = 1; col <= totalCols; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      }
+    }
+
+    // Save the workbook
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "SchoolMaster.xlsx";
+    link.click();
   };
 
   const handleFileUpload = (event) => {
@@ -858,9 +962,11 @@ const SchoolMaster = () => {
           >
             Import
           </Button> */}
-          <Button variant="contained" sx={{ backgroundColor: "rgb(255, 165, 0)"}} onClick={handleExport}>
+          {/* <Button variant="contained" sx={{ backgroundColor: "rgb(255, 165, 0)"}} onClick={handleExport}>
             Export
-          </Button>
+          </Button> */}
+          
+          <Export orangeBtn={orangeBtn} columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"SCHOOL MASTER"} pdfFilename={"SchoolMaster.pdf"} excelFilename={"SchoolMaster.xlsx"}/>
         </div>
         <div
           style={{

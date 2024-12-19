@@ -1315,6 +1315,7 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
@@ -1323,6 +1324,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import {Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import { Category } from "@mui/icons-material";
+import Export from "../../Export";
 //import { TextField } from '@mui/material';
 
 const style = {
@@ -1646,18 +1648,6 @@ const handleChangePage = (event, newPage) => {
     fetchData();
   };
  
-
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "AddDevices.xlsx");
-  };
-
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -2150,9 +2140,7 @@ const handleFilterChange = (event) => {
           >
             Import
           </Button>
-          <Button variant="contained" color="primary" onClick={handleExport}>
-            Export
-          </Button>
+          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"ADD DEVICE LIST"} pdfFilename={"AddDevice.pdf"} excelFilename={"AddDevice.xlsx"}/>
         </div>
        
 

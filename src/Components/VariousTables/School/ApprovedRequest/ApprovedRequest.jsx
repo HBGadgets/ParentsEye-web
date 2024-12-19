@@ -32,6 +32,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "../../Export";
 
 //import { TextField } from '@mui/material';
 
@@ -500,16 +501,6 @@ function formatDate(date){
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "ApprovedRequest.xlsx");
-  };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -721,17 +712,9 @@ function formatDate(date){
     Column Visibility
   </Button>
 
-  <Button
-    variant="contained"
-    color="success"
-    onClick={handleExport}
-    sx={{
-      padding: "6px 12px",
-      marginRight: "10px",
-    }}
-  >
-    Export
-  </Button>
+  
+  <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"APPROVED REQUEST LIST"} pdfFilename={"ApprovedRequest.pdf"} excelFilename={"ApprovedRequest.xlsx"} />
+
 
   <input
     type="date"

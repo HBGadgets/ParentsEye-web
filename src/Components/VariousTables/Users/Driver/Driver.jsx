@@ -660,7 +660,9 @@ import { jwtDecode } from "jwt-decode";
 import { Autocomplete } from "@mui/material";
 //import { TextField } from '@mui/material';
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "../../Export";
 
+const prevColor={color:"primary"}
 const style = {
   position: "absolute",
   top: "50%",
@@ -1032,16 +1034,22 @@ export const Driver = () => {
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "Driver.xlsx");
-  };
+  // const handleExport = () => {
+  //   const dataToExport = filteredRows.map((row) => {
+  //     const { isSelected, ...rowData } = row;
+  //     return rowData;
+  //   });
+  //   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   XLSX.writeFile(workbook, "Driver.xlsx");
+  // };
+ // backened
+  // driverId	driverName	address	driverMobile	email	deviceName	deviceId
+  // 	statusOfRegister	schoolName	branchName	registrationDate	formattedRegistrationDate	password
+//table order
+// Bus Name	Driver Name	Address	Phone Number	password	Email	School Name
+// 	Branch Name	Driver License	Device Id	Registration Date
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -1692,9 +1700,11 @@ export const Driver = () => {
           >
             Import
           </Button>
-          <Button variant="contained" color="primary" onClick={handleExport}>
+          {/* <Button variant="contained" color="primary" onClick={handleExport}>
             Export
-          </Button>
+          </Button> */}
+          <Export prevColor={prevColor} columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"DRIVER APPROVE"} pdfFilename={"DriverApprove.pdf"} excelFilename={"DriverApprove.xlsx"}/>
+
         </div>
         <div
           style={{

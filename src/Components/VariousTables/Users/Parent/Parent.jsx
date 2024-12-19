@@ -1619,6 +1619,7 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
@@ -1645,6 +1646,9 @@ import dayjs from "dayjs";
 import { Autocomplete } from "@mui/material";
 //import { TextField } from '@mui/material';
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "./ExportParent";
+
+const prevColor={color:"primary"}
 
 const style = {
   position: "absolute",
@@ -2026,16 +2030,17 @@ console.log("role is:",role)
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "Parent.xlsx");
-  };
+  // const handleExport = () => {
+  //   const dataToExport = filteredRows.map((row) => {
+  //     const { isSelected, ...rowData } = row;
+  //     return rowData;
+  //   });
+  //   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   XLSX.writeFile(workbook, "Parent.xlsx");
+  // };
+
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -2835,9 +2840,11 @@ const lastThirdColumn = columns[columns.length - 3];
           >
             Import
           </Button>
-          <Button variant="contained" color="primary" onClick={handleExport}>
+          {/* <Button variant="contained" color="primary" onClick={handleExport}>
             Export
-          </Button>
+          </Button> */}
+          <Export prevColor={prevColor} columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"PARENT DETAIL LIST"} pdfFilename={"ParentApprove.pdf"} excelFilename={"ParentApprove.xlsx"}/>
+
         </div>
         <div
           style={{

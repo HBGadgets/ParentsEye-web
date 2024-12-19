@@ -1104,6 +1104,7 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
@@ -1111,6 +1112,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import { saveAs } from 'file-saver'; // Save file to the user's machine
+import Export from "./ExportTrip"
 // import * as XLSX from 'xlsx'; // To process and convert the excel file to JSON
 //import { TextField } from '@mui/material';
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
@@ -1331,17 +1333,135 @@ export const Trips = () => {
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "Trips.xlsx");
-  };
+  // const handleExport = () => {
+  //   const dataToExport = filteredRows.map((row) => {
+  //     const { isSelected, ...rowData } = row;
+  //     return rowData;
+  //   });
+  //   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   XLSX.writeFile(workbook, "Trips.xlsx");
+  // };
+//from backened
+ // deviceId	deviceName	startTime	endTime	startLatitude	startLongitude	endLatitude
+ // 	endLongitude	startSpeed	endSpeed	address	course	altitude	accuracy	valid	protocol	
+ // totalDistance	motion	blocked	ignition	batteryLevel	odometer	engineStatus	charge	alarm1Status
+ // 	alarm2Status	geofences	distance1
+//table order
+console.log("filteredRows in TRIPS", filteredRows);
 
+const handleExport = async () => {
+
+    // Define fields to exclude and the desired header names
+    const excludedFields = ["isSelected",];
+    const headerOverrides = {
+      deviceName:"DEVICE NAME",
+      startTime:"START TIME",
+      startLatitude:"START LATITUDE",
+      startLongitude:"START LONGITUDE",
+      endTime:"END TIME",
+      endLatitude:"END LATITUDE",
+      endLongitude:"END LONGITUDE",
+      distance1:"DISTANCE"
+    };
+
+   // Define the desired order of fields
+   const fieldOrder = [
+    "deviceName",
+    "startTime",
+    "startLatitude",
+    "startLongitude",
+    "endTime",
+    "endLatitude",
+    "endLongitude",
+    "distance1",
+  ];
+
+  // Filter, map, and reorder data
+  const dataToExport = filteredRows.map((row) => {
+    const filteredRow = {};
+    for (const field of fieldOrder) {
+      // if (!excludedFields.includes(field) && row[field] !== undefined) {
+      //   filteredRow[headerOverrides[field] || field.toUpperCase()] = row[field];
+      // }
+      if (field === "distance1") {
+        filteredRow[headerOverrides[field] || field.toUpperCase()] = `${(row[field] / 1000).toFixed(2)} km`;
+      } else {
+        filteredRow[headerOverrides[field] || field.toUpperCase()] = row[field];
+      }
+    }
+    return filteredRow;
+  });
+
+    // Create a workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Sheet1");
+
+    // Add headers to the worksheet
+    const headers = Object.keys(dataToExport[0] || {}).map((key) => ({
+      header: key,
+      key,
+      width: Math.max(
+        key.length + 5, // Header length with padding
+        ...dataToExport.map((row) => String(row[key] || "").length + 5) // Max data length with padding
+      ),
+    }));
+    worksheet.columns = headers;
+
+    // Add data rows
+    dataToExport.forEach((row, index) => {
+      const addedRow = worksheet.addRow(row);
+
+      // Apply alternate row styling
+      if (index % 2 === 1) {
+        addedRow.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "F9F9F9" }, // Light gray background for alternate rows
+        };
+      }
+      addedRow.eachCell((cell) => {
+        cell.alignment = { vertical: "middle", horizontal: "left" };
+      });
+    });
+
+
+    // Style the headers
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FFFFFF" } }; // Bold and white font
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "4F81BD" }, // Blue background for headers
+      };
+      cell.alignment = { vertical: "middle", horizontal: "center" }; // Center alignment
+
+    });
+    //BORDERS FOR ALL COLUMNS
+    const totalRows = worksheet.rowCount;
+    const totalCols = headers.length;
+
+    for (let row = 1; row <= totalRows; row++) {
+      for (let col = 1; col <= totalCols; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      }
+    }
+
+    // Save the workbook
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Trips.xlsx";
+    link.click();
+  };
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -3253,9 +3373,11 @@ console.log("Grouped Data11:", groupedData);
          
          
          
-<Button variant="contained" color="error" onClick={handleExport}>
+{/* <Button variant="contained" color="error" onClick={handleExport}>
             Export
-          </Button>
+          </Button> */}
+          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"TRIPS REPORT"} pdfFilename={"TripsReport.pdf"} excelFilename={"TripsReport.xlsx"}/>
+
         </div>
        
      <div

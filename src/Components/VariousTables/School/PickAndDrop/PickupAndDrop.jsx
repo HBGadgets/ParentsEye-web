@@ -23,6 +23,7 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
@@ -31,7 +32,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"; // Green check icon
 import CancelIcon from "@mui/icons-material/Cancel"; // Red cross icon
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "../../Export";
 import {
+  backdropClasses,
   FormControlLabel,
   FormLabel,
   IconButton,
@@ -39,6 +42,11 @@ import {
   RadioGroup,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+
+const prevColor={
+  backgroundColor: "#4CAF50", // Success green HEX value
+  color: "white",
+}
 const style = {
   position: "absolute",
   top: "50%",
@@ -688,16 +696,6 @@ export const PickupAndDrop = () => {
     setSelectAll(newSelectAll);
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "PickupAndDrop.xlsx");
-  };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -895,18 +893,9 @@ export const PickupAndDrop = () => {
     <ImportExportIcon />
     Column Visibility
   </Button>
+  
+  <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"PICKUP AND DROP LIST"} pdfFilename={"PickupDrop.pdf"} excelFilename={"PickupDrop.xlsx"} />
 
-  <Button
-    variant="contained"
-    color="success"
-    onClick={handleExport}
-    sx={{
-      padding: "6px 12px",
-      marginRight: "10px",
-    }}
-  >
-    Export
-  </Button>
 
   <input
     type="date"

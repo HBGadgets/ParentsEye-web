@@ -31,6 +31,7 @@ import { TotalResponsesContext } from "../../../../TotalResponsesContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Token } from "@mui/icons-material";
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "./ExportLeave";
 
 import {
   FormControlLabel,
@@ -335,17 +336,6 @@ return `${day}-${month}-${year}`;
     }
   };
 
-  
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "StudentDetail.xlsx");
-  };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -519,17 +509,7 @@ return `${day}-${month}-${year}`;
     Column Visibility
   </Button>
 
-  <Button
-    variant="contained"
-    color="success"
-    onClick={handleExport}
-    sx={{
-      padding: "6px 12px",
-      marginRight: "10px",
-    }}
-  >
-    Export
-  </Button>
+  <Export filteredRows={filteredRows} columnVisibility={columnVisibility} COLUMNS={COLUMNS}/>
 
   <input
     type="date"

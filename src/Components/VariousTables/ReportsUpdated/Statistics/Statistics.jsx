@@ -23,6 +23,7 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
@@ -33,6 +34,7 @@ import { saveAs } from "file-saver"; // Save file to the user's machine
 // import * as XLSX from 'xlsx'; // To process and convert the excel file to JSON
 //import { TextField } from '@mui/material';
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "../../Export";
 const style = {
   position: "absolute",
   top: "50%",
@@ -265,16 +267,143 @@ export const Statistics = () => {
     fetchData();
   };
 
-  const handleExport = () => {
+  // const handleExport = () => {
+  //   const dataToExport = filteredRows.map((row) => {
+  //     const { isSelected, ...rowData } = row;
+  //     return rowData;
+  //   });
+  //   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   XLSX.writeFile(workbook, "Statistics.xlsx");
+  // };
+  //Statistics
+  // id	captureTime	activeUsers	activeDevices	requests	messagesReceived
+  // 	messagesStored	mailSent	smsSent	geocoderRequests	geolocationRequests	protocols	attributes
+
+  // ID	Attributes	Capture Time	Active Users	Active Devices	Requests
+  // Messages Received	Messages Stored	Mail Sent	SMS Sent	Geocoder Requests
+  // Geolocation Requests	Protocols
+
+  console.log("filteredDATA IN Statistics ", filteredRows)
+  const handleExport = async () => {
+    console.log("filteredRows in handleexport", filteredRows);
+
+    // Define fields to exclude and the desired header names
+    const excludedFields = ["isSelected",];
+    const headerOverrides = {
+      id: "ID",
+      attributes: "ATTRIBUTES",
+      captureTime: "CAPTURE TIME",
+      activeUsers: "ACTIVE USERS",
+      activeDevices: "ACTIVE DEVICES",
+      requests: "Requests",
+      messagesReceived: "MESSAGES RECEIVED",
+      messagesStored: "MESSAGES STORED",
+      mailSent: "MAIL SENT",
+      smsSent: "SMS SENT",
+      geocoderRequests: "GEOCODER REQUESTS",
+      geolocationRequests: "GEOLOCATION REQUEST",
+      protocols: "PROTOCOLS"
+    };
+
+    // Define the desired order of fields
+    const fieldOrder = [
+      "id",
+      "attributes",
+      "captureTime",
+      "activeUsers",
+      "activeDevices",
+      "requests",
+      "messagesReceived",
+      "messagesStored",
+      "mailSent",
+      "smsSent",
+      "geocoderRequests",
+      "geolocationRequests",
+      "protocols",
+    ];
+
+    // Filter, map, and reorder data
     const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
+      const filteredRow = {};
+      for (const field of fieldOrder) {
+        if (!excludedFields.includes(field) && row[field] !== undefined) {
+          filteredRow[headerOverrides[field] || field.toUpperCase()] = row[field];
+        }
+      }
+      return filteredRow;
     });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "Statistics.xlsx");
+
+    // Create a workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Sheet1");
+
+    // Add headers to the worksheet
+    const headers = Object.keys(dataToExport[0] || {}).map((key) => ({
+      header: key,
+      key,
+      width: Math.max(
+        key.length + 5, // Header length with padding
+        ...dataToExport.map((row) => String(row[key] || "").length + 5) // Max data length with padding
+      ),
+    }));
+    worksheet.columns = headers;
+
+    // Add data rows
+    dataToExport.forEach((row, index) => {
+      const addedRow = worksheet.addRow(row);
+
+      // Apply alternate row styling
+      if (index % 2 === 1) {
+        addedRow.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "F9F9F9" }, // Light gray background for alternate rows
+        };
+      }
+      addedRow.eachCell((cell) => {
+        cell.alignment = { vertical: "middle", horizontal: "left" };
+      });
+    });
+
+
+    // Style the headers
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true, color: { argb: "FFFFFF" } }; // Bold and white font
+      cell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "4F81BD" }, // Blue background for headers
+      };
+      cell.alignment = { vertical: "middle", horizontal: "center" }; // Center alignment
+
+    });
+    //BORDERS FOR ALL COLUMNS
+    const totalRows = worksheet.rowCount;
+    const totalCols = headers.length;
+
+    for (let row = 1; row <= totalRows; row++) {
+      for (let col = 1; col <= totalCols; col++) {
+        const cell = worksheet.getCell(row, col);
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      }
+    }
+
+    // Save the workbook
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: "application/octet-stream" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Statistics.xlsx";
+    link.click();
   };
+
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -912,7 +1041,7 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
   //         protocols: event.protocols || {},
   //         attributes: event.attributes || {}, // Attributes object, you can further map if needed
   //       }));
-        
+
   //       console.log("Processed Event Data:", processedEvents);
 
   //       // Set the filtered rows and the total responses
@@ -990,28 +1119,28 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
   const fetchData = async (url) => {
     console.log("Fetching report...");
     setLoading(true);
-  
+
     try {
       const username = "schoolmaster";
       const password = "123456";
       const token = btoa(`${username}:${password}`);
-  
+
       const response = await axios.get(url, {
         headers: {
           Authorization: `Basic ${token}`,
         },
         responseType: "blob", // Downloading as binary data
       });
-  
+
       // Log the content type of the response
       console.log("Content-Type:", response.headers["content-type"]);
-  
+
       // Handle JSON response
       if (response.headers["content-type"] === "application/json") {
         const text = await response.data.text(); // Convert Blob to text
         console.log("JSON Response:", text); // Log JSON response
         const jsonResponse = JSON.parse(text); // Parse JSON
-  
+
         // Process the JSON data according to your provided structure
         const processedEvents = jsonResponse.map((event) => ({
           id: event.id || "N/A",
@@ -1030,9 +1159,9 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
           protocols: event.protocols || {},
           attributes: event.attributes || {}, // Attributes object
         }));
-  
+
         console.log("Processed Event Data:", processedEvents);
-  
+
         // Set the filtered rows and the total responses
         setFilteredRows(processedEvents);
         setTotalResponses(processedEvents.length);
@@ -1045,21 +1174,21 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
         saveAs(blob, "report.xlsx"); // Save the file to the user's system
-  
+
         // Process the file to extract data
         const reader = new FileReader();
         reader.onload = (e) => {
           const data = new Uint8Array(e.target.result);
           const reportWorkbook = XLSX.read(data, { type: "array" });
-  
+
           const firstSheetName = reportWorkbook.SheetNames[0];
           const reportWorksheet = reportWorkbook.Sheets[firstSheetName];
-  
+
           // Convert worksheet data to JSON
           const jsonData = XLSX.utils.sheet_to_json(reportWorksheet);
-  
+
           console.log("Extracted JSON Data from Excel:", jsonData);
-  
+
           // Process the data from Excel similar to how JSON is processed
           const processedEvents = jsonData.map((event) => ({
             id: event.id || "N/A",
@@ -1078,12 +1207,12 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
             protocols: event.protocols || {},
             attributes: event.attributes || {},
           }));
-  
+
           console.log("Processed Events from Excel:", processedEvents);
-  
+
           setFilteredRows(processedEvents);
           setTotalResponses(processedEvents.length);
-  
+
           // Optionally export the processed data back to an Excel file
           const outputWorksheet = XLSX.utils.json_to_sheet(processedEvents);
           const outputWorkbook = XLSX.utils.book_new();
@@ -1092,11 +1221,11 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
             outputWorksheet,
             "Processed Report"
           );
-  
+
           // Trigger file download
           XLSX.writeFile(outputWorkbook, "processed_report.xlsx");
         };
-  
+
         reader.readAsArrayBuffer(blob); // Read the Blob as an ArrayBuffer
       } else {
         throw new Error(
@@ -1110,7 +1239,7 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
       setLoading(false);
     }
   };
-  
+
   // const [selectedNotification, setSelectedNotification] = useState("allEvents");
   //   const [notificationTypes, setNotificationTypes] = useState([]);
   // const [selectedNotification, setSelectedNotification] = useState('');
@@ -1158,7 +1287,7 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
     <>
       <h1 style={{ textAlign: "center", marginTop: "80px" }}>Statistics</h1>
       <div>
-      <div
+        <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -1166,57 +1295,56 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
           }}
         >
           <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Smaller width
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Set a fixed height to reduce it
-        padding: '0px', // Reduce padding to shrink height
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position
-        fontSize: '14px', // Slightly smaller label font
-      }
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
-          style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
-          }}
-        />
-      ),
-    }}
-  />
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Smaller width
+              '& .MuiOutlinedInput-root': {
+                height: '36px', // Set a fixed height to reduce it
+                padding: '0px', // Reduce padding to shrink height
+              },
+              '& .MuiInputLabel-root': {
+                top: '-6px', // Adjust label position
+                fontSize: '14px', // Slightly smaller label font
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
           <Button
-  onClick={() => setModalOpen(true)}
-  sx={{
-    backgroundColor: "rgb(85, 85, 85)",
-    color: "white",
-    fontWeight: "bold",
-    marginRight: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    "&:hover": {
-      fontWeight: "bolder", // Make text even bolder on hover
-      backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
-    },
-  }}
->
-  <ImportExportIcon />
-  Column Visibility
-</Button>
-       
-          <Button variant="contained" color="error" onClick={handleExport}>
-            Export
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              "&:hover": {
+                fontWeight: "bolder", // Make text even bolder on hover
+                backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
           </Button>
+
+          
+          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"Statistics Report"} pdfFilename={"StatisticsReport.pdf"} excelFilename={"StatisticsReport.xlsx"}/>
         </div>
 
         <div
@@ -1253,7 +1381,7 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
             </select>
 
             {/* Display current selection for demonstration */}
-            {/* <p>Selected Type: {selectedNotification}</p>
+          {/* <p>Selected Type: {selectedNotification}</p>
             <p>Daily: {daily ? 'true' : 'false'}</p> 
           </div> */}
           {/* <select
@@ -1645,40 +1773,40 @@ style={{ marginRight: '10px', padding: '5px' }}
               </Table>
             </TableContainer>
             <StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
-       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '20px',
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -1688,7 +1816,7 @@ style={{ marginRight: '10px', padding: '5px' }}
                 />
                 {col.Header}
               </div>
-              
+
             ))}
           </Box>
         </Modal>

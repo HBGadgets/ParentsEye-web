@@ -29,8 +29,8 @@ import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
-
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "../../Export";
 
 
 import {
@@ -44,6 +44,9 @@ import { MenuItem, Select, InputLabel, FormControl } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 //import { TextField } from '@mui/material';
 import { Autocomplete } from "@mui/material";
+const prevColor={
+  color:"primary"
+}
 const style = {
   position: "absolute",
   top: "50%",
@@ -97,13 +100,13 @@ export const StudentDetail = () => {
   const [branches, setBranches] = useState();
   const [buses, setBuses] = useState();
 
-  
+
   const fetchData = async (startDate = "", endDate = "") => {
     setLoading(true);
     try {
       let response;
       const token = localStorage.getItem("token");
-  
+
       if (role == 1) {
         response = await axios.get(
           `${process.env.REACT_APP_SUPER_ADMIN_API}/read-children`,
@@ -133,64 +136,64 @@ export const StudentDetail = () => {
           }
         );
       }
-  
+
       console.log("fetch data", response.data);
-  
+
       if (response?.data) {
         const allData =
           role == 1
             ? response.data.data.flatMap((school) =>
-                school.branches.flatMap((branch) =>
-                  Array.isArray(branch.children) && branch.children.length > 0
-                    ? branch.children.map((child) => ({
-                        ...child,
-                        schoolName: school.schoolName,
-                        branchName: branch.branchName,
-                      }))
-                    : []
-                )
+              school.branches.flatMap((branch) =>
+                Array.isArray(branch.children) && branch.children.length > 0
+                  ? branch.children.map((child) => ({
+                    ...child,
+                    schoolName: school.schoolName,
+                    branchName: branch.branchName,
+                  }))
+                  : []
               )
+            )
             : role == 2
-            ? response?.data.branches.flatMap((branch) =>
+              ? response?.data.branches.flatMap((branch) =>
                 Array.isArray(branch.children) && branch.children.length > 0
                   ? branch.children
                   : []
               )
-            : role == 3
-            ? response?.data.data
-            : role == 4
-            ? response?.data.updatedChildData.map((child) => ({
-                ...child,
-                schoolName: child.schoolId?.schoolName || "N/A",
-                branchName: child.branchId?.branchName || "N/A",
-                parentName: child.parentId?.parentName || "N/A",
-                 email:child.parentId?.email || "N/A",
-                 password:child.parentId?.password || "N/A",
-                formattedRegistrationDate: formatDate(child.registrationDate),
-              }))
-            : [];
-  
+              : role == 3
+                ? response?.data.data
+                : role == 4
+                  ? response?.data.updatedChildData.map((child) => ({
+                    ...child,
+                    schoolName: child.schoolId?.schoolName || "N/A",
+                    branchName: child.branchId?.branchName || "N/A",
+                    parentName: child.parentId?.parentName || "N/A",
+                    email:child.parentId?.email || "N/A",
+                    password:child.parentId?.password || "N/A",
+                    formattedRegistrationDate: formatDate(child.registrationDate),
+                  }))
+                  : [];
+
         console.log("Processed allData:", allData);
-  
+
         const filteredData =
           startDate || endDate
             ? allData.filter((row) => {
-                const registrationDate = parseDate(
-                  row.formattedRegistrationDate
-                );
-                const start = parseDate(startDate);
-                const end = parseDate(endDate);
-  
-                return (
-                  (!startDate || registrationDate >= start) &&
-                  (!endDate || registrationDate <= end)
-                );
-              })
+              const registrationDate = parseDate(
+                row.formattedRegistrationDate
+              );
+              const start = parseDate(startDate);
+              const end = parseDate(endDate);
+
+              return (
+                (!startDate || registrationDate >= start) &&
+                (!endDate || registrationDate <= end)
+              );
+            })
             : allData;
-  
+
         const reversedData = filteredData.reverse();
         console.log(`Data fetched between ${startDate} and ${endDate}:`, filteredData);
-  
+
         setFilteredRows(
           reversedData.map((row) => ({ ...row, isSelected: false }))
         );
@@ -205,7 +208,7 @@ export const StudentDetail = () => {
       setLoading(false);
     }
   };
-  
+
   // Helper function to parse dates
   function formatDate(date) {
     const d = new Date(date);
@@ -214,13 +217,13 @@ export const StudentDetail = () => {
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
   }
-  
+
   function parseDate(dateString) {
     const [day, month, year] = dateString.split("-").map(Number);
     return new Date(year, month - 1, day);
   }
-  
-  
+
+
 
   const handleApplyDateRange = () => {
     const startDate = document.getElementById("startDate").value;
@@ -238,7 +241,7 @@ export const StudentDetail = () => {
     }
   };
 
-  
+
 
   useEffect(() => {
     fetchData();
@@ -257,7 +260,7 @@ export const StudentDetail = () => {
     setRowsPerPage(newRowsPerPage === -1 ? sortedData.length : newRowsPerPage); // Set to all rows if -1
     setPage(0); // Reset to the first page
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -372,10 +375,10 @@ export const StudentDetail = () => {
         role == 1
           ? `${process.env.REACT_APP_SUPER_ADMIN_API}/delete/child`
           : role == 2
-          ? `${process.env.REACT_APP_SCHOOL_API}/delete/child`
-          : role==3
-          ? `${process.env.REACT_APP_BRANCH_API}/delete/child`
-          : `http://63.142.251.13:4000/branchgroupuser/deletechildbybranchgroup`;
+            ? `${process.env.REACT_APP_SCHOOL_API}/delete/child`
+            : role==3
+              ? `${process.env.REACT_APP_BRANCH_API}/delete/child`
+              : `http://63.142.251.13:4000/branchgroupuser/deletechildbybranchgroup`;
 
       const token = localStorage.getItem("token");
       // Send delete requests for each selected ID
@@ -414,18 +417,7 @@ export const StudentDetail = () => {
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "StudentDetail.xlsx");
-  };
 
-  
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -499,8 +491,8 @@ export const StudentDetail = () => {
       role == 1
         ? `${process.env.REACT_APP_SUPER_ADMIN_API}/update-child`
         : role == 2
-        ? `${process.env.REACT_APP_SCHOOL_API}/update-child`
-        : `${process.env.REACT_APP_BRANCH_API}/update-child`;
+          ? `${process.env.REACT_APP_SCHOOL_API}/update-child`
+          : `${process.env.REACT_APP_BRANCH_API}/update-child`;
 
     // Prepare the updated data
     const updatedData = {
@@ -611,7 +603,7 @@ export const StudentDetail = () => {
     }
   };
 
-  
+
   const handleBusChange = (e) => {
     const { value } = e.target;
 
@@ -799,8 +791,8 @@ export const StudentDetail = () => {
           role == 1
             ? `${process.env.REACT_APP_SUPER_ADMIN_API}/read-devices`
             : role == 2
-            ? `${process.env.REACT_APP_SCHOOL_API}/read-devices`
-            : `${process.env.REACT_APP_BRANCH_API}/read-devices`;
+              ? `${process.env.REACT_APP_SCHOOL_API}/read-devices`
+              : `${process.env.REACT_APP_BRANCH_API}/read-devices`;
 
         const response = await axios.get(apiUrl, {
           headers: {
@@ -814,10 +806,10 @@ export const StudentDetail = () => {
             school.branches.flatMap((branch) =>
               Array.isArray(branch.devices) && branch.devices.length > 0
                 ? branch.devices.map((device) => ({
-                    ...device,
-                    schoolName: school.schoolName,
-                    branchName: branch.branchName,
-                  }))
+                  ...device,
+                  schoolName: school.schoolName,
+                  branchName: branch.branchName,
+                }))
                 : []
             )
           );
@@ -825,10 +817,10 @@ export const StudentDetail = () => {
           allData = response?.data.branches.flatMap((branch) =>
             Array.isArray(branch.devices) && branch.devices.length > 0
               ? branch.devices.map((device) => ({
-                  ...device,
-                  branchName: branch.branchName,
-                  schoolName: response.data.schoolName,
-                }))
+                ...device,
+                branchName: branch.branchName,
+                schoolName: response.data.schoolName,
+              }))
               : []
           );
         } else if (role == 3) {
@@ -837,10 +829,10 @@ export const StudentDetail = () => {
 
           allData = Array.isArray(response.data.devices)
             ? response.data.devices.map((device) => ({
-                ...device,
-                branchName,
-                schoolName,
-              }))
+              ...device,
+              branchName,
+              schoolName,
+            }))
             : [];
         }
 
@@ -852,7 +844,7 @@ export const StudentDetail = () => {
       }
     };
 
-    
+
 
     const fetchGeofence = async (startDate = "", endDate = "") => {
       // setLoading(true);
@@ -883,7 +875,7 @@ export const StudentDetail = () => {
             }
           );
         }
-console.log("my geofences",response.data)
+        console.log("my geofences",response.data)
         if (response?.data) {
           let fetchedData = {};
 
@@ -931,7 +923,7 @@ console.log("my geofences",response.data)
               });
             });
           }
-          
+
 
           console.log("role is:", role);
           console.log("geofences are:", fetchedData);
@@ -947,7 +939,7 @@ console.log("my geofences",response.data)
     fetchSchool();
     fetchGeofence();
   }, [role]);
- 
+
   const sampleData = [
     [
       "childName",
@@ -1024,56 +1016,56 @@ console.log("my geofences",response.data)
             marginBottom: "10px",
           }}
         >
-       
-           <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Smaller width
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Set a fixed height to reduce it
-        padding: '0px', // Reduce padding to shrink height
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position
-        fontSize: '14px', // Slightly smaller label font
-      }
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
-          style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
-          }}
-        />
-      ),
-    }}
-  />
-        
+
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Smaller width
+              '& .MuiOutlinedInput-root': {
+                height: '36px', // Set a fixed height to reduce it
+                padding: '0px', // Reduce padding to shrink height
+              },
+              '& .MuiInputLabel-root': {
+                top: '-6px', // Adjust label position
+                fontSize: '14px', // Slightly smaller label font
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
+
           <Button
-  onClick={() => setModalOpen(true)}
-  sx={{
-    backgroundColor: "rgb(85, 85, 85)",
-    color: "white",
-    fontWeight: "bold",
-    marginRight: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    "&:hover": {
-      fontWeight: "bolder", // Make text even bolder on hover
-      backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
-    },
-  }}
->
-  <ImportExportIcon />
-  Column Visibility
-</Button>
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              "&:hover": {
+                fontWeight: "bolder", // Make text even bolder on hover
+                backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
+          </Button>
 
           <Button
             variant="contained"
@@ -1110,9 +1102,8 @@ console.log("my geofences",response.data)
           >
             Import
           </Button>
-          <Button variant="contained" color="primary" onClick={handleExport}>
-            Export
-          </Button>
+          
+          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"STUDENTS DETAIL"} pdfFilename={"StudentDetail.pdf"} excelFilename={"StudentDetail.xlsx"} prevColor={prevColor}/>
         </div>
         <div
           style={{
@@ -1344,28 +1335,28 @@ console.log("my geofences",response.data)
                 </TableBody>
               </Table>
             </TableContainer>
-           
-          
- 
-  
-  
-    <StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+
+
+
+
+
+            <StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
@@ -1373,17 +1364,17 @@ console.log("my geofences",response.data)
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '20px',
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -1393,12 +1384,12 @@ console.log("my geofences",response.data)
                 />
                 {col.Header}
               </div>
-              
+
             ))}
           </Box>
         </Modal>
         <Modal open={editModalOpen} onClose={handleModalClose}>
-         
+
           <Box sx={style}>
             {/* <h2>Add Row</h2> */}
             <Box
@@ -1495,7 +1486,7 @@ console.log("my geofences",response.data)
               fullWidth
             />
 
-          
+
             <FormControl fullWidth sx={{ marginBottom: "10px" }}>
               <Autocomplete
                 id="searchable-select"
@@ -1539,7 +1530,7 @@ console.log("my geofences",response.data)
             />
             {role == 1 ? (
               <>
-               
+
                 <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
@@ -1552,9 +1543,9 @@ console.log("my geofences",response.data)
                     value={
                       Array.isArray(schools)
                         ? schools.find(
-                            (school) =>
-                              school.schoolName === formData["schoolName"]
-                          )
+                          (school) =>
+                            school.schoolName === formData["schoolName"]
+                        )
                         : null
                     } // Safely find the selected school
                     onChange={(event, newValue) => {
@@ -1575,7 +1566,7 @@ console.log("my geofences",response.data)
                     )}
                   />
                 </FormControl>
-               
+
                 <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
@@ -1588,9 +1579,9 @@ console.log("my geofences",response.data)
                     value={
                       Array.isArray(branches)
                         ? branches.find(
-                            (branch) =>
-                              branch.branchName === formData["branchName"]
-                          )
+                          (branch) =>
+                            branch.branchName === formData["branchName"]
+                        )
                         : null
                     } // Safely find the selected branch
                     onChange={(event, newValue) => {
@@ -1613,7 +1604,7 @@ console.log("my geofences",response.data)
                 </FormControl>
               </>
             ) : role == 2 ? (
-              
+
               <FormControl
                 variant="outlined"
                 sx={{ marginBottom: "10px" }}
@@ -1647,8 +1638,8 @@ console.log("my geofences",response.data)
                 />
               </FormControl>
             ) : null}
-            
-           
+
+
             <FormControl
               variant="outlined"
               sx={{ marginBottom: "10px" }}
@@ -1681,7 +1672,7 @@ console.log("my geofences",response.data)
                 )}
               />
             </FormControl>
-          
+
             <FormControl fullWidth sx={{ marginBottom: "10px" }}>
               <Autocomplete
                 id="geofence-autocomplete"
@@ -1991,9 +1982,9 @@ console.log("my geofences",response.data)
                     value={
                       Array.isArray(schools)
                         ? schools.find(
-                            (school) =>
-                              school.schoolName === formData["schoolName"]
-                          )
+                          (school) =>
+                            school.schoolName === formData["schoolName"]
+                        )
                         : null
                     } // Safely find the selected school
                     onChange={(event, newValue) => {
@@ -2046,9 +2037,9 @@ console.log("my geofences",response.data)
                     value={
                       Array.isArray(branches)
                         ? branches.find(
-                            (branch) =>
-                              branch.branchName === formData["branchName"]
-                          )
+                          (branch) =>
+                            branch.branchName === formData["branchName"]
+                        )
                         : null
                     } // Safely find the selected branch
                     onChange={(event, newValue) => {
@@ -2124,9 +2115,9 @@ console.log("my geofences",response.data)
                   value={
                     Array.isArray(branches)
                       ? branches.find(
-                          (branch) =>
-                            branch.branchName === formData["branchName"]
-                        ) || null
+                        (branch) =>
+                          branch.branchName === formData["branchName"]
+                      ) || null
                       : null
                   } // Safeguard find method
                   onChange={(event, newValue) => {

@@ -25,11 +25,13 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs"
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
+import Export from "./ExportUserAccess"
 // import excelfileUserAccess from "../../../../../public/UserAccess.xlsx";
 import {
   FormControlLabel,
@@ -400,16 +402,7 @@ export const UserAccess = () => {
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "UserAccess.xlsx");
-  };
+
 
   // const handleFileUpload = (event) => {
   //   const file = event.target.files[0];
@@ -1282,9 +1275,8 @@ const handleInputChange = (e) => {
           >
             Import
           </Button>
-          <Button variant="contained" color="primary" onClick={handleExport}>
-            Export
-          </Button>
+          
+          <Export filteredRows={filteredRows} COLUMNS={COLUMNS} columnVisibility={columnVisibility}/>
         </div>
         <div
           style={{

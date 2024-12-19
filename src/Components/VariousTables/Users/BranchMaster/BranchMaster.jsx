@@ -1374,6 +1374,7 @@ import { TotalResponsesContext } from "../../../../TotalResponsesContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "./ExportBranchMaster";
 
 import {
   FormControl,
@@ -1385,6 +1386,7 @@ import {
 import { jwtDecode } from "jwt-decode";
 
 //import { TextField } from '@mui/material';
+const orangeBtn ={ backgroundColor: "rgb(255, 165, 0)"}
 
 const style = {
   position: "absolute",
@@ -1708,16 +1710,17 @@ const BranchMaster = () => {
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "Branches.xlsx");
-  };
+  // const handleExport = () => {
+  //   const dataToExport = filteredRows.map((row) => {
+  //     const { isSelected, ...rowData } = row;
+  //     return rowData;
+  //   });
+  //   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+  //   XLSX.writeFile(workbook, "Branches.xlsx");
+  // };
+ 
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -2189,9 +2192,9 @@ const BranchMaster = () => {
           >
             Import
           </Button> */}
-          <Button variant="contained" sx={{ backgroundColor: "rgb(255, 165, 0)"}} onClick={handleExport}>
-            Export
-          </Button>
+         
+          <Export orangeBtn={orangeBtn} columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"BRANCH MASTER"} pdfFilename={"BranchMaster.pdf"} excelFilename={"BranchMaster.xlsx"}/>
+
         </div>
         <div
           style={{

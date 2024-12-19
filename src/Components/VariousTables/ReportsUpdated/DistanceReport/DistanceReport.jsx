@@ -964,6 +964,9 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import ExcelJS from "exceljs";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
@@ -973,6 +976,7 @@ import { IconButton } from "@mui/material";
 import { saveAs } from 'file-saver'; // Save file to the user's machine
 // import * as XLSX from 'xlsx'; // To process and convert the excel file to JSON
 //import { TextField } from '@mui/material';
+import Export from "./Export";
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
 import Select from "react-select";
 const style = {
@@ -1096,7 +1100,15 @@ const COLUMNS = () => {
       }
     });
   });
+  const toSortableDate = (date) => {
+    const [day, month, year] = date.split("/").map(Number);
+    return `${year}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+  };
 
+  // Sort the dates using the sortable format
+  dateColumns.sort((a, b) => {
+    return new Date(toSortableDate(a)) - new Date(toSortableDate(b));
+  });
   // Create columns for each date
   dateColumns.forEach((date) => {
     columns.push({
@@ -1162,7 +1174,6 @@ const { setTotalResponses } = useContext(TotalResponsesContext); // Get the cont
     setFilterText(text);
   };
 
- 
   const filterData = (text) => {
     // Apply text-based filtering
     if (text === "") {
@@ -1182,7 +1193,7 @@ const { setTotalResponses } = useContext(TotalResponsesContext); // Get the cont
   
       setFilteredRows(filteredData);
     }
-  };
+  }; 
   
   const requestSort = (key) => {
     let direction = "ascending";
@@ -1296,16 +1307,6 @@ const { setTotalResponses } = useContext(TotalResponsesContext); // Get the cont
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "DistanceReport.xlsx");
-  };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -1882,12 +1883,9 @@ const fetchData = async (url) => {
   Column Visibility
 </Button>
          
-         
-         
-         
-<Button variant="contained" color="error" onClick={handleExport}>
-            Export
-          </Button>
+
+          <Export sortedData={sortedData} columnVisibility={columnVisibility} COLUMNS={COLUMNS} pdfTitle={"DISTANCE REPORT"} pdfFilename={"DistanceReport"} excelFilename={"DistanceReport.xlsx"}/>
+          
           <div
   style={{
     width: "250px",
@@ -2348,7 +2346,7 @@ const fetchData = async (url) => {
           <h4>No Data Available</h4>
         </TableCell>
       </TableRow>
-    ) : (
+    ) : (      
       sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => {
         // Calculate the total distance for each row by summing the relevant columns
         const totalDistance = Object.keys(row).reduce((sum, key) => {
@@ -2518,10 +2516,28 @@ const fetchData = async (url) => {
       }
 
       // Calculate the column total by summing up relevant values in `sortedData`
-      const columnTotal = sortedData.reduce((sum, row) => {
-        const value = parseFloat(row[column.accessor] || 0); // Default to 0 if value is undefined
-        return sum + (isNaN(value) ? 0 : value);
-      }, 0);
+      console.log("sorted date in columntotal calculation",sortedData);
+
+      // const columnTotal = sortedData.reduce((sum, row) => {
+        
+      //   console.log("row[column.accessor]",row[column.accessor]);
+        
+      //   const value = parseFloat(row[column.accessor] || 0); // Default to 0 if value is undefined
+      //   return sum + (isNaN(value) ? 0 : value);
+        
+      // }, 0);
+     // Dynamically format the column accessor to match the keys in sortedData
+const columnTotal = sortedData.reduce((sum, row) => {
+  const formattedAccessor = column.accessor.replace("date_", "").replace(/-/g, "/"); // Convert "date_05-12-2024" to "05/12/2024"
+
+  console.log("Row being processed:", row);
+  console.log(`Value for column "${formattedAccessor}":`, row[formattedAccessor]);
+
+  // Extract and parse the value for the column
+  const value = parseFloat(row[formattedAccessor] || 0); // Default to 0 if the value is missing or undefined
+  return sum + (isNaN(value) ? 0 : value); // Add only valid numeric values
+}, 0);
+
 
       return (
         <TableCell
@@ -2532,7 +2548,7 @@ const fetchData = async (url) => {
             backgroundColor: "#f5f5f5",
           }}
         >
-          {columnTotal.toFixed(2)} {/* Format to 2 decimal places */}
+          {columnTotal.toFixed(2)} 
         </TableCell>
       );
     })}

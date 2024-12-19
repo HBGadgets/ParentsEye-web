@@ -1651,6 +1651,7 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { TotalResponsesContext } from "../../../../TotalResponsesContext";
@@ -1659,6 +1660,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import { MenuItem, Select, InputLabel, FormControl } from "@mui/material";
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
+import Export from "./ExportStatus";
 
 // import './TableStyles.css';
 //import { TextField } from '@mui/material';
@@ -1897,14 +1899,14 @@ export const Status = () => {
     const filteredData =
       startDate || endDate
         ? allChildren.filter((child) => {
-            const requestDate = parseDate(child.requestDate);
-            const start = startDate ? parseDate(startDate) : null;
-            const end = endDate ? parseDate(endDate) : null;
+          const requestDate = parseDate(child.requestDate);
+          const start = startDate ? parseDate(startDate) : null;
+          const end = endDate ? parseDate(endDate) : null;
 
-            return (
-              (!start || requestDate >= start) && (!end || requestDate <= end)
-            );
-          })
+          return (
+            (!start || requestDate >= start) && (!end || requestDate <= end)
+          );
+        })
         : allChildren; // If no date range, use all children
 
     const reversedData = filteredData.reverse();
@@ -1968,7 +1970,7 @@ export const Status = () => {
     setRowsPerPage(newRowsPerPage === -1 ? sortedData.length : newRowsPerPage); // Set to all rows if -1
     setPage(0); // Reset to the first page
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -2116,16 +2118,6 @@ export const Status = () => {
     fetchData();
   };
 
-  const handleExport = () => {
-    const dataToExport = filteredRows.map((row) => {
-      const { isSelected, ...rowData } = row;
-      return rowData;
-    });
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, "Status.xlsx");
-  };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -2422,121 +2414,112 @@ export const Status = () => {
     <>
       <h1 style={{ textAlign: "center", marginTop: "80px" }}>Status</h1>
       <div>
-      <div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    marginBottom: "10px",
-    flexWrap: "wrap", // Allow items to wrap on smaller screens
-  }}
->
-  <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Adjusted width for consistency
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Reduced height
-        padding: '0px', // Remove padding to compact it
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position for smaller size
-        fontSize: '14px', // Slightly smaller font
-      },
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
+        <div
           style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "10px",
+            flexWrap: "wrap", // Allow items to wrap on smaller screens
           }}
-        />
-      ),
-    }}
-  />
+        >
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Adjusted width for consistency
+              '& .MuiOutlinedInput-root': {
+                height: '36px', // Reduced height
+                padding: '0px', // Remove padding to compact it
+              },
+              '& .MuiInputLabel-root': {
+                top: '-6px', // Adjust label position for smaller size
+                fontSize: '14px', // Slightly smaller font
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
 
-  <Button
-    onClick={() => setModalOpen(true)}
-    sx={{
-      backgroundColor: "rgb(85, 85, 85)",
-      color: "white",
-      fontWeight: "bold",
-      marginRight: "10px",
-      display: "flex",
-      alignItems: "center",
-      gap: "5px", // Consistent gap
-      padding: "6px 12px", // Added padding for better click area
-      '&:hover': {
-        backgroundColor: "rgb(100, 100, 100)", // Lighter shade on hover
-      },
-    }}
-  >
-    <ImportExportIcon />
-    Column Visibility
-  </Button>
+          <Button
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "5px", // Consistent gap
+              padding: "6px 12px", // Added padding for better click area
+              '&:hover': {
+                backgroundColor: "rgb(100, 100, 100)", // Lighter shade on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
+          </Button>
 
-  <Button
-    variant="contained"
-    color="success"
-    onClick={handleExport}
-    sx={{
-      padding: "6px 12px",
-      marginRight: "10px",
-    }}
-  >
-    Export
-  </Button>
+          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} />
 
-  <input
-    type="date"
-    id="startDate"
-    placeholder="DD-MM-YYYY"
-    style={{
-      width: "130px",
-      marginRight: "10px",
-      padding: "6px 10px", // Increased padding for better click area
-      marginLeft: "3px",
-      border: "0.1px solid black",
-      borderRadius: "3px",
-    }}
-  />
 
-  <input
-    type="date"
-    id="endDate"
-    placeholder="DD-MM-YYYY"
-    style={{
-      width: "130px",
-      marginRight: "10px",
-      padding: "6px 10px",
-      marginLeft: "3px",
-      border: "0.1px solid black",
-      borderRadius: "3px",
-    }}
-  />
+          <input
+            type="date"
+            id="startDate"
+            placeholder="DD-MM-YYYY"
+            style={{
+              width: "130px",
+              marginRight: "10px",
+              padding: "6px 10px", // Increased padding for better click area
+              marginLeft: "3px",
+              border: "0.1px solid black",
+              borderRadius: "3px",
+            }}
+          />
 
-  <button
-    onClick={handleApplyDateRange}
-    style={{
-      backgroundColor: "#1976d2",
-      color: "white",
-      border: "none",
-      padding: "6px 12px", // Increased padding for better click area
-      borderRadius: "5px",
-      cursor: "pointer",
-      '&:hover': {
-        backgroundColor: "#115293", // Darker blue on hover
-      },
-    }}
-  >
-    Apply Date Range
-  </button>
-</div>
+          <input
+            type="date"
+            id="endDate"
+            placeholder="DD-MM-YYYY"
+            style={{
+              width: "130px",
+              marginRight: "10px",
+              padding: "6px 10px",
+              marginLeft: "3px",
+              border: "0.1px solid black",
+              borderRadius: "3px",
+            }}
+          />
+
+          <button
+            onClick={handleApplyDateRange}
+            style={{
+              backgroundColor: "#1976d2",
+              color: "white",
+              border: "none",
+              padding: "6px 12px", // Increased padding for better click area
+              borderRadius: "5px",
+              cursor: "pointer",
+              '&:hover': {
+                backgroundColor: "#115293", // Darker blue on hover
+              },
+            }}
+          >
+            Apply Date Range
+          </button>
+        </div>
 
         {loading ? (
           <div
@@ -2972,40 +2955,40 @@ export const Status = () => {
               </Table>
             </TableContainer>
             <StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
-     <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '20px',
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -3015,7 +2998,7 @@ export const Status = () => {
                 />
                 {col.Header}
               </div>
-              
+
             ))}
           </Box>
         </Modal>
