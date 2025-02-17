@@ -43,6 +43,7 @@
     "jspdf-autotable": "^3.8.4",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
+    "leaflet-routing-machine": "^3.2.12",
     "moment-timezone": "^0.5.45",
     "mongoose": "^8.5.1",
     "nodemon": "^3.1.4",
@@ -69,7 +70,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts --max_old_space_size=5120 build",
+    "build": "react-scripts --max_old_space_size=8120 build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
