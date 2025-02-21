@@ -32,9 +32,13 @@ import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
+import { Card, CardContent, CardHeader } from '@mui/material';
 import "./GeoFencing.css";
 import Draggable from 'react-draggable'
 import GeofenceForm from "./GeofenceForm"; 
+import Tooltip from '@mui/material/Tooltip';
+import { io } from 'socket.io-client';
+
 import {
   Box,
   FormControl,
@@ -60,7 +64,31 @@ const mapIcons = {
     gray: busgraySvg,
   },
 }
-
+// const CustomTooltip = styled(Tooltip)({
+//   tooltip: {
+//     backgroundColor: "#333", // Dark background
+//     color: "#fff", // White text
+//     fontSize: "14px", // Larger font
+//     padding: "8px 12px", // Better spacing
+//     borderRadius: "8px", // Rounded corners
+//   },
+//   arrow: {
+//     color: "#333", // Match background
+//   },
+// });
+const CustomTooltip = styled(Tooltip)(({ theme }) => ({
+  tooltip: {
+    backgroundColor: "#0f0f0f", // Dark background
+    color: "#fff", // White text
+    fontSize: "14px", // Larger font
+    padding: "10px", // More padding
+    borderRadius: "8px", // Rounded corners
+    maxWidth: 220, // Optional, limit the width of the tooltip
+  },
+  arrow: {
+    color: "#333", // Match the tooltip background
+  },
+}));
 const getVehicleIcon = (vehicle, cat) => {
   let speed = vehicle.speed
   let ignition = vehicle.attributes.ignition
@@ -168,8 +196,43 @@ const IndividualTrack = (lat, long) => {
   const [open, setOpen] = useState(false);
   const [clickedLocation, setClickedLocation] = useState(null); 
   const [renderTrigger, setRenderTrigger] = useState(false);
- 
+  const [socketId, setSocketId] = useState(null);
+  const [etaAlert, setEtaAlert] = useState(null);
+  const socketRef = useRef(null); // Store the socket instance
   // const [isCrossed,setIsCrossed] = useState(false);
+  useEffect(() => {
+    if (!socketRef.current) {
+      // Only connect if socket is not already initialized
+      socketRef.current = io(process.env.REACT_APP_Testing_Server_API, {
+        transports: ["websocket"], // Use WebSocket for better performance
+      });
+
+      const socket = socketRef.current; // Shortcut for readability
+
+      socket.on("connect", () => {
+        console.log("Connected to socket:", socket.id);
+        setSocketId(socket.id);
+      });
+      const DeviceId = deviceId;
+      if (DeviceId) {
+        // Emit the token after connecting to the serv
+        socket.emit("getDeviceId",{DeviceId});
+        console.log(DeviceId)
+      }
+      socket.on("etaAlerts", (data) => {
+        console.log("Received ETA Alert:", data);
+        setEtaAlert(data);
+      });
+
+      // Cleanup on unmount
+      return () => {
+        socket.off("connect"); 
+        socket.off("etaAlerts");
+        socket.disconnect();
+        console.log("Socket disconnected");
+      };
+    }
+  }, []);
   const ClickHandler = () => {
     useMapEvents({
       click: (e) => {
@@ -346,7 +409,11 @@ const IndividualTrack = (lat, long) => {
       console.log("Devvvvvvvvvvvvvvvvvvvvv", deviceId);
 
 // Use template literal to properly pass deviceId into the URL
-const response = await fetch(`https://parentseyereplica.onrender.com/iscrossedhistory?deviceIds=${deviceId}`);
+// const response = await fetch(`https://parentseye-test-2.onrender.com/iscrossedhistory?deviceIds=${deviceId}`);
+const response = await fetch(
+  `${process.env.REACT_APP_Testing_Server_API}/iscrossedhistory?deviceIds=${deviceId}`
+);
+
 
 if (!response.ok) {
   throw new Error('Network response was not ok');
@@ -376,7 +443,7 @@ setGeoStatus(data); // Store the data in geoStatus state
     const interval = setInterval(() => {
     fetchData();
     fetchStatus();
-  }, 5000); 
+  }, 1000); 
   return () => clearInterval(interval);
   }, [])
   useEffect(() => {
@@ -514,7 +581,7 @@ setGeoStatus(data); // Store the data in geoStatus state
       <ReactLeafletDriftMarker
         position={[individualSalesMan.latitude, individualSalesMan.longitude]}
         icon={getVehicleIcon(individualSalesMan, category)}
-        duration={2000}
+        duration={3000}
       >
          <GeofenceForm
           formData={formData}
@@ -564,9 +631,12 @@ setGeoStatus(data); // Store the data in geoStatus state
                {showGeofences && matchingGeofences.map((geofence) => {
                   const parsedArea = parseArea(geofence.area);
                   if (parsedArea) {
-                    const matchingGeoStatus = geoStatus.data.filter(
-                      (status) => status.geofenceName === geofence.name && status.status === "Exited"
-                    );
+                    // const matchingGeoStatus = geoStatus.data.filter(
+                    //   (status) => status.geofenceName === geofence.name && status.status === "Entered"
+                    // );
+                    const matchingGeoStatus = geoStatus?.data?.filter(
+                      (status) => status.geofenceName === geofence.name && status.status === "Entered"
+                  ) || [];
                     var hasExitedStatus = matchingGeoStatus.length > 0;
                    
                     return (
@@ -577,9 +647,9 @@ setGeoStatus(data); // Store the data in geoStatus state
                         center={[parsedArea.lat, parsedArea.lng]}
                         radius={parsedArea.radius}
                         className={`geofence-circle ${geofence._id}`}
-                        color={hasExitedStatus ? "rgba(255, 0, 0, 0.5)" : "rgba(0, 128, 0, 0.5)"}
+                        color={!hasExitedStatus ? "rgb(251, 187, 49)" : "rgba(0, 128, 0, 0.5)"}
                         strokeWidth={2}
-                        fillColor={hasExitedStatus ? "rgba(255, 0, 0, 0.2)" : "rgba(0, 128, 0, 0.2)"}
+                        fillColor={!hasExitedStatus ? "rgba(251, 187, 49, 0.5)" : "rgba(0, 128, 0, 0.2)"}
                         fillOpacity={0.4}
                       >
                         <Popup>
@@ -595,24 +665,27 @@ setGeoStatus(data); // Store the data in geoStatus state
                   }
                   return null;
                 })}
-                {showRoutes && (
+             
+            </MapContainer>
+            {showRoutes && (
             <div
               className="sidebar"
               style={{
-                width: '300px',
-                backgroundColor: '#f8f9fa',
-                padding: '10px',
+                width: '400px',
+                backgroundColor: '#fff2d6',
+                padding: '20px',
                 height: '650px', // Match map height
                 position: 'absolute',
                 right: 0,
-                top: 0,
+                top: '9%',
                 boxShadow: '-2px 0 5px rgba(0,0,0,0.2)',
                 zIndex: '1000', // Ensure it appears in front of the map, but behind the "Show Routes" button
                 overflowY: 'auto',
+                
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <h4>Travel Route Information</h4>
+                <h4>Travel Route<br /> Information</h4>
                 {/* Close button */}
                 <CButton
                   color="danger"
@@ -624,46 +697,142 @@ setGeoStatus(data); // Store the data in geoStatus state
                 </CButton>
               </div>
   
-              <div className="vehicle-list" style={{ overflowY: 'auto', height: 'calc(100% - 40px)' }}>
-              {matchingGeofences.map((geofence, index) => {
-    // Filter geostatus to find matching geofenceName and "Entered" status
-    // var arrivalStatus;
-    const arrivalStatus = geoStatus?.data?.filter(status => status.geofenceName === geofence.name && status.status === 'Entered') || [];
-    console.log("arrived at", arrivalStatus);
-    const dipartureStatus = geoStatus?.data?.filter(status => status.geofenceName === geofence.name && status.status === 'Exited') || [];
-    console.log("departed at", dipartureStatus);            
-    return (
-      <div
-        key={index}
-        // key={`${geofence._id}-${arrivalStatus}`}
-        className="vehicle-item"
-        style={{
-          marginBottom: '10px',
-          padding: '10px',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-        }}
-      >
-        <h5>{geofence.name}</h5>
-        <p><strong>Arrival Time:</strong> {arrivalStatus[0] ? new Date(arrivalStatus[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : 'N/A'}</p>
-        <p><strong>Departure Time:</strong> {dipartureStatus[0] ? new Date(dipartureStatus[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : 'N/A'}</p>
-        <p><strong>Stop Duration:</strong> {
-            arrivalStatus[0] && dipartureStatus[0] ? (() => {
+              <div className="vehicle-list" style={{
+                 overflowY: 'auto', height: 'calc(100% - 40px)', 
+                //  width: '400px',
+                //  backgroundColor: '#fff2d6',
+                //  padding: '20px',
+                //  height: '650px',
+                //  position: 'absolute',
+                // // position:'relative',
+                //  right: 0,
+                //  top: 30,
+                //  boxShadow: '-2px 0 5px rgba(0,0,0,0.2)',
+                //  zIndex: '1000',
+                //  overflowY: 'auto',
+                overflowY: 'auto',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#ffe5ad #fff2d6', // Thumb color first, then track color
+                '&::-webkit-scrollbar': {
+                  width: '8px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: '#fff2d6',
+                  borderRadius: '100px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: '#ffe5ad',
+                  borderRadius: '100px',
+                },
+                '&::-webkit-scrollbar-thumb:hover': {
+                  background: '#555',
+                },
+                // Remove scrollbar buttons (arrows)
+                '&::-webkit-scrollbar-button': {
+                  display: 'none',
+                  width: 0,
+                  height: 0,
+                }, // Fully remove scrollbar buttons (arrows)
+                '&::-webkit-scrollbar-button:single-button': {
+                  display: 'none',
+                  width: '0px',
+                  height: '0px',
+                  background: 'transparent',
+                },
+                 }}>
+             {
+  matchingGeofences.length > 0 ? (
+    matchingGeofences.map((geofence, index) => {
+      // Filter geostatus to find matching geofenceName and "Entered" status
+      const arrivalStatus = geoStatus?.data?.filter(status => status.geofenceName === geofence.name && status.status === 'Entered') || [];
+      console.log("arrived at", arrivalStatus);
+      const dipartureStatus = geoStatus?.data?.filter(status => status.geofenceName === geofence.name && status.status === 'Exited') || [];
+      console.log("departed at", dipartureStatus);      
+      const filteredEta = etaAlert?.filter(etaAlert => etaAlert.geofenceName === geofence.name) || []; 
+      console.log("filteredEta",filteredEta)    
+      const etaTime = Math.floor(filteredEta?.[0]?.etaTime || 0);
+      const formattedEta = etaTime >= 60 ? `${Math.floor(etaTime / 60)} h ${etaTime % 60} min` : `${etaTime} min`;
+      console.log(formattedEta);
+
+      return (
+        <Card
+          key={index}
+          sx={{
+            marginRight: 2,
+            display: 'flex',
+            alignItems: 'center',
+            boxShadow: '3px 3px 10px rgba(0, 0, 0, 0.2)',
+            border: '1px solid rgba(0, 0, 0, 0.2)',
+            borderRadius: 2,
+            overflow: 'hidden',
+            mb: 2,
+            paddingLeft: 2,
+            backgroundColor:
+              dipartureStatus.length > 0
+                ? '#ccffcc' // Red if "departed" is present (highest priority)
+                : arrivalStatus.length > 0
+                ? '#ccffcc' // Green if only "arrived" is present
+                : '#ffe5ad', // Default color if neither are present
+          }}
+        >
+          {/* Left side small road representation */}
+          <Box
+            sx={{
+              width: '20px',
+              height: '150px',
+              backgroundColor: '#333',
+              position: 'relative',
+              mr: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '4px',
+            }}
+          >
+            <Box
+              sx={{
+                width: '3px',
+                height: '100%',
+                backgroundColor: 'white',
+                backgroundImage: 'repeating-linear-gradient(to bottom,white 0%, white 40%,black 40%,black 60%,white 60%,white 100%)',
+                backgroundSize: '3px 12px',
+              }}
+            />
+          </Box>
+
+          {/* Card Content */}
+          <CardContent>
+            <Typography variant="h6">{geofence.name}</Typography>
+            <Typography><strong>Arrival Time:</strong> {arrivalStatus[0] ? new Date(arrivalStatus[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : 'N/A'}</Typography>
+            <Typography><strong>Departure Time:</strong> {dipartureStatus[0] ? new Date(dipartureStatus[0].createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : 'N/A'}</Typography>
+            <Typography><strong>Stop Duration:</strong> {
+              arrivalStatus[0] && dipartureStatus[0] ? (() => {
                 const arrivalTime = new Date(arrivalStatus[0].createdAt);
                 const departureTime = new Date(dipartureStatus[0].createdAt);
-                const diffMs = departureTime - arrivalTime; // Difference in milliseconds
-                const minutes = Math.floor((diffMs / 1000) / 60); // Convert to minutes
+                const diffMs = departureTime - arrivalTime;
+                const minutes = Math.floor((diffMs / 1000) / 60);
                 return `${minutes} min`;
-            })() : 'N/A'
-        }</p>
-        <p><strong>ETA:</strong> {geofence.eta}</p>
-      </div>
-    );
-  })}
+              })() : 'N/A'
+            }</Typography>
+            <CustomTooltip title="Estimated Time of Arrival" arrow>
+              <Typography component="span" sx={{ fontWeight: "bold", cursor: "pointer" }}>
+                ETA
+              </Typography>
+            </CustomTooltip>
+            : {formattedEta}
+          </CardContent>
+        </Card>
+      );
+    })
+  ) : (
+    <Typography variant="h6" sx={{ textAlign: 'center', marginTop: 2 }}>
+      No routes found
+    </Typography>
+  )
+}
               </div>
             </div>
           )}
-            </MapContainer>
             {/* Sidebar for Vehicle Information */}
       {/* {showRoutes && (
         <div className="col-4" style={{ padding: '10px', backgroundColor: '#f8f9fa' }}>

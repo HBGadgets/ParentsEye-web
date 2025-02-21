@@ -1387,7 +1387,7 @@ const [page, setPage] = useState(0);
   const [originalRows, setOriginalRows] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
+  const role = localStorage.getItem("role");
 
   // Update rowsPerPage to sortedData.length once sortedData is initialized
 
@@ -1399,7 +1399,7 @@ const fetchData = async () => {
     const username = "schoolmaster";
     const password = "123456";
     const token = btoa(`${username}:${password}`);
-
+    const tokenschool = localStorage.getItem("token");
     // First API call to fetch devices
     const firstApiResponse = await axios.get("https://rocketsalestracker.com/api/devices", {
       headers: {
@@ -1412,7 +1412,7 @@ const fetchData = async () => {
     // Second API call to fetch school, branch, and device info
     const secondApiResponse = await axios.get("http://63.142.251.13:4000/superadmin/read-devices", {
       headers: {
-        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDJkN2NhZDllYzhkZjg5ZTc4ODU2MiIsInVzZXJuYW1lIjoiaGFyc2hhbF8xIiwiaWF0IjoxNzI2MTM4MTY3fQ.w2PbCygMIkVg77xzOYLJXONuysGjTVkITf-IAF9ahIo`, // Replace with actual token if necessary
+        Authorization: `Bearer ${tokenschool}`, // Replace with actual token if necessary
       },
     });
 
@@ -1735,7 +1735,7 @@ const handleEditSubmit = async () => {
     const username = "schoolmaster";
     const password = "123456";
     const token1 = btoa(`${username}:${password}`);
-    const token2 = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDJkN2NhZDllYzhkZjg5ZTc4ODU2MiIsInVzZXJuYW1lIjoiaGFyc2hhbF8xIiwiaWF0IjoxNzI2MTM4MTY3fQ.w2PbCygMIkVg77xzOYLJXONuysGjTVkITf-IAF9ahIo`;
+    const token2 =  localStorage.getItem("token");
 
     const { isSelected, ...updatedData } = formData;
 
@@ -1960,13 +1960,14 @@ const handleInputChange = (e) => {
 useEffect(() => {
   const fetchSchool = async (startDate = "", endDate = "") => {
     setLoading(true);
+    const token = localStorage.getItem("token");
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(
         `${process.env.REACT_APP_SUPER_ADMIN_API}/getschools`,
         {
           headers: {
-            Authorization:"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDJkN2NhZDllYzhkZjg5ZTc4ODU2MiIsInVzZXJuYW1lIjoiaGFyc2hhbF8xIiwiaWF0IjoxNzI1NTE5MTc3fQ.bdjnmN2c20DjmMAvNL1L_TN59iGOa_MnblhcQQK5d4w",
+            Authorization:`Bearer ${token}`,
           },
         }
       );
@@ -2008,7 +2009,7 @@ const handleAddSubmit = async () => {
     const username = "schoolmaster"; // Replace with your actual username
     const password = "123456"; // Replace with your actual password
     const token1 = btoa(`${username}:${password}`); // Encode credentials in Base64 for first URL
-    const token2 = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDJkN2NhZDllYzhkZjg5ZTc4ODU2MiIsInVzZXJuYW1lIjoiaGFyc2hhbF8xIiwiaWF0IjoxNzI2MTM4MTY3fQ.w2PbCygMIkVg77xzOYLJXONuysGjTVkITf-IAF9ahIo"; // Token for the second URL
+    const token2 = localStorage.getItem("token");
 
     // Prepare the data for the first API
     const newRow = {
