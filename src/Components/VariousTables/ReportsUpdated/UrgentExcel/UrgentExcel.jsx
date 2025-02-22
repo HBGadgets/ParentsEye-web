@@ -208,7 +208,7 @@
 //             marginBottom: "10px",
 //           }}
 //         >
-       
+
 //            <TextField
 //     label="Search"
 //     variant="outlined"
@@ -238,13 +238,13 @@
 //       ),
 //     }}
 //   />
-        
-        
+
+
 
 //           <Button
 //             variant="contained"
 //             color="error"
-           
+
 //             sx={{ marginRight: "10px" }}
 //             startIcon={<DeleteIcon />}
 //           >
@@ -253,7 +253,7 @@
 //           <Button
 //             variant="contained"
 //             color="primary"
-         
+
 //             sx={{ marginRight: "10px" }}
 //             startIcon={<EditIcon />}
 //           >
@@ -262,13 +262,13 @@
 //           <Button
 //             variant="contained"
 //             color="success"
-          
+
 //             sx={{ marginRight: "10px" }}
 //             startIcon={<AddCircleIcon />}
 //           >
 //             Add
 //           </Button>
-          
+
 //           <Button variant="contained" color="primary" >
 //             Export
 //           </Button>
@@ -401,7 +401,7 @@ export const UrgentExcel = () => {
   const [filterText, setFilterText] = useState("");
 
   // List of files available in the public folder
-  const availableFiles = ["BS4 Nov-24 (1).xlsx", "SOS Nov GPS Km.xlsx","hbtrack_Vehicle List.xlsx","studentDetail.xlsx","jnmc-01_11_24-30_11_24-TSR.xlsx","Hansa GPS Km Nov-2024.xlsx"];
+  const availableFiles = ["BS4 Nov-24 (1).xlsx", "SOS Nov GPS Km.xlsx", "hbtrack_Vehicle List.xlsx", "studentDetail.xlsx", "jnmc-01_11_24-30_11_24-TSR.xlsx", "Hansa GPS Km Nov-2024.xlsx"];
 
   // Fetch and load the selected file
   const handleFileLoadFromPublic = async (fileName) => {
@@ -454,7 +454,7 @@ export const UrgentExcel = () => {
   );
 
   return (
-    <div>
+    <div className="mx-3">
       <h1 style={{ textAlign: "center", marginTop: "20px" }}>Kilometer and GPS</h1>
 
       <div>
@@ -493,17 +493,17 @@ export const UrgentExcel = () => {
             Export
           </Button>
           <Button
-        variant="contained"
-        onClick={() => setImportModalOpen(true)}
-        sx={{ backgroundColor: "rgb(255, 165, 0)", marginRight: "10px",marginLeft:"4px" }}
-        startIcon={<CloudUploadIcon />}
-      >
-        Import
-      </Button>
+            variant="contained"
+            onClick={() => setImportModalOpen(true)}
+            sx={{ backgroundColor: "rgb(255, 165, 0)", marginRight: "10px", marginLeft: "4px" }}
+            startIcon={<CloudUploadIcon />}
+          >
+            Import
+          </Button>
         </div>
       </div>
 
-     
+
 
       <TableContainer component={Paper} sx={{ maxHeight: 470, border: "1.5px solid black", borderRadius: "7px" }}>
         <Table stickyHeader aria-label="sticky table">

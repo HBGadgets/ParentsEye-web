@@ -903,7 +903,7 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
   //         protocols: event.protocols || {},
   //         attributes: event.attributes || {}, // Attributes object, you can further map if needed
   //       }));
-        
+
   //       console.log("Processed Event Data:", processedEvents);
 
   //       // Set the filtered rows and the total responses
@@ -981,28 +981,28 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
   const fetchData = async (url) => {
     console.log("Fetching report...");
     setLoading(true);
-  
+
     try {
       const username = "schoolmaster";
       const password = "123456";
       const token = btoa(`${username}:${password}`);
-  
+
       const response = await axios.get(url, {
         headers: {
           Authorization: `Basic ${token}`,
         },
         responseType: "blob", // Downloading as binary data
       });
-  
+
       // Log the content type of the response
       console.log("Content-Type:", response.headers["content-type"]);
-  
+
       // Handle JSON response
       if (response.headers["content-type"] === "application/json") {
         const text = await response.data.text(); // Convert Blob to text
         console.log("JSON Response:", text); // Log JSON response
         const jsonResponse = JSON.parse(text); // Parse JSON
-  
+
         // Process the JSON data according to your provided structure
         const processedEvents = jsonResponse.map((event) => ({
           id: event.id || "N/A",
@@ -1021,9 +1021,9 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
           protocols: event.protocols || {},
           attributes: event.attributes || {}, // Attributes object
         }));
-  
+
         console.log("Processed Event Data:", processedEvents);
-  
+
         // Set the filtered rows and the total responses
         setFilteredRows(processedEvents);
         setTotalResponses(processedEvents.length);
@@ -1036,21 +1036,21 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
           type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         });
         saveAs(blob, "report.xlsx"); // Save the file to the user's system
-  
+
         // Process the file to extract data
         const reader = new FileReader();
         reader.onload = (e) => {
           const data = new Uint8Array(e.target.result);
           const reportWorkbook = XLSX.read(data, { type: "array" });
-  
+
           const firstSheetName = reportWorkbook.SheetNames[0];
           const reportWorksheet = reportWorkbook.Sheets[firstSheetName];
-  
+
           // Convert worksheet data to JSON
           const jsonData = XLSX.utils.sheet_to_json(reportWorksheet);
-  
+
           console.log("Extracted JSON Data from Excel:", jsonData);
-  
+
           // Process the data from Excel similar to how JSON is processed
           const processedEvents = jsonData.map((event) => ({
             id: event.id || "N/A",
@@ -1069,12 +1069,12 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
             protocols: event.protocols || {},
             attributes: event.attributes || {},
           }));
-  
+
           console.log("Processed Events from Excel:", processedEvents);
-  
+
           setFilteredRows(processedEvents);
           setTotalResponses(processedEvents.length);
-  
+
           // Optionally export the processed data back to an Excel file
           const outputWorksheet = XLSX.utils.json_to_sheet(processedEvents);
           const outputWorkbook = XLSX.utils.book_new();
@@ -1083,11 +1083,11 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
             outputWorksheet,
             "Processed Report"
           );
-  
+
           // Trigger file download
           XLSX.writeFile(outputWorkbook, "processed_report.xlsx");
         };
-  
+
         reader.readAsArrayBuffer(blob); // Read the Blob as an ArrayBuffer
       } else {
         throw new Error(
@@ -1101,7 +1101,7 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
       setLoading(false);
     }
   };
-  
+
   // const [selectedNotification, setSelectedNotification] = useState("allEvents");
   //   const [notificationTypes, setNotificationTypes] = useState([]);
   // const [selectedNotification, setSelectedNotification] = useState('');
@@ -1146,10 +1146,10 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
   //   setDaily(selectedType === 'Daily Summary');
   // };
   return (
-    <>
+    <div className="mx-3">
       <h1 style={{ textAlign: "center", marginTop: "80px" }}>Statistics</h1>
       <div>
-      <div
+        <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -1157,55 +1157,55 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
           }}
         >
           <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Smaller width
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Set a fixed height to reduce it
-        padding: '0px', // Reduce padding to shrink height
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position
-        fontSize: '14px', // Slightly smaller label font
-      }
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
-          style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
-          }}
-        />
-      ),
-    }}
-  />
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Smaller width
+              '& .MuiOutlinedInput-root': {
+                height: '36px', // Set a fixed height to reduce it
+                padding: '0px', // Reduce padding to shrink height
+              },
+              '& .MuiInputLabel-root': {
+                top: '-6px', // Adjust label position
+                fontSize: '14px', // Slightly smaller label font
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
           <Button
-  onClick={() => setModalOpen(true)}
-  sx={{
-    backgroundColor: "rgb(85, 85, 85)",
-    color: "white",
-    fontWeight: "bold",
-    marginRight: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    "&:hover": {
-      fontWeight: "bolder", // Make text even bolder on hover
-      backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
-    },
-  }}
->
-  <ImportExportIcon />
-  Column Visibility
-</Button>
-       
-<Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"Statistics Report"} pdfFilename={"StatisticsReport.pdf"} excelFilename={"StatisticsReport.xlsx"}/>
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              "&:hover": {
+                fontWeight: "bolder", // Make text even bolder on hover
+                backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
+          </Button>
+
+          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"Statistics Report"} pdfFilename={"StatisticsReport.pdf"} excelFilename={"StatisticsReport.xlsx"} />
 
         </div>
 
@@ -1213,6 +1213,8 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
           style={{
             display: "flex",
             alignItems: "center",
+            gap: "15px",
+            flexWrap: "wrap", // Ensures responsiveness
             marginBottom: "10px",
           }}
         >
@@ -1243,7 +1245,7 @@ https://rocketsalestracker.com/api/statistics?from=${encodeURIComponent(
             </select>
 
             {/* Display current selection for demonstration */}
-            {/* <p>Selected Type: {selectedNotification}</p>
+          {/* <p>Selected Type: {selectedNotification}</p>
             <p>Daily: {daily ? 'true' : 'false'}</p> 
           </div> */}
           {/* <select
@@ -1285,30 +1287,50 @@ style={{ marginRight: '10px', padding: '5px' }}
             ))}
           </select> */}
 
-          <div style={{ marginRight: "10px", padding: "5px" }}>
-            <label htmlFor="start-date">Start Date & Time:</label>
-            <input
-              id="start-date"
-              type="datetime-local"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              style={{ marginRight: "10px", padding: "5px" }}
-            />
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <div>
+              <label htmlFor="start-date"> Start Date & Time : </label>
+              <input
+                id="start-date"
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                style={{
+                  padding: "5px",
+                  marginLeft: "5px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                }}
+              />
+            </div>
 
-            <label htmlFor="end-date">End Date & Time:</label>
-            <input
-              id="end-date"
-              type="datetime-local"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              style={{ padding: "5px" }}
-            />
+            <div>
+              <label htmlFor="end-date">End Date & Time : </label>
+              <input
+                id="end-date"
+                type="datetime-local"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                style={{
+                  padding: "5px",
+                  marginLeft: "5px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                }}
+              />
+            </div>
           </div>
 
           <button
             onClick={handleShowClick}
             style={{
-              padding: "5px 10px",
+              padding: "8px 15px",
+              backgroundColor: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              transition: "background 0.3s ease",
             }}
           >
             Show
@@ -1635,40 +1657,40 @@ style={{ marginRight: '10px', padding: '5px' }}
               </Table>
             </TableContainer>
             <StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
-       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '20px',
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -1678,7 +1700,7 @@ style={{ marginRight: '10px', padding: '5px' }}
                 />
                 {col.Header}
               </div>
-              
+
             ))}
           </Box>
         </Modal>
@@ -1789,6 +1811,6 @@ style={{ marginRight: '10px', padding: '5px' }}
           </Alert>
         </Snackbar>
       </div>
-    </>
+    </div>
   );
 };
