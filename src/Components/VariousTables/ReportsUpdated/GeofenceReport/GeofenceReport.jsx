@@ -355,7 +355,7 @@ export const GeofenceReport = () => {
     }
 
     // Construct the API URL
-    const url = `https://parentseyereplica.onrender.com/notificationalerthistory?startDate=${encodeURIComponent(formattedStartDate)}&endDate=${encodeURIComponent(formattedEndDate)}&deviceIds=${encodeURIComponent(deviceIds)}`;
+    const url = `${process.env.REACT_APP_API}/notificationalerthistory?startDate=${encodeURIComponent(formattedStartDate)}&endDate=${encodeURIComponent(formattedEndDate)}&deviceIds=${encodeURIComponent(deviceIds)}`;
     
     setApiUrl(url); // Update the state with the generated URL
     fetchData(url); // Call fetchData with the generated URL
