@@ -462,11 +462,11 @@ export const Navbar = (props) => {
                 </div>
               </Tooltip>
             </CHeaderNav>
-            <Tooltip title='Red Zone Alert'>
+            {/* <Tooltip title='Red Zone Alert'>
               <IconButton sx={{ p: 0 }} onClick={handleRedAlert}>
                 <ReportProblemOutlinedIcon style={{ color: 'red', marginRight: 10 }} />
               </IconButton>
-            </Tooltip>
+            </Tooltip> */}
             <Tooltip title='Refresh Page'>
               <IconButton sx={{ p: 0 }} onClick={() => window.location.reload()}>
                 <LoopSharpIcon style={{ color: 'black' }} />
