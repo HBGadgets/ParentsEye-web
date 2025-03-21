@@ -1,11 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
-import axios from 'axios';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+} from "react-leaflet";
+import axios from "axios";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 // import CarIcon from '../../SVG/Vehicle Top View/Car/Car-Y.png';
-import CarIcon from '../../SVG/car-s.png';
-import './LiveTracking.css';
+import CarIcon from "../../SVG/car-s.png";
+import "./LiveTracking.css";
 import { IoIosSpeedometer } from "react-icons/io";
 import { FaTruckFast } from "react-icons/fa6";
 import { IoIosTime } from "react-icons/io";
@@ -13,7 +19,7 @@ import { IoIosTime } from "react-icons/io";
 // Custom icon for marker
 const createCustomIcon = (course) => {
   return L.divIcon({
-    className: 'custom-icon',
+    className: "custom-icon",
     html: `
       <div style="
         width: 32px; height: 32px;
@@ -31,10 +37,12 @@ const createCustomIcon = (course) => {
 const LiveTracking = ({ individualDataObj, setTrack }) => {
   const [latLng, setLatLng] = useState({
     lat: individualDataObj.latitude,
-    lng: individualDataObj.longitude
+    lng: individualDataObj.longitude,
   });
   const [course, setCourse] = useState(individualDataObj.course);
-  const [positions, setPositions] = useState([{ lat: individualDataObj.latitude, lng: individualDataObj.longitude }]);
+  const [positions, setPositions] = useState([
+    { lat: individualDataObj.latitude, lng: individualDataObj.longitude },
+  ]);
   const markerRef = useRef(null);
   const mapRef = useRef(null);
   const intervalRef = useRef(null);
@@ -58,12 +66,15 @@ const LiveTracking = ({ individualDataObj, setTrack }) => {
 
       const positionData = response.data;
       if (positionData.length > 0) {
-        setSpeed(positionData.speed)
+        setSpeed(positionData.speed);
         const latestPosition = positionData[0];
-        const newLatLng = { lat: latestPosition.latitude, lng: latestPosition.longitude };
+        const newLatLng = {
+          lat: latestPosition.latitude,
+          lng: latestPosition.longitude,
+        };
         setLatLng(newLatLng);
         setCourse(latestPosition.course);
-        setPositions(prevPositions => [...prevPositions, newLatLng]);
+        setPositions((prevPositions) => [...prevPositions, newLatLng]);
       }
     } catch (error) {
       console.error("Error fetching position data:", error);
@@ -82,18 +93,20 @@ const LiveTracking = ({ individualDataObj, setTrack }) => {
     }
   };
 
-  const [currentDateTime, setCurrentDateTime] = useState('');
+  const [currentDateTime, setCurrentDateTime] = useState("");
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+      const day = String(now.getDate()).padStart(2, "0");
+      const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
       const year = now.getFullYear();
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      const seconds = String(now.getSeconds()).padStart(2, "0");
 
-      setCurrentDateTime(`${day}/${month}/${year} ${hours}:${minutes}:${seconds}`);
+      setCurrentDateTime(
+        `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`
+      );
     };
 
     updateDateTime(); // Update the date and time once immediately
@@ -112,13 +125,16 @@ const LiveTracking = ({ individualDataObj, setTrack }) => {
       markerRef.current.setIcon(createCustomIcon(course));
     }
     if (mapRef.current) {
-      mapRef.current.setView([latLng.lat, latLng.lng], mapRef.current.getZoom());
+      mapRef.current.setView(
+        [latLng.lat, latLng.lng],
+        mapRef.current.getZoom()
+      );
     }
   }, [latLng, course]);
 
   const handleTrack = () => {
     setTrack(false); // Stop tracking
-  }
+  };
 
   return (
     <div className="wrapper">
@@ -129,8 +145,10 @@ const LiveTracking = ({ individualDataObj, setTrack }) => {
         <MapContainer
           center={[latLng.lat, latLng.lng]}
           zoom={16}
-          style={{ height: '70%', width: '100%' }}
-          whenCreated={(mapInstance) => { mapRef.current = mapInstance; }}
+          style={{ height: "70%", width: "100%" }}
+          whenCreated={(mapInstance) => {
+            mapRef.current = mapInstance;
+          }}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -149,14 +167,27 @@ const LiveTracking = ({ individualDataObj, setTrack }) => {
         </MapContainer>
 
         <div className="liveInfo">
-          <div className="liveData"><IoIosSpeedometer/> <p>{individualDataObj.attributes.ignition ? `${speed} km/h` : '0 km/h'}</p></div>
-          <div className="liveData"><IoIosTime/> <p>{currentDateTime}</p></div>
+          <div className="liveData">
+            <IoIosSpeedometer />{" "}
+            <p>
+              {individualDataObj.attributes.ignition
+                ? `${speed} km/h`
+                : "0 km/h"}
+            </p>
+          </div>
+          <div className="liveData">
+            <IoIosTime /> <p>{currentDateTime}</p>
+          </div>
         </div>
 
-        <button type="button" className="btn btn-outline-danger stop-fetching-button" onClick={() => {
-          stopFetchingData();
-          handleTrack();
-        }} >
+        <button
+          type="button"
+          className="btn btn-outline-danger stop-fetching-button"
+          onClick={() => {
+            stopFetchingData();
+            handleTrack();
+          }}
+        >
           Close
         </button>
       </div>

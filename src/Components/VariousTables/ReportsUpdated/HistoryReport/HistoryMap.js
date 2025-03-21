@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -37,6 +37,11 @@ import { Scrollbars } from "react-custom-scrollbars-2";
 import SlidingSideMenu from "./SlidingSideMenu";
 import L from "leaflet";
 import axios from "axios";
+import { HistoryStopReport } from "./HistoryStopReport.js";
+import { ContactlessOutlined } from "@mui/icons-material";
+import { set } from "mongoose";
+import { HistoryTripReport } from "./HistoryTripReport.js";
+import { TotalResponsesContext } from "../../../../TotalResponsesContext.jsx";
 
 // Register Chart.js components
 ChartJS.register(
@@ -110,12 +115,76 @@ const HistoryMap = ({
     { deviceId, from: fromDateTime, to: toDateTime },
     fetch
   );
+
+  const [filteredRows, setFilteredRows] = useState([]);
+  const [originalRows, setOriginalRows] = useState([]);
+  const { setTotalResponses } = useContext(TotalResponsesContext);
+  const [stopData, setStopData] = useState([]);
+  const [appliedTripFilter, setAppliedTripFilter] = useState(false);
+  const [currentTrip, setCurrentTrip] = useState(null);
+
+  // stop report
+  useEffect(() => {
+    if (!deviceId || !fromDateTime || !toDateTime) return;
+
+    const controller = new AbortController();
+    const fetchHistoryStopReport = async () => {
+      await HistoryStopReport(
+        deviceId,
+        fromDateTime,
+        toDateTime,
+        setFilteredRows,
+        setOriginalRows,
+        setTotalResponses
+      );
+    };
+
+    fetchHistoryStopReport();
+    return () => controller.abort(); // Cleanup function to cancel previous request
+  }, [deviceId, fromDateTime, toDateTime]);
+
+  useEffect(() => {
+    setStopData(filteredRows);
+    console.log("stopData:", filteredRows);
+  }, [filteredRows]);
+
+  const [filtereRow, setFiltereRow] = useState([]);
+  const [originalRow, setOriginalRow] = useState([]);
+  const { setTotalResponse } = useContext(TotalResponsesContext);
+  const [tripData, setTripData] = useState([]);
+
+  // trip report
+  useEffect(() => {
+    if (!deviceId || !fromDateTime || !toDateTime) return;
+
+    const controller = new AbortController();
+    const fetchHistoryTripReport = async () => {
+      await HistoryTripReport(
+        deviceId,
+        fromDateTime,
+        toDateTime,
+        setFiltereRow,
+        setOriginalRow,
+        setTotalResponse
+      );
+    };
+
+    fetchHistoryTripReport();
+    return () => controller.abort(); // Cleanup function to cancel previous request
+  }, [deviceId, fromDateTime, toDateTime]);
+
+  useEffect(() => {
+    console.log("tripData:", filtereRow);
+    setTripData(filtereRow);
+  }, [filtereRow]);
+
+  //##################################################################################//
   const [positions, setPositions] = useState([]);
   const [showStopages, setShowStopages] = useState(true);
   const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [speed, setSpeed] = useState(5);
-  const [zoomLevel, setZoomLevel] = useState(14);
+  const [speed, setSpeed] = useState(2);
+  const [zoomLevel, setZoomLevel] = useState(17);
   const [progress, setProgress] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [trips, setTrips] = useState([]);
@@ -126,7 +195,16 @@ const HistoryMap = ({
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [prevhoveredIndex, setPrevHoveredIndex] = useState(null);
   const [originalPositions, setOriginalPositions] = useState([]);
+
   const mapRef = useRef();
+
+  useEffect(() => {
+    if (tripData) {
+      setTrips(tripData);
+      setTotalTrips(tripData.length);
+      // findLongestTrip(tripData);
+    }
+  }, [tripData]);
 
   const convertDurationToMinutes = (duration) => {
     const [hours, minutes] = duration
@@ -229,8 +307,38 @@ const HistoryMap = ({
     }
   }, [filteredData]);
 
+  const handleTripFilter = (filteredPositions, trip) => {
+    setAppliedTripFilter(true);
+    setCurrentTrip(trip);
+    setPositions(filteredPositions);
+    setCurrentPositionIndex(0);
+
+    // Calculate bounds for the filtered positions
+    if (filteredPositions.length > 0) {
+      const bounds = L.latLngBounds(
+        filteredPositions.map((pos) => [pos.latitude, pos.longitude])
+      );
+      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+    }
+  };
+
+  const resetTripFilter = () => {
+    setAppliedTripFilter(false);
+    setCurrentTrip(null);
+    setPositions(originalPositions);
+    setCurrentPositionIndex(0);
+    if (originalPositions.length > 0) {
+      mapRef.current.fitBounds(
+        L.latLngBounds(
+          originalPositions.map((pos) => [pos.latitude, pos.longitude])
+        ),
+        { padding: [50, 50] }
+      );
+    }
+  };
+
   const poly = useMemo(
-    () => positions.map((item) => [item.latitude, item.longitude]),
+    () => positions.map((item) => [item.latitude, item.longitude, item.course]),
     [positions]
   );
 
@@ -342,15 +450,6 @@ const HistoryMap = ({
     const validIndex = currentPositionIndex % positions.length;
     const current = positions[validIndex];
     const next = positions[(validIndex + 1) % positions.length];
-
-    console.log(
-      "currentPositionIndex:",
-      currentPositionIndex,
-      "validIndex:",
-      validIndex
-    );
-    console.log("current:", current, "next:", next);
-
     const lerp = (start, end, t) => start + (end - start) * t;
     const lat = lerp(current.latitude, next.latitude, segmentProgress);
     const lng = lerp(current.longitude, next.longitude, segmentProgress);
@@ -360,6 +459,8 @@ const HistoryMap = ({
   const MapZoomController = () => {
     const map = useMap();
     const [lastPosition, setLastPosition] = useState(null);
+
+    // Update the map view on position changes using the current zoomLevel.
     useEffect(() => {
       if (positions.length > 0) {
         const currentPosition = positions[currentPositionIndex];
@@ -369,16 +470,24 @@ const HistoryMap = ({
             0.001 ||
           Math.abs(currentPosition?.longitude - lastPosition?.longitude) > 0.001
         ) {
-          if ((currentPosition?.latitude, currentPosition?.longitude)) {
-            map.setView(
-              [currentPosition?.latitude, currentPosition?.longitude],
-              zoomLevel
-            );
-            setLastPosition(currentPosition);
-          }
+          map.setView(
+            [currentPosition?.latitude, currentPosition?.longitude],
+            zoomLevel
+          );
+          setLastPosition(currentPosition);
         }
       }
     }, [currentPositionIndex, zoomLevel, map, positions, lastPosition]);
+
+    // Listen for manual zoom events and update the zoomLevel state.
+    useEffect(() => {
+      const onZoomEnd = () => {
+        setZoomLevel(map.getZoom());
+      };
+      map.on("zoomend", onZoomEnd);
+      return () => map.off("zoomend", onZoomEnd);
+    }, [map]);
+
     return null;
   };
 
@@ -387,13 +496,16 @@ const HistoryMap = ({
   };
 
   const arrowPositions = useMemo(() => {
-    return poly.slice(1).map((pos, index) => {
+    return poly.map((pos, index) => {
       const [lat1, lon1] = poly[index];
       const [lat2, lon2] = pos;
-      const angle = Math.atan2(lat2 - lat1, lon2 - lon1) * (180 / Math.PI);
+      // Calculate the angle in degrees from the previous point to the current point
+      const angle = pos.course;
       return { lat: lat2, lon: lon2, angle };
     });
   }, [poly]);
+
+  const courseDirection = positions.map((pos) => pos.course);
 
   const iconImage = useGetVehicleIcon(
     positions[currentPositionIndex],
@@ -430,33 +542,58 @@ const HistoryMap = ({
   }, [currentPositionIndex, positions]);
 
   const renderMarkers = () => {
-    return positions
-      .filter((_, index) => index % 4 === 0) // Skip every 5th point
-      .map((point, index) => {
-        // Create a custom icon with the course rotation
-        // const rotation = point.course; // Assuming course is an angle in degrees
+    return arrowPositions
+      .filter((_, index) => index % 4 === 0) // For example, show an arrow every 4 segments
+      .map((arrow, index) => {
+        // Convert the icon component to a string
         const iconHtml = ReactDOMServer.renderToString(
           <MdOutlineKeyboardDoubleArrowUp />
-        ); // Convert React icon to string
+        );
 
+        // Create the icon HTML without duplicating the rotation
+        const arrowIconHtml = `
+        <div style="font-size: 18px; font-weight: 900; color:#fff;">${iconHtml}</div>
+      `;
+
+        // Create a divIcon and apply the rotation using arrow.angle
         const icon = L.divIcon({
-          html: `<div style="transform: rotate(deg); font-size: 18px; font-weight: 900; color:#fff;">${iconHtml}</div>`, // Use the string icon
-          className: "custom-icon", // Optional: style the icon if needed
+          html: `<div style="transform: rotate(${courseDirection[index]}deg);">${arrowIconHtml}</div>`,
+          className: "custom-arrow", // optional CSS class for further styling
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
         });
 
         return (
           <Marker
-            key={index}
-            position={[point.latitude, point.longitude]}
+            key={`arrow-${index}`}
+            position={[arrow.lat, arrow.lon]}
             icon={icon}
-          >
-            <Popup>
-              {`Lat: ${point.latitude}, Long: ${point.longitude}, Course: ${point.course}`}
-            </Popup>
-          </Marker>
+          />
         );
       });
   };
+
+  const [filteredPositions, setFilteredPositions] = useState([]);
+  const [stopages, setStopages] = useState(
+    filtereRow?.finalDeviceDataByStopage || []
+  );
+
+  const handleFilterData = (positions) => {
+    setFilteredPositions(positions);
+  };
+
+  const toggleStopages = (e) => {
+    e.preventDefault();
+    // Check if there's valid stop data to toggle
+    if (!stopData || stopData.length === 0) {
+      alert("This vehicle has not made any stops in this time period.");
+      return;
+    }
+    setShowStopages((prev) => !prev);
+  };
+
+  console.log("Original Positions", originalPositions);
+  console.log("Filtered Position", filteredPositions);
 
   return (
     <div className="individualMap position-relative border border-5">
@@ -473,6 +610,7 @@ const HistoryMap = ({
           }
           zoom={zoomLevel}
           scrollWheelZoom={true}
+          dragging={true}
           style={{
             position: "relative",
             height: "400px",
@@ -490,9 +628,7 @@ const HistoryMap = ({
             <>
               <Polyline
                 positions={poly}
-                color="blue"
-                weight={7}
-                opacity={0.6}
+                pathOptions={{ color: "blue", weight: 1, opacity: 0.6 }}
                 arrowheads={{
                   size: "15px",
                   frequency: "endonly",
@@ -500,11 +636,32 @@ const HistoryMap = ({
                   color: "white", // Arrow color set to white
                 }}
               />
-              {/* {renderMarkers()} */}
+              {renderMarkers()}
 
+              {showStopages &&
+                stopData?.map((stop, index) => {
+                  const lat = stop.startLatitude;
+                  const lng = stop.startLongitude;
+
+                  if (typeof lat !== "number" || typeof lng !== "number") {
+                    console.error(
+                      `Invalid stop coordinates at index ${index}`,
+                      stop
+                    );
+                    return null;
+                  }
+
+                  return (
+                    <Marker
+                      key={`stop-${index}`}
+                      position={[lat, lng]}
+                      icon={redFlagIcon}
+                    />
+                  );
+                })}
               <DriftMarker
                 position={currentMarkerPosition}
-                duration={190}
+                duration={450}
                 keepAtCenter={true}
                 icon={iconImage}
               >
@@ -659,35 +816,15 @@ const HistoryMap = ({
                         className="speed-toggle"
                         onChange={(e) => setSpeed(Number(e.target.value))}
                       >
-                        <option value={5}>1x</option>
-                        <option value={8}>2x</option>
-                        <option value={10}>3x</option>
+                        <option value={2}>1x</option>
+                        <option value={4}>2x</option>
+                        <option value={6}>3x</option>
                       </select>
-                      <button
-                        className="zoom-toggle"
-                        onClick={() => setIsExpanded(!isExpanded)}
-                      >
-                        Zoom
-                      </button>
-                      {isExpanded && (
-                        <div className="zoom-slider">
-                          <input
-                            type="range"
-                            min="10"
-                            max="15"
-                            value={zoomLevel}
-                            onChange={(e) =>
-                              handleZoomChange(Number(e.target.value))
-                            }
-                            className="slider"
-                          />
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
               </div>
-              {/* <CButton
+              <CButton
                 color={showStopages ? "primary" : "success"}
                 style={{
                   height: "2.1rem",
@@ -698,9 +835,10 @@ const HistoryMap = ({
                   justifyContent: "center",
                   alignItems: "center",
                 }}
+                onClick={toggleStopages}
               >
                 {showStopages ? "Hide Stopages" : "Show Stopages"}
-              </CButton> */}
+              </CButton>
               <CButton
                 color="danger"
                 onClick={handleBack}
@@ -725,7 +863,24 @@ const HistoryMap = ({
       </div>
       {loading && <HistoryLoader />}
       {historyOn && (
-        <div>{/* SlidingSideMenu can be rendered here if needed */}</div>
+        <div>
+          <SlidingSideMenu
+            stopData={stopData}
+            trips={tripData}
+            mapRef={mapRef}
+            setIsPlaying={setIsPlaying}
+            originalPositions={originalPositions}
+            setPositions={setPositions}
+            positions={positions}
+            setCurrentPositionIndex={setCurrentPositionIndex}
+            toggleStopages={toggleStopages}
+            showStopages={showStopages}
+            handleFilterData={handleFilterData}
+            handleTripFilter={handleTripFilter}
+            resetTripFilter={resetTripFilter}
+            currentTrip={currentTrip}
+          />
+        </div>
       )}
     </div>
   );

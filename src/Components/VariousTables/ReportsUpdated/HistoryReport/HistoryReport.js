@@ -69,22 +69,19 @@ export const HistoryReport = () => {
   const { devices, loading } = useSelector((state) => state.devices);
 
   useEffect(() => {
-    console.log("fetching devices");
     dispatch(fetchDevices());
-
-    console.log("fetching devices paused");
   }, [dispatch]);
 
-  const handleDeviceChange = (event) => {
-    setDeviceId(event.target.value);
-  };
-
-  // const handleDeviceChange = (selectedOption) => {
-  //   setDeviceId(selectedOption ? selectedOption.value : "");
+  // const handleDeviceChange = (event) => {
+  //   setDeviceId(event.target.value);
   // };
 
-  const deviceOptions = devices.map((device) => ({
-    value: device.deviceId,
+  const handleDeviceChange = (selectedOption) => {
+    setDeviceId(selectedOption.value);
+  };
+
+  const options = devices.map((device) => ({
+    value: device.id,
     label: device.name,
   }));
 
@@ -146,7 +143,7 @@ export const HistoryReport = () => {
                     />
                   </div>
 
-                  <CFormSelect
+                  {/* <CFormSelect
                     id="device-select"
                     value={deviceId}
                     onChange={handleDeviceChange}
@@ -164,17 +161,34 @@ export const HistoryReport = () => {
                         {device.name}
                       </option>
                     ))}
-                  </CFormSelect>
+                  </CFormSelect> */}
                   {/* <div style={{ width: "20rem" }}>
                     <CFormLabel htmlFor="device">Devices</CFormLabel>
                     <Select
                       id="device-select"
                       value={deviceId}
                       onChange={handleDeviceChange}
-                      options={deviceOptions}
+                      options={devices}
                       placeholder="Select a Device"
                     />
                   </div> */}
+                  <Select
+                    id="device-select"
+                    options={options}
+                    value={options.find((option) => option.value === deviceId)}
+                    onChange={handleDeviceChange}
+                    isLoading={loading}
+                    isSearchable={true}
+                    placeholder="Select a Device"
+                    styles={{
+                      control: (provided) => ({
+                        ...provided,
+                        height: "3rem",
+                        width: "12rem",
+                        marginTop: "1rem",
+                      }),
+                    }}
+                  />
 
                   <CButton
                     color="primary"

@@ -90,22 +90,8 @@ const mapIcons = {
 };
 const getCategory = (category) => {
   switch (category) {
-    case "car":
-      return "car";
-    case "bus":
-      return "bus";
-    case "truck":
-      return "truck";
-    case "motorcycle":
-      return "bike"; // Adjusted to match the imageMap key
-    case "auto":
-      return "auto";
-    case "tractor":
-      return "crane";
-    case "jcb":
-      return "jcb";
     default:
-      return "car"; // Default case
+      return "bus"; // Default case
   }
 };
 const useGetVehicleIcon = (vehicle, cat) => {
