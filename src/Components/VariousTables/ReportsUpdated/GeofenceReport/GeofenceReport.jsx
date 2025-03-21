@@ -79,13 +79,13 @@ export const GeofenceReport = () => {
   const [originalRows, setOriginalRows] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const role=localStorage.getItem('role');
+  const role = localStorage.getItem('role');
   const username = "schoolmaster";
   const password = "123456";
- const[loadingdevice,setloadingdevice]=useState(true);
+  const [loadingdevice, setloadingdevice] = useState(true);
 
 
-  
+
 
   useEffect(() => {
     fetchData();
@@ -95,13 +95,13 @@ export const GeofenceReport = () => {
     filterData(filterText);
   }, [filterText]);
 
- 
+
   const handleChangeRowsPerPage = (event) => {
     const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage === -1 ? sortedData.length : newRowsPerPage); // Set to all rows if -1
     setPage(0); // Reset to the first page
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -111,10 +111,10 @@ export const GeofenceReport = () => {
     setFilterText(text);
   };
 
- 
+
   const filterData = (text) => {
     // let dataToFilter = originalRows;
-  
+
     // // Apply date filter
     // if (startDate && endDate) {
     //   dataToFilter = dataToFilter.filter((row) => {
@@ -122,7 +122,7 @@ export const GeofenceReport = () => {
     //     return rowDate >= new Date(startDate) && rowDate <= new Date(endDate);
     //   });
     // }
-  
+
     // // Apply text filter
     // if (text === "") {
     //   setFilteredRows(dataToFilter); // Reset to full filtered data
@@ -136,7 +136,7 @@ export const GeofenceReport = () => {
     //       )
     //     )
     //     .map((row) => ({ ...row, isSelected: false }));
-      
+
     //   setFilteredRows(filteredData); // Update filtered rows
     // }
     if (text === "") {
@@ -153,11 +153,11 @@ export const GeofenceReport = () => {
           )
         )
         .map((row) => ({ ...row, isSelected: false }));
-  
+
       setFilteredRows(filteredData);
     }
   };
-  
+
   const requestSort = (key) => {
     let direction = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -203,10 +203,10 @@ export const GeofenceReport = () => {
     });
   }
 
- 
+
 
   const handleModalClose = () => {
-   
+
     setFormData({});
     setModalOpen(false);
   };
@@ -223,7 +223,7 @@ export const GeofenceReport = () => {
     });
   };
 
- 
+
 
 
 
@@ -235,15 +235,15 @@ export const GeofenceReport = () => {
   const [error, setError] = useState(null);
 
 
-  
+
   useEffect(() => {
-   
-  
+
+
     const fetchDevices = async (myDevices) => {
       try {
         let response;
         const token = localStorage.getItem('token');
-  
+
         if (role == 1) {
           response = await axios.get(`${process.env.REACT_APP_SUPER_ADMIN_API}/read-devices`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -261,31 +261,31 @@ export const GeofenceReport = () => {
             headers: { Authorization: `Bearer ${token}` },
           });
         }
-  
+
         if (response?.data) {
           const allData = role == 1
             ? response.data.data.flatMap((school) =>
-                school.branches.flatMap((branch) =>
-                  Array.isArray(branch.devices) ? branch.devices : []
-                )
-              )
-            : role == 2
-            ? response.data.branches.flatMap((branch) =>
+              school.branches.flatMap((branch) =>
                 Array.isArray(branch.devices) ? branch.devices : []
               )
-            : role == 3
-            ? response.data.devices
-            : role == 4
-            ? response.data.data.flatMap((school) =>
-                school.branches.flatMap((branch) =>
-                  Array.isArray(branch.devices) ? branch.devices : []
-                )
+            )
+            : role == 2
+              ? response.data.branches.flatMap((branch) =>
+                Array.isArray(branch.devices) ? branch.devices : []
               )
-            : [];
-  
+              : role == 3
+                ? response.data.devices
+                : role == 4
+                  ? response.data.data.flatMap((school) =>
+                    school.branches.flatMap((branch) =>
+                      Array.isArray(branch.devices) ? branch.devices : []
+                    )
+                  )
+                  : [];
+
           // Combine the data from myfetchDevices and fetchDevices
-          
-  
+
+
           setDevices(allData);
           console.log('Merged Devices:', allData);
         } else {
@@ -298,53 +298,53 @@ export const GeofenceReport = () => {
       }
       setloadingdevice(false);
     };
-  
-  
-  fetchDevices();
-   
+
+
+    fetchDevices();
+
   }, [role]);
-  
-    // Transform devices into options for React-Select
-    // const options = devices.map((device) => ({
-    //   value: device.deviceId,
-    //   label: device.deviceName,
-    // }));
- 
-    const handleChange = (selectedOptions) => {
-      if (selectedOptions.some(option => option.value === "select_all")) {
-        // When "Select All" is selected, display only the "Select All" label
-        setSelectedDevice([{
-          value: "select_all",
-          label: "Select All", // Only display this label when "Select All" is selected
-        }]);
-      } else {
-        // Otherwise, update with the selected devices
-        setSelectedDevice(selectedOptions || []);
-      }
-    };
-  
-    // Options for the select dropdown
-    const options = [
-      { value: "select_all", label: "Select All" }, // One "Select All" option at the top
-      ...devices.map((device) => ({
-        value: device.deviceId,
-        label: device.deviceName,
-      })),
-    ];
-    
-  
-  
+
+  // Transform devices into options for React-Select
+  // const options = devices.map((device) => ({
+  //   value: device.deviceId,
+  //   label: device.deviceName,
+  // }));
+
+  const handleChange = (selectedOptions) => {
+    if (selectedOptions.some(option => option.value === "select_all")) {
+      // When "Select All" is selected, display only the "Select All" label
+      setSelectedDevice([{
+        value: "select_all",
+        label: "Select All", // Only display this label when "Select All" is selected
+      }]);
+    } else {
+      // Otherwise, update with the selected devices
+      setSelectedDevice(selectedOptions || []);
+    }
+  };
+
+  // Options for the select dropdown
+  const options = [
+    { value: "select_all", label: "Select All" }, // One "Select All" option at the top
+    ...devices.map((device) => ({
+      value: device.deviceId,
+      label: device.deviceName,
+    })),
+  ];
+
+
+
   // const [startDate, setStartDate] = useState('');
   // const [endDate, setEndDate] = useState('');
   const [selectedDevice, setSelectedDevice] = useState([]);
- 
+
   const [apiUrl, setApiUrl] = useState('');
-  
+
   // const deviceIds = selectedDevice.map((device) => device.value).join(',');
   const deviceIds = selectedDevice.some(option => option.value === "select_all")
-  ? devices.map(device => device.deviceId).join(',') // Get all device IDs if "Select All" is selected
-  : selectedDevice.map(option => option.value); // Otherwise, get selected device IDs
-  
+    ? devices.map(device => device.deviceId).join(',') // Get all device IDs if "Select All" is selected
+    : selectedDevice.map(option => option.value); // Otherwise, get selected device IDs
+
   const handleShowClick = () => {
     const formattedStartDate = formatToUTC(startDate);
     const formattedEndDate = formatToUTC(endDate);
@@ -355,7 +355,7 @@ export const GeofenceReport = () => {
     }
 
     // Construct the API URL
-    const url = `https://parentseyereplica.onrender.com/notificationalerthistory?startDate=${encodeURIComponent(formattedStartDate)}&endDate=${encodeURIComponent(formattedEndDate)}&deviceIds=${encodeURIComponent(deviceIds)}`;
+    const url = `${process.env.REACT_APP_API}/notificationalerthistory?startDate=${encodeURIComponent(formattedStartDate)}&endDate=${encodeURIComponent(formattedEndDate)}&deviceIds=${encodeURIComponent(deviceIds)}`;
     
     setApiUrl(url); // Update the state with the generated URL
     fetchData(url); // Call fetchData with the generated URL
@@ -366,93 +366,93 @@ export const GeofenceReport = () => {
     const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
     return utcDate.toISOString();
   };
-  
-  
 
 
-const fetchData = async (url) => {
-  console.log('Fetching report...');
-  setLoading(true);
 
-  try {
-   
-   const token= localStorage.getItem("token");
 
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    
-    });
-console.log("mydata of geofence",response.data)
-    // Log the content type of the response
-    // const allData=response.data;
-    if (response?.data) {
-      const allData =response.data.data.map((item)=>({
-        ...item,
-        createdAt: formatDateTimeAMPM(item.createdAt),
-      }))
-      setFilteredRows(
-        allData.map((row) => ({ ...row, isSelected: false }))
-      );
-      setOriginalRows(allData.map((row) => ({ ...row, isSelected: false })));
-      setTotalResponses(allData.length);
+  const fetchData = async (url) => {
+    console.log('Fetching report...');
+    setLoading(true);
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+
+      });
+      console.log("mydata of geofence", response.data)
+      // Log the content type of the response
+      // const allData=response.data;
+      if (response?.data) {
+        const allData = response.data.data.map((item) => ({
+          ...item,
+          createdAt: formatDateTimeAMPM(item.createdAt),
+        }))
+        setFilteredRows(
+          allData.map((row) => ({ ...row, isSelected: false }))
+        );
+        setOriginalRows(allData.map((row) => ({ ...row, isSelected: false })));
+        setTotalResponses(allData.length);
+      }
+
+      // const reversedData = allData.reverse();
+
+    } catch (error) {
+      console.error('Error fetching the report:', error);
+
+    } finally {
+      setLoading(false);
     }
-          
-    // const reversedData = allData.reverse();
-  
-  } catch (error) {
-    console.error('Error fetching the report:', error);
-  
-  } finally {
-    setLoading(false);
+  };
+  function formatDateTimeAMPM(dateString) {
+    const d = new Date(dateString); // Use the date as it is
+
+    // Extract day, month, and year
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const year = d.getUTCFullYear();
+
+    // Extract hours and minutes in UTC
+    let hours = d.getUTCHours();
+    const minutes = String(d.getUTCMinutes()).padStart(2, "0");
+    const seconds = String(d.getUTCSeconds()).padStart(2, "0");
+
+    // Determine AM/PM
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12; // Convert 0 to 12 for midnight
+
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds} ${ampm}`;
   }
-};
-function formatDateTimeAMPM(dateString) {
-  const d = new Date(dateString); // Use the date as it is
-  
-  // Extract day, month, and year
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const year = d.getUTCFullYear();
-  
-  // Extract hours and minutes in UTC
-  let hours = d.getUTCHours();
-  const minutes = String(d.getUTCMinutes()).padStart(2, "0");
-  const seconds = String(d.getUTCSeconds()).padStart(2, "0");
-  
-  // Determine AM/PM
-  const ampm = hours >= 12 ? "PM" : "AM";
-  hours = hours % 12 || 12; // Convert 0 to 12 for midnight
-  
-  return `${day}-${month}-${year} ${hours}:${minutes}:${seconds} ${ampm}`;
-}
 
 
-// Example usage
+  // Example usage
 
 
 
-function parseDate(dateString) {
-  const [day, month, year] = dateString.split("-").map(Number);
-  return new Date(year, month - 1, day);
-}
+  function parseDate(dateString) {
+    const [day, month, year] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  }
 
 
-// const handleChange = (selectedOption) => {
-//   setSelectedDevice(selectedOption ? selectedOption.value : null);
-// };
-// const handleChange = (selectedOptions) => {
-//   setSelectedDevice(selectedOptions || []); // Handle empty selection
-// };
-const [searchText, setSearchText] = useState("");
-const filteredDevices = Array.isArray(devices)
-  ? devices.filter((device) =>
+  // const handleChange = (selectedOption) => {
+  //   setSelectedDevice(selectedOption ? selectedOption.value : null);
+  // };
+  // const handleChange = (selectedOptions) => {
+  //   setSelectedDevice(selectedOptions || []); // Handle empty selection
+  // };
+  const [searchText, setSearchText] = useState("");
+  const filteredDevices = Array.isArray(devices)
+    ? devices.filter((device) =>
       device.deviceName.toLowerCase().includes(searchText.toLowerCase())
     )
-  : [];
+    : [];
   const isSelectAllSelected = selectedDevice.length === 1 && selectedDevice[0].value === "select_all";
- 
+
   const calculateWidth = (text) => {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
@@ -461,9 +461,9 @@ const filteredDevices = Array.isArray(devices)
     return width + 20; // Add some padding
   };
   return (
-    <>
+    <div className="mx-3">
       <h1 style={{ textAlign: "center", marginTop: "80px" }}>
-       Geofence Report 
+        Geofence Report
       </h1>
       <div>
         <div
@@ -473,67 +473,69 @@ const filteredDevices = Array.isArray(devices)
             marginBottom: "10px",
           }}
         >
-       <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Smaller width
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Set a fixed height to reduce it
-        padding: '0px', // Reduce padding to shrink height
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position
-        fontSize: '14px', // Slightly smaller label font
-      }
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
-          style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
-          }}
-        />
-      ),
-    }}
-  />
-             <Button
-  onClick={() => setModalOpen(true)}
-  sx={{
-    backgroundColor: "rgb(85, 85, 85)",
-    color: "white",
-    fontWeight: "bold",
-    marginRight: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    "&:hover": {
-      fontWeight: "bolder", // Make text even bolder on hover
-      backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
-    },
-  }}
->
-  <ImportExportIcon />
-  Column Visibility
-</Button>
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Smaller width
+              '& .MuiOutlinedInput-root': {
+                height: '36px', // Set a fixed height to reduce it
+                padding: '0px', // Reduce padding to shrink height
+              },
+              '& .MuiInputLabel-root': {
+                top: '-6px', // Adjust label position
+                fontSize: '14px', // Slightly smaller label font
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
+          <Button
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              "&:hover": {
+                fontWeight: "bolder", // Make text even bolder on hover
+                backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
+          </Button>
 
-<Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"GeofenceReport REPORT"} pdfFilename={"GeofenceReportReport.pdf"} excelFilename={"GeofenceReportReport.xlsx"}/>
+          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"GeofenceReport REPORT"} pdfFilename={"GeofenceReportReport.pdf"} excelFilename={"GeofenceReportReport.xlsx"} />
 
         </div>
-       
-     <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        marginBottom: "10px",
-      }}
-    >
-      {/* <div
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "15px",
+            flexWrap: "wrap", // Ensures responsiveness
+            marginBottom: "10px",
+          }}
+        >
+          {/* <div
   style={{
     width: "250px",
     position: "relative",
@@ -567,7 +569,7 @@ const filteredDevices = Array.isArray(devices)
       }}
     />
 </div> */}
-     {/* <div
+          {/* <div
       style={{
         width: '250px',
         position: 'relative',
@@ -640,114 +642,93 @@ const filteredDevices = Array.isArray(devices)
         }}
       />
     </div> */}
-      <div
-      style={{
-        width: '250px',
-        position: 'relative',
-        border: '1px solid #000',
-        zIndex: 1000,
-        backgroundColor: '#fff',
-      }}
-    >
-      <Select
-        options={options}
-        value={selectedDevice}
-        onChange={handleChange}
-        isMulti
-        placeholder="Select Devices"
-        isClearable
-        closeMenuOnSelect={false}
-        hideSelectedOptions={false} // Keep selected options in the dropdown
-        styles={{
-          control: (provided) => ({
-            ...provided,
-            border: 'none',
-            boxShadow: 'none',
-            minHeight: '45px',
-            maxHeight: '60px',
-            overflowX: 'auto',
-            display: 'flex',
-            flexWrap: 'nowrap',
-            alignItems: 'center',
-            width: '100%',
-          }),
-          valueContainer: (provided) => ({
-            ...provided,
-            display: 'flex',
-            flexWrap: 'nowrap',
-            overflowX: 'auto',
-            maxWidth: '100%',
-            whiteSpace: 'nowrap',
-          }),
-          multiValue: (provided, { data }) => ({
-            ...provided,
-            backgroundColor: 'transparent',
-            color: '#000',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            minWidth: `${calculateWidth(data.label)}px`,
-            // padding: '0px',
-            fontSize: "12px",
-            padding: '0px 0px',
-            paddingLeft:'0px',
-   
-          }),
-          multiValueLabel: (provided) => ({
-            ...provided,
-            color: '#000',
-            fontSize: '12px',
-             padding: '0px 0px',
-             paddingLeft:'0px',
-          }),
-          multiValueRemove: (provided) => ({
-            ...provided,
-            color: '#888',
-            ':hover': {
-              color: '#000',
-            },
-          }),
-          option: (provided, { isSelected }) => ({
-            ...provided,
-            backgroundColor: isSelected ? '#ADD8E6' : '#fff', // Light blue background for selected items
-            color: '#000',
-            ':hover': {
-              backgroundColor: '#ddd',
-            },
-          }),
-        }}
-      />
-    </div>
-      <div style={{ marginRight: "10px", padding: "5px" }}>
-        <label htmlFor="start-date">Start Date & Time:</label>
-        <input
-          id="start-date"
-          type="datetime-local"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          style={{ marginRight: "10px", padding: "5px" }}
-        />
-        
-        <label htmlFor="end-date">End Date & Time:</label>
-        <input
-          id="end-date"
-          type="datetime-local"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          style={{ padding: "5px" }}
-        />
-      </div>
+          <div
+            style={{
+              minWidth: "250px",
+              position: "relative",
+              zIndex: "10",
+              border: "1px solid #000",
+              borderRadius: "4px",
+            }}
+          >
+            <Select
+              options={options}
+              value={selectedDevice}
+              onChange={handleChange}
+              isMulti
+              placeholder="Select Devices"
+              isClearable
+              closeMenuOnSelect={false}
+              hideSelectedOptions={false} // Keep selected options in the dropdown
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  border: "none",
+                  boxShadow: "none",
+                }),
+                dropdownIndicator: (provided) => ({
+                  ...provided,
+                  color: "#000",
+                }),
+                clearIndicator: (provided) => ({
+                  ...provided,
+                  color: "#000",
+                }),
+              }}
+            />
+          </div>
 
-      <button
-        onClick={handleShowClick}
-        style={{
-          padding: "5px 10px",
-        }}
-      >
-        Show
-      </button>
 
-      {/* {apiUrl && (
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <div>
+              <label htmlFor="start-date">Start Date & Time:</label>
+              <input
+                id="start-date"
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                style={{
+                  padding: "5px",
+                  marginLeft: "5px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                }}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="end-date">End Date & Time:</label>
+              <input
+                id="end-date"
+                type="datetime-local"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                style={{
+                  padding: "5px",
+                  marginLeft: "5px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                }}
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={handleShowClick}
+            style={{
+              padding: "8px 15px",
+              backgroundColor: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+              transition: "background 0.3s ease",
+            }}
+          >
+            Show
+          </button>
+
+          {/* {apiUrl && (
         <div style={{ marginTop: '10px' }}>
           <label htmlFor="api-url">Generated API URL:</label>
           <textarea
@@ -759,9 +740,9 @@ const filteredDevices = Array.isArray(devices)
           ></textarea>
         </div>
       )} */}
-    </div>
+        </div>
 
-       
+
 
         {loading ? (
           <div
@@ -783,169 +764,169 @@ const filteredDevices = Array.isArray(devices)
                 borderRadius: "7px",
               }}
             >
-            
-          
- <Table
-      stickyHeader
-      aria-label="sticky table"
-      style={{ border: "1px solid black" }}
-    >
-      <TableHead>
-        <TableRow
-          style={{
-            borderBottom: "1px solid black",
-            borderTop: "1px solid black",
-          }}
-        >
-          <TableCell
-            padding="checkbox"
-            style={{
-              borderRight: "1px solid #e0e0e0",
-              borderBottom: "2px solid black",
-            }}
-          >
-            <Switch
-              checked={selectAll}
-              onChange={handleSelectAll}
-              color="primary"
-            />
-          </TableCell>
-          {COLUMNS()
-            .filter((col) => columnVisibility[col.accessor])
-            .map((column) => (
-              <TableCell
-                key={column.accessor}
-                align={column.align || 'left'}
-                style={{
-                  minWidth: column.minWidth || '100px',
-                  cursor: "pointer",
-                  borderRight: "1px solid #e0e0e0",
-                  borderBottom: "2px solid black",
-                  padding: "4px 4px",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-                onClick={() => requestSort(column.accessor)}
+
+
+              <Table
+                stickyHeader
+                aria-label="sticky table"
+                style={{ border: "1px solid black" }}
               >
-                {column.Header}
-                {sortConfig.key === column.accessor ? (
-                  sortConfig.direction === "ascending" ? (
-                    <ArrowUpwardIcon fontSize="small" />
+                <TableHead>
+                  <TableRow
+                    style={{
+                      borderBottom: "1px solid black",
+                      borderTop: "1px solid black",
+                    }}
+                  >
+                    <TableCell
+                      padding="checkbox"
+                      style={{
+                        borderRight: "1px solid #e0e0e0",
+                        borderBottom: "2px solid black",
+                      }}
+                    >
+                      <Switch
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        color="primary"
+                      />
+                    </TableCell>
+                    {COLUMNS()
+                      .filter((col) => columnVisibility[col.accessor])
+                      .map((column) => (
+                        <TableCell
+                          key={column.accessor}
+                          align={column.align || 'left'}
+                          style={{
+                            minWidth: column.minWidth || '100px',
+                            cursor: "pointer",
+                            borderRight: "1px solid #e0e0e0",
+                            borderBottom: "2px solid black",
+                            padding: "4px 4px",
+                            textAlign: "center",
+                            fontWeight: "bold",
+                          }}
+                          onClick={() => requestSort(column.accessor)}
+                        >
+                          {column.Header}
+                          {sortConfig.key === column.accessor ? (
+                            sortConfig.direction === "ascending" ? (
+                              <ArrowUpwardIcon fontSize="small" />
+                            ) : (
+                              <ArrowDownwardIcon fontSize="small" />
+                            )
+                          ) : null}
+                        </TableCell>
+                      ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sortedData.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={COLUMNS().filter((col) => columnVisibility[col.accessor]).length}
+                        style={{
+                          textAlign: 'center',
+                          padding: '16px',
+                          fontSize: '16px',
+                          color: '#757575',
+                        }}
+                      >
+                        <h4>No Data Available</h4>
+                      </TableCell>
+                    </TableRow>
                   ) : (
-                    <ArrowDownwardIcon fontSize="small" />
-                  )
-                ) : null}
-              </TableCell>
-            ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {sortedData.length === 0 ? (
-          <TableRow>
-            <TableCell
-              colSpan={COLUMNS().filter((col) => columnVisibility[col.accessor]).length}
-              style={{
-                textAlign: 'center',
-                padding: '16px',
-                fontSize: '16px',
-                color: '#757575',
-              }}
-            >
-              <h4>No Data Available</h4>
-            </TableCell>
-          </TableRow>
-        ) : (
-          sortedData
-            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map((row, index) => (
-              <TableRow
-                hover
-                role="checkbox"
-                tabIndex={-1}
-                key={row.deviceId + index} // Ensure uniqueness for the key
-                onClick={() =>
-                  handleRowSelect(page * rowsPerPage + index)
-                }
-                selected={row.isSelected}
-                style={{
-                  backgroundColor:
-                    index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-                  borderBottom: "none",
-                }}
-              >
-                <TableCell
-                  padding="checkbox"
-                  style={{ borderRight: "1px solid #e0e0e0" }}
-                >
-                  <Switch checked={row.isSelected} color="primary" />
-                </TableCell>
-              
-                  {COLUMNS()
-  .filter((col) => columnVisibility[col.accessor])
-  .map((column) => {
-    // Ensure column.accessor is a string before calling split
-    const accessor = typeof column.accessor === 'string' ? column.accessor : '';
-    const value = accessor.split('.').reduce((acc, part) => acc && acc[part], row);
+                    sortedData
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((row, index) => (
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={row.deviceId + index} // Ensure uniqueness for the key
+                          onClick={() =>
+                            handleRowSelect(page * rowsPerPage + index)
+                          }
+                          selected={row.isSelected}
+                          style={{
+                            backgroundColor:
+                              index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                            borderBottom: "none",
+                          }}
+                        >
+                          <TableCell
+                            padding="checkbox"
+                            style={{ borderRight: "1px solid #e0e0e0" }}
+                          >
+                            <Switch checked={row.isSelected} color="primary" />
+                          </TableCell>
 
-    return (
-      <TableCell
-        key={accessor}
-        align={column.align || 'left'}
-        style={{
-          borderRight: "1px solid #e0e0e0",
-          paddingTop: "4px",
-          paddingBottom: "4px",
-          borderBottom: "none",
-          backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-          fontSize: "smaller",
-        }}
-      >
-        {column.Cell ? column.Cell({ value }) : value}
-      </TableCell>
-    );
-  })}
+                          {COLUMNS()
+                            .filter((col) => columnVisibility[col.accessor])
+                            .map((column) => {
+                              // Ensure column.accessor is a string before calling split
+                              const accessor = typeof column.accessor === 'string' ? column.accessor : '';
+                              const value = accessor.split('.').reduce((acc, part) => acc && acc[part], row);
 
-              </TableRow>
-            ))
-        )}
-      </TableBody>
-    </Table>
+                              return (
+                                <TableCell
+                                  key={accessor}
+                                  align={column.align || 'left'}
+                                  style={{
+                                    borderRight: "1px solid #e0e0e0",
+                                    paddingTop: "4px",
+                                    paddingBottom: "4px",
+                                    borderBottom: "none",
+                                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                                    fontSize: "smaller",
+                                  }}
+                                >
+                                  {column.Cell ? column.Cell({ value }) : value}
+                                </TableCell>
+                              );
+                            })}
+
+                        </TableRow>
+                      ))
+                  )}
+                </TableBody>
+              </Table>
             </TableContainer>
             <StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
-              <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '20px',
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -955,13 +936,13 @@ const filteredDevices = Array.isArray(devices)
                 />
                 {col.Header}
               </div>
-              
+
             ))}
           </Box>
         </Modal>
-       
-        
-      
+
+
+
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={3000}
@@ -972,7 +953,7 @@ const filteredDevices = Array.isArray(devices)
           </Alert>
         </Snackbar>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -78,9 +78,9 @@ export const Stops = () => {
   const [endDate, setEndDate] = useState("");
   const username = "schoolmaster";
   const password = "123456";
-  const role=localStorage.getItem("role");
-  const token=localStorage.getItem("token");
-const[deviceloader,setdeviceloader]=useState(true);
+  const role = localStorage.getItem("role");
+  const token = localStorage.getItem("token");
+  const [deviceloader, setdeviceloader] = useState(true);
   useEffect(() => {
     fetchData();
   }, []);
@@ -89,7 +89,7 @@ const[deviceloader,setdeviceloader]=useState(true);
     filterData(filterText);
   }, [filterText]);
 
- 
+
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -105,7 +105,7 @@ const[deviceloader,setdeviceloader]=useState(true);
     setFilterText(text);
   };
 
- 
+
   const filterData = (text) => {
     // Apply text-based filtering
     if (text === "") {
@@ -122,11 +122,11 @@ const[deviceloader,setdeviceloader]=useState(true);
           )
         )
         .map((row) => ({ ...row, isSelected: false }));
-  
+
       setFilteredRows(filteredData);
     }
   };
-  
+
   const requestSort = (key) => {
     let direction = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -174,7 +174,7 @@ const[deviceloader,setdeviceloader]=useState(true);
 
 
   const handleModalClose = () => {
-  
+
     setFormData({});
     setModalOpen(false);
   };
@@ -200,7 +200,7 @@ const[deviceloader,setdeviceloader]=useState(true);
       try {
         let response;
         const token = localStorage.getItem('token');
-  
+
         if (role == 1) {
           response = await axios.get(`${process.env.REACT_APP_SUPER_ADMIN_API}/read-devices`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -218,28 +218,28 @@ const[deviceloader,setdeviceloader]=useState(true);
             headers: { Authorization: `Bearer ${token}` },
           });
         }
-  
+
         if (response?.data) {
           const allData = role == 1
             ? response.data.data.flatMap((school) =>
-                school.branches.flatMap((branch) =>
-                  Array.isArray(branch.devices) ? branch.devices : []
-                )
-              )
-            : role == 2
-            ? response.data.branches.flatMap((branch) =>
+              school.branches.flatMap((branch) =>
                 Array.isArray(branch.devices) ? branch.devices : []
               )
-            : role == 3
-            ? response.data.devices
-            : role == 4
-            ? response.data.data.flatMap((school) =>
-                school.branches.flatMap((branch) =>
-                  Array.isArray(branch.devices) ? branch.devices : []
-                )
+            )
+            : role == 2
+              ? response.data.branches.flatMap((branch) =>
+                Array.isArray(branch.devices) ? branch.devices : []
               )
-            : [];
-  
+              : role == 3
+                ? response.data.devices
+                : role == 4
+                  ? response.data.data.flatMap((school) =>
+                    school.branches.flatMap((branch) =>
+                      Array.isArray(branch.devices) ? branch.devices : []
+                    )
+                  )
+                  : [];
+
           setDevices(allData);
           console.log('Merged Devices:', allData);
         } else {
@@ -252,19 +252,19 @@ const[deviceloader,setdeviceloader]=useState(true);
       }
       setdeviceloader(false);
     };
-  
-  
-  fetchDevices();
-   
+
+
+    fetchDevices();
+
   }, [role]);
-  
 
 
-  
+
+
   const [selectedDevice, setSelectedDevice] = useState('');
- 
+
   const [apiUrl, setApiUrl] = useState('');
-  
+
   const handleShowClick = () => {
     const formattedStartDate = formatToUTC(startDate);
     const formattedEndDate = formatToUTC(endDate);
@@ -276,7 +276,7 @@ const[deviceloader,setdeviceloader]=useState(true);
 
     // Construct the API URL
     const url = `${process.env.REACT_APP_ROCKETSALES_API}/reports/route?deviceId=${encodeURIComponent(selectedDevice)}&from=${encodeURIComponent(formattedStartDate)}&to=${encodeURIComponent(formattedEndDate)}`;
-    
+
     setApiUrl(url); // Update the state with the generated URL
     fetchData(url); // Call fetchData with the generated URL
   };
@@ -286,109 +286,109 @@ const[deviceloader,setdeviceloader]=useState(true);
     const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
     return utcDate.toISOString();
   };
-  
 
-const parseDate = (dateString) => {
-  const [datePart, timePart] = dateString.split(', ');
-  const [day, month, year] = datePart.split('/').map(Number);
-  const [time, ampm] = timePart.split(' ');
-  const [hour, minute, second] = time.split(':').map(Number);
 
-  // Convert hour to 24-hour format
-  let hours = hour;
-  if (ampm === 'pm' && hours < 12) hours += 12; // Convert PM to 24-hour format
-  if (ampm === 'am' && hours === 12) hours = 0; // Convert 12 AM to 00 hours
+  const parseDate = (dateString) => {
+    const [datePart, timePart] = dateString.split(', ');
+    const [day, month, year] = datePart.split('/').map(Number);
+    const [time, ampm] = timePart.split(' ');
+    const [hour, minute, second] = time.split(':').map(Number);
 
-  return new Date(year, month - 1, day, hours, minute, second);
-};
+    // Convert hour to 24-hour format
+    let hours = hour;
+    if (ampm === 'pm' && hours < 12) hours += 12; // Convert PM to 24-hour format
+    if (ampm === 'am' && hours === 12) hours = 0; // Convert 12 AM to 00 hours
 
-const processGroupedEvents = (groupedEvents) => {
-  const processedGroupedEvents = groupedEvents.map(group => {
-    if (group.length === 0) return null; // Skip empty groups
-    
-    // Get the first and last object in the group
-    const startEvent = group[0];
-    const endEvent = group[group.length - 1];
-    
-    // Extract the necessary data from the start and end events
-    const startLatitude = startEvent.latitude || 'N/A';
-    const startLongitude = startEvent.longitude || 'N/A';
-    const endLatitude = endEvent.latitude || 'N/A';
-    const endLongitude = endEvent.longitude || 'N/A';
-    
-    const startOdometer = startEvent.odometer || 'N/A';
-    const endOdometer = endEvent.odometer || 'N/A';
-    
-    // Manually parse the server times
-    const startTime = parseDate(startEvent.serverTime);
-    const endTime = parseDate(endEvent.serverTime);
-    
-    // Check for valid Date objects
-    if (isNaN(startTime) || isNaN(endTime)) {
-      console.error('Invalid start or end time:', startEvent.serverTime, endEvent.serverTime);
-      return null;
-    }
-    
-    // Calculate stop duration in minutes (convert milliseconds to minutes)
-    const stopDuration = Math.abs((endTime - startTime) / 60000); // Difference in minutes
-    
-    // Extract the device name from the first event in the group
-    const deviceName = startEvent.deviceName || 'Unknown Device';
-  
-    // Create the new object for the group with device name included
-    const groupSummary = {
-      deviceName,
-      startLatitude,
-      startLongitude,
-      endLatitude,
-      endLongitude,
-      startOdometer,
-      endOdometer,
-      startTime: startTime.toLocaleString(),
-      endTime: endTime.toLocaleString(),
-      stopDuration: stopDuration.toFixed(2), // Rounded to 2 decimal places
-    };
-    
-    return groupSummary;
-  }).filter(Boolean); // Remove any null values from the array
-  
-  return processedGroupedEvents;
-};
+    return new Date(year, month - 1, day, hours, minute, second);
+  };
+
+  const processGroupedEvents = (groupedEvents) => {
+    const processedGroupedEvents = groupedEvents.map(group => {
+      if (group.length === 0) return null; // Skip empty groups
+
+      // Get the first and last object in the group
+      const startEvent = group[0];
+      const endEvent = group[group.length - 1];
+
+      // Extract the necessary data from the start and end events
+      const startLatitude = startEvent.latitude || 'N/A';
+      const startLongitude = startEvent.longitude || 'N/A';
+      const endLatitude = endEvent.latitude || 'N/A';
+      const endLongitude = endEvent.longitude || 'N/A';
+
+      const startOdometer = startEvent.odometer || 'N/A';
+      const endOdometer = endEvent.odometer || 'N/A';
+
+      // Manually parse the server times
+      const startTime = parseDate(startEvent.serverTime);
+      const endTime = parseDate(endEvent.serverTime);
+
+      // Check for valid Date objects
+      if (isNaN(startTime) || isNaN(endTime)) {
+        console.error('Invalid start or end time:', startEvent.serverTime, endEvent.serverTime);
+        return null;
+      }
+
+      // Calculate stop duration in minutes (convert milliseconds to minutes)
+      const stopDuration = Math.abs((endTime - startTime) / 60000); // Difference in minutes
+
+      // Extract the device name from the first event in the group
+      const deviceName = startEvent.deviceName || 'Unknown Device';
+
+      // Create the new object for the group with device name included
+      const groupSummary = {
+        deviceName,
+        startLatitude,
+        startLongitude,
+        endLatitude,
+        endLongitude,
+        startOdometer,
+        endOdometer,
+        startTime: startTime.toLocaleString(),
+        endTime: endTime.toLocaleString(),
+        stopDuration: stopDuration.toFixed(2), // Rounded to 2 decimal places
+      };
+
+      return groupSummary;
+    }).filter(Boolean); // Remove any null values from the array
+
+    return processedGroupedEvents;
+  };
 
   const fetchData = async (url) => {
     console.log('Fetching report...');
     setLoading(true);
-    
+
     try {
-     
+
       const token = btoa(`${username}:${password}`);
-    
+
       const response = await axios.get(url, {
         headers: {
           Authorization: `Basic ${token}`,
         },
         responseType: 'blob', // Downloading as binary data
       });
-    
+
       console.log('Content-Type:', response.headers['content-type']);
-    
+
       const deviceIdToNameMap = devices.reduce((acc, device) => {
         acc[device.deviceId] = device.deviceName;
         return acc;
       }, {});
-    
+
       let isIgnitionOffFound = false;
       let currentGroup = [];
       let groupedEvents = [];
-    
+
       // Handle JSON response
       if (response.headers['content-type'] === 'application/json') {
         const text = await response.data.text(); // Convert Blob to text
         console.log('JSON Response:', text); // Log JSON response
         const jsonResponse = JSON.parse(text); // Parse JSON
-    
+
         console.log('Processed JSON Data:', jsonResponse);
-    
+
         const processedEvents = jsonResponse.map((data) => {
           if (data.attributes?.ignition === false && !isIgnitionOffFound) {
             isIgnitionOffFound = true;
@@ -412,7 +412,7 @@ const processGroupedEvents = (groupedEvents) => {
                 geofences: data.geofenceIds ? data.geofenceIds.join(', ') : 'None',
                 satellites: data.attributes?.sat || 'N/A',
                 RSSI: data.attributes?.rssi || 'N/A',
-                odometer: data.attributes?.odometer|| 'N/A',
+                odometer: data.attributes?.odometer || 'N/A',
                 // odometer: data.attributes?.odometer ? `${data.attributes.odometer.toFixed(2)} mi` : 'N/A',
                 batteryLevel: data.attributes?.batteryLevel || 'N/A',
                 ignition: data.attributes?.ignition ? 'Yes' : 'No',
@@ -431,7 +431,7 @@ const processGroupedEvents = (groupedEvents) => {
             ];
             return null;
           }
-    
+
           if (isIgnitionOffFound) {
             currentGroup.push({
               deviceId: data.deviceId || 'N/A',
@@ -452,7 +452,7 @@ const processGroupedEvents = (groupedEvents) => {
               geofences: data.geofenceIds ? data.geofenceIds.join(', ') : 'None',
               satellites: data.attributes?.sat || 'N/A',
               RSSI: data.attributes?.rssi || 'N/A',
-              odometer: data.attributes?.odometer|| 'N/A',
+              odometer: data.attributes?.odometer || 'N/A',
               batteryLevel: data.attributes?.batteryLevel || 'N/A',
               ignition: data.attributes?.ignition ? 'Yes' : 'No',
               charge: data.attributes?.charge ? 'Yes' : 'No',
@@ -467,29 +467,29 @@ const processGroupedEvents = (groupedEvents) => {
               engineStatus: data.attributes?.engineStatus ? 'On' : 'Off',
               adc1: data.attributes?.adc1 ? `${data.attributes.adc1.toFixed(2)} V` : 'N/A',
             });
-    
+
             if (data.attributes?.ignition === true) {
               groupedEvents.push(currentGroup);
               currentGroup = [];
               isIgnitionOffFound = false;
             }
           }
-    
+
           return null;
-        }).filter(Boolean); 
-    
+        }).filter(Boolean);
+
         if (currentGroup.length > 0) {
           groupedEvents.push(currentGroup);
         }
-    
+
         // Process each group and create a summary object
         const finalProcessedEvents = processGroupedEvents(groupedEvents);
         console.log('Final Processed Events:', finalProcessedEvents);
-    
+
         // Update the state with the processed data
-        console.log('groupedEvents:',groupedEvents)
+        console.log('groupedEvents:', groupedEvents)
         setFilteredRows(finalProcessedEvents);
-        setOriginalRows(finalProcessedEvents); 
+        setOriginalRows(finalProcessedEvents);
         setTotalResponses(finalProcessedEvents.length);
       } else {
         throw new Error('Unexpected content type: ' + response.headers['content-type']);
@@ -501,154 +501,178 @@ const processGroupedEvents = (groupedEvents) => {
       setLoading(false);
     }
   };
-  
-const options = devices.map((device) => ({
-  value: device.deviceId,
-  label: device.deviceName,
-}));
 
-const handleChange = (selectedOption) => {
-  setSelectedDevice(selectedOption ? selectedOption.value : null);
-};
+  const options = devices.map((device) => ({
+    value: device.deviceId,
+    label: device.deviceName,
+  }));
+
+  const handleChange = (selectedOption) => {
+    setSelectedDevice(selectedOption ? selectedOption.value : null);
+  };
 
   return (
-    <>
+    <div className="mx-3">
       <h1 style={{ textAlign: "center", marginTop: "80px" }}>
-       Stops 
+        Stops
       </h1>
       <div>
-      <div
+        <div
           style={{
             display: "flex",
             alignItems: "center",
             marginBottom: "10px",
           }}
         >
-       <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Smaller width
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Set a fixed height to reduce it
-        padding: '0px', // Reduce padding to shrink height
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position
-        fontSize: '14px', // Slightly smaller label font
-      }
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
-          style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
-          }}
-        />
-      ),
-    }}
-  />
-             <Button
-  onClick={() => setModalOpen(true)}
-  sx={{
-    backgroundColor: "rgb(85, 85, 85)",
-    color: "white",
-    fontWeight: "bold",
-    marginRight: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    "&:hover": {
-      fontWeight: "bolder", // Make text even bolder on hover
-      backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
-    },
-  }}
->
-  <ImportExportIcon />
-  Column Visibility
-</Button>
-         
-<Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"STOPS REPORT"} pdfFilename={"StopsReport.pdf"} excelFilename={"StopsReport.xlsx"}/>
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Smaller width
+              '& .MuiOutlinedInput-root': {
+                height: '36px', // Set a fixed height to reduce it
+                padding: '0px', // Reduce padding to shrink height
+              },
+              '& .MuiInputLabel-root': {
+                top: '-6px', // Adjust label position
+                fontSize: '14px', // Slightly smaller label font
+              }
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
+          <Button
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              "&:hover": {
+                fontWeight: "bolder", // Make text even bolder on hover
+                backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
+          </Button>
+
+          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"STOPS REPORT"} pdfFilename={"StopsReport.pdf"} excelFilename={"StopsReport.xlsx"} />
 
         </div>
-       
+
         <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        marginBottom: "10px",
-      }}
-    >
-      <div
-  style={{
-    width: "250px",
-    position: "relative",
-    zIndex: "10",
-    border: "1px solid #000", // Add a black border
-    
-  }}
->
-  <Select
-    options={options}
-    value={options.find((option) => option.value === selectedDevice) || null}
-    onChange={handleChange}
-    placeholder={deviceloader?"Loading Devices...":"Select Device"}
-    isClearable
-    isLoading={deviceloader}
-    styles={{
-      control: (provided) => ({
-        ...provided,
-        border: "none", // Remove react-select's default border if necessary
-        boxShadow: "none", // Remove default focus outline
-      }),
-      dropdownIndicator: (provided) => ({
-        ...provided,
-        color: "#000", // Set the dropdown arrow to black
-      }),
-      clearIndicator: (provided) => ({
-        ...provided,
-        color: "#000", // Set the clear icon to black
-      }),
-    }}
-  />
-</div>
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "15px",
+            flexWrap: "wrap", // Ensures responsiveness
+            marginBottom: "10px",
+          }}
+        >
+          <div
+            style={{
+              minWidth: "250px",
+              position: "relative",
+              zIndex: "10",
+              border: "1px solid #000",
+              borderRadius: "4px",
+
+            }}
+          >
+            <Select
+              options={options}
+              value={options.find((option) => option.value === selectedDevice) || null}
+              onChange={handleChange}
+              placeholder={deviceloader ? "Loading Devices..." : "Select Device"}
+              isClearable
+              isLoading={deviceloader}
+              styles={{
+                control: (provided) => ({
+                  ...provided,
+                  border: "none", // Remove react-select's default border if necessary
+                  boxShadow: "none", // Remove default focus outline
+                }),
+                dropdownIndicator: (provided) => ({
+                  ...provided,
+                  color: "#000", // Set the dropdown arrow to black
+                }),
+                clearIndicator: (provided) => ({
+                  ...provided,
+                  color: "#000", // Set the clear icon to black
+                }),
+              }}
+            />
+          </div>
 
 
-      <div style={{ marginRight: "10px", padding: "5px" }}>
-        <label htmlFor="start-date">Start Date & Time:</label>
-        <input
-          id="start-date"
-          type="datetime-local"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          style={{ marginRight: "10px", padding: "5px" }}
-        />
-        
-        <label htmlFor="end-date">End Date & Time:</label>
-        <input
-          id="end-date"
-          type="datetime-local"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          style={{ padding: "5px" }}
-        />
-      </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <div>
+              <label htmlFor="start-date">Start Date & Time:</label>
+              <input
+                id="start-date"
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                style={{
+                  padding: "5px",
+                  marginLeft: "5px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                }}
+              />
+            </div>
 
-      <button
-        onClick={handleShowClick}
-        style={{
-          padding: "5px 10px",
-        }}
-      >
-        Show
-      </button>
+            <div>
+              <label htmlFor="end-date">End Date & Time:</label>
+              <input
+                id="end-date"
+                type="datetime-local"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                style={{
+                  padding: "5px",
+                  marginLeft: "5px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                }}
+              />
+            </div>
 
-      {/* {apiUrl && (
+            <button
+              onClick={handleShowClick}
+              style={{
+                padding: "8px 15px",
+                backgroundColor: "#007bff",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                transition: "background 0.3s ease",
+              }}
+            >
+              Show
+            </button>
+          </div>
+
+
+          {/* {apiUrl && (
         <div style={{ marginTop: '10px' }}>
           <label htmlFor="api-url">Generated API URL:</label>
           <textarea
@@ -660,9 +684,9 @@ const handleChange = (selectedOption) => {
           ></textarea>
         </div>
       )} */}
-    </div>
+        </div>
 
-       
+
 
         {loading ? (
           <div
@@ -684,169 +708,169 @@ const handleChange = (selectedOption) => {
                 borderRadius: "7px",
               }}
             >
-            
 
- <Table
-      stickyHeader
-      aria-label="sticky table"
-      style={{ border: "1px solid black" }}
-    >
-      <TableHead>
-        <TableRow
-          style={{
-            borderBottom: "1px solid black",
-            borderTop: "1px solid black",
-          }}
-        >
-          <TableCell
-            padding="checkbox"
-            style={{
-              borderRight: "1px solid #e0e0e0",
-              borderBottom: "2px solid black",
-            }}
-          >
-            <Switch
-              checked={selectAll}
-              onChange={handleSelectAll}
-              color="primary"
-            />
-          </TableCell>
-          {COLUMNS()
-            .filter((col) => columnVisibility[col.accessor])
-            .map((column) => (
-              <TableCell
-                key={column.accessor}
-                align={column.align || 'left'}
-                style={{
-                  minWidth: column.minWidth || '100px',
-                  cursor: "pointer",
-                  borderRight: "1px solid #e0e0e0",
-                  borderBottom: "2px solid black",
-                  padding: "4px 4px",
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-                onClick={() => requestSort(column.accessor)}
+
+              <Table
+                stickyHeader
+                aria-label="sticky table"
+                style={{ border: "1px solid black" }}
               >
-                {column.Header}
-                {sortConfig.key === column.accessor ? (
-                  sortConfig.direction === "ascending" ? (
-                    <ArrowUpwardIcon fontSize="small" />
+                <TableHead>
+                  <TableRow
+                    style={{
+                      borderBottom: "1px solid black",
+                      borderTop: "1px solid black",
+                    }}
+                  >
+                    <TableCell
+                      padding="checkbox"
+                      style={{
+                        borderRight: "1px solid #e0e0e0",
+                        borderBottom: "2px solid black",
+                      }}
+                    >
+                      <Switch
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        color="primary"
+                      />
+                    </TableCell>
+                    {COLUMNS()
+                      .filter((col) => columnVisibility[col.accessor])
+                      .map((column) => (
+                        <TableCell
+                          key={column.accessor}
+                          align={column.align || 'left'}
+                          style={{
+                            minWidth: column.minWidth || '100px',
+                            cursor: "pointer",
+                            borderRight: "1px solid #e0e0e0",
+                            borderBottom: "2px solid black",
+                            padding: "4px 4px",
+                            textAlign: "center",
+                            fontWeight: "bold",
+                          }}
+                          onClick={() => requestSort(column.accessor)}
+                        >
+                          {column.Header}
+                          {sortConfig.key === column.accessor ? (
+                            sortConfig.direction === "ascending" ? (
+                              <ArrowUpwardIcon fontSize="small" />
+                            ) : (
+                              <ArrowDownwardIcon fontSize="small" />
+                            )
+                          ) : null}
+                        </TableCell>
+                      ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sortedData.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={COLUMNS().filter((col) => columnVisibility[col.accessor]).length}
+                        style={{
+                          textAlign: 'center',
+                          padding: '16px',
+                          fontSize: '16px',
+                          color: '#757575',
+                        }}
+                      >
+                        <h4>No Data Available</h4>
+                      </TableCell>
+                    </TableRow>
                   ) : (
-                    <ArrowDownwardIcon fontSize="small" />
-                  )
-                ) : null}
-              </TableCell>
-            ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {sortedData.length === 0 ? (
-          <TableRow>
-            <TableCell
-              colSpan={COLUMNS().filter((col) => columnVisibility[col.accessor]).length}
-              style={{
-                textAlign: 'center',
-                padding: '16px',
-                fontSize: '16px',
-                color: '#757575',
-              }}
-            >
-              <h4>No Data Available</h4>
-            </TableCell>
-          </TableRow>
-        ) : (
-          sortedData
-            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map((row, index) => (
-              <TableRow
-                hover
-                role="checkbox"
-                tabIndex={-1}
-                key={row.deviceId + index} // Ensure uniqueness for the key
-                onClick={() =>
-                  handleRowSelect(page * rowsPerPage + index)
-                }
-                selected={row.isSelected}
-                style={{
-                  backgroundColor:
-                    index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-                  borderBottom: "none",
-                }}
-              >
-                <TableCell
-                  padding="checkbox"
-                  style={{ borderRight: "1px solid #e0e0e0" }}
-                >
-                  <Switch checked={row.isSelected} color="primary" />
-                </TableCell>
-               
-                  {COLUMNS()
-  .filter((col) => columnVisibility[col.accessor])
-  .map((column) => {
-    // Ensure column.accessor is a string before calling split
-    const accessor = typeof column.accessor === 'string' ? column.accessor : '';
-    const value = accessor.split('.').reduce((acc, part) => acc && acc[part], row);
+                    sortedData
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((row, index) => (
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={row.deviceId + index} // Ensure uniqueness for the key
+                          onClick={() =>
+                            handleRowSelect(page * rowsPerPage + index)
+                          }
+                          selected={row.isSelected}
+                          style={{
+                            backgroundColor:
+                              index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                            borderBottom: "none",
+                          }}
+                        >
+                          <TableCell
+                            padding="checkbox"
+                            style={{ borderRight: "1px solid #e0e0e0" }}
+                          >
+                            <Switch checked={row.isSelected} color="primary" />
+                          </TableCell>
 
-    return (
-      <TableCell
-        key={accessor}
-        align={column.align || 'left'}
-        style={{
-          borderRight: "1px solid #e0e0e0",
-          paddingTop: "4px",
-          paddingBottom: "4px",
-          borderBottom: "none",
-          backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-          fontSize: "smaller",
-        }}
-      >
-        {column.Cell ? column.Cell({ value }) : value}
-      </TableCell>
-    );
-  })}
+                          {COLUMNS()
+                            .filter((col) => columnVisibility[col.accessor])
+                            .map((column) => {
+                              // Ensure column.accessor is a string before calling split
+                              const accessor = typeof column.accessor === 'string' ? column.accessor : '';
+                              const value = accessor.split('.').reduce((acc, part) => acc && acc[part], row);
 
-              </TableRow>
-            ))
-        )}
-      </TableBody>
-    </Table>
+                              return (
+                                <TableCell
+                                  key={accessor}
+                                  align={column.align || 'left'}
+                                  style={{
+                                    borderRight: "1px solid #e0e0e0",
+                                    paddingTop: "4px",
+                                    paddingBottom: "4px",
+                                    borderBottom: "none",
+                                    backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                                    fontSize: "smaller",
+                                  }}
+                                >
+                                  {column.Cell ? column.Cell({ value }) : value}
+                                </TableCell>
+                              );
+                            })}
+
+                        </TableRow>
+                      ))
+                  )}
+                </TableBody>
+              </Table>
             </TableContainer>
             <StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
-         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '20px',
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -856,13 +880,13 @@ const handleChange = (selectedOption) => {
                 />
                 {col.Header}
               </div>
-              
+
             ))}
           </Box>
         </Modal>
-      
-       
-      
+
+
+
         <Snackbar
           open={snackbarOpen}
           autoHideDuration={3000}
@@ -873,7 +897,7 @@ const handleChange = (selectedOption) => {
           </Alert>
         </Snackbar>
       </div>
-    </>
+    </div >
   );
 };
 
