@@ -1,7 +1,9 @@
 .App {
   text-align: center;
 }
-
+.MuiDrawer-root > .MuiPaper-root {
+  transition: transform 0.3s ease-in-out !important;
+}
 .App-logo {
   height: 40vmin;
   pointer-events: none;

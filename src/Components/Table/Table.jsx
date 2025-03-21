@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback,useContext } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import SearchIcon from "@mui/icons-material/Search";
@@ -15,7 +15,7 @@ import ImportExportIcon from "@mui/icons-material/ImportExport";
 import axios from "axios";
 import Grid from "@mui/material/Grid";
 import { styled } from "@mui/material/styles";
-import { StyledTablePagination } from "../../Components/VariousTables/PaginationCssFile/TablePaginationStyles.js"
+import { StyledTablePagination } from "../../Components/VariousTables/PaginationCssFile/TablePaginationStyles.js";
 import {
   Autocomplete,
   FormControl,
@@ -40,9 +40,7 @@ import {
   CTableRow,
 } from "@coreui/react";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-IconButton
-} from "@mui/material";
+import { IconButton } from "@mui/material";
 import { IoMdBatteryCharging } from "react-icons/io";
 import { MdGpsFixed, MdGpsNotFixed } from "react-icons/md";
 import { PiEngineFill } from "react-icons/pi";
@@ -57,6 +55,7 @@ import { TotalResponsesContext } from "../../TotalResponsesContext.jsx";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setNewAddress } from "./addressSlice.js";
+import schoolbus from "../images/schoolbus-png.png";
 dayjs.extend(duration);
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -111,7 +110,7 @@ export const Tablee = ({ data }) => {
     power: true,
     track: true,
   });
-  
+
   const [modalOpen, setModalOpen] = useState(false);
   const [selectAll, setSelectAll] = useState(false);
   const [vehicleRunningCount, setVehicleRunningCount] = useState(0);
@@ -148,9 +147,83 @@ export const Tablee = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(0); // State for the current page
   const [rowsPerPage, setRowsPerPage] = useState(13); // State for the number of rows per page
   const [selectedDriver, setSelectedDriver] = useState(""); // To manage selected value
-  
-  const dispatch = useDispatch()
+  const [sortBy, setSortBy] = useState(null);
+  const [sortOrder, setSortOrder] = useState("asc");
+  const dispatch = useDispatch();
+  const startIndex = currentPage * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const [searchTerm, setSearchTerm] = useState("");
+  const { newAddress } = useSelector((state) => state.address);
+  const [dropdownOptions, setDropdownOptions] = useState([]);
+  const [areas, setAreas] = useState([]);
+  const [drivers, setDrivers] = useState([]);
+  const filteredData = filteringData.filter((item) => {
+    const nameMatch =
+      typeof item.name === "string" &&
+      item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const deviceIdMatch =
+      typeof item.deviceId === "string" &&
+      item.deviceId.toLowerCase().includes(searchTerm.toLowerCase());
+    const distanceMatch =
+      typeof item.attributes?.distance === "number" &&
+      item.attributes.distance.toString().includes(searchTerm);
+    const driverMatch =
+      typeof item.driver_name === "string" &&
+      item.driver_name.toLowerCase().includes(searchTerm.toLowerCase());
+    return nameMatch || deviceIdMatch || distanceMatch || driverMatch;
+  });
+  const currentRows = filteredData.slice(startIndex, endIndex);
+  if (data) {
+    console.log("my data", data);
+  }
+  const getSortValue = (item, column) => {
+    switch (column) {
+      case "deviceName":
+        return item.name?.toLowerCase();
+      case "address":
+        return newAddress[item.deviceId]?.toLowerCase();
+      case "driver":
+        return drivers
+          .find((d) => d.deviceId === item.deviceId)
+          ?.driverName?.toLowerCase();
+      case "lastUpdate":
+        return new Date(item.lastUpdate);
+      case "speed":
+        return item.speed;
+      case "distance":
+        return item.attributes.distance;
+      case "satellite":
+        return item.attributes.sat;
+      case "ignition":
+        return item.attributes.ignition;
+      case "gps":
+        return item.valid;
+      case "power":
+        return item.attributes.battery;
+      default:
+        return 0;
+    }
+  };
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(column);
+      setSortOrder("asc");
+    }
+  };
+  const sortedRows = [...currentRows].sort((a, b) => {
+    if (!sortBy) return 0;
 
+    const valueA = getSortValue(a, sortBy);
+    const valueB = getSortValue(b, sortBy);
+
+    if (valueA < valueB) return sortOrder === "asc" ? -1 : 1;
+    if (valueA > valueB) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
+
+ 
   // Handle page change
   const handlePageClick = (data) => {
     setCurrentPage(data.selected); // Update the current page state
@@ -166,21 +239,11 @@ export const Tablee = ({ data }) => {
   const pageCount = Math.ceil(data.length / rowsPerPage);
 
   // Get the current rows based on the selected page
-  const startIndex = currentPage * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
+  
   // const   currentRows = data.slice(startIndex, endIndex);
-  const [searchTerm, setSearchTerm] = useState("");
-  const filteredData = filteringData.filter(item => {
-    const nameMatch = typeof item.name === 'string' && item.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const deviceIdMatch = typeof item.deviceId === 'string' && item.deviceId.toLowerCase().includes(searchTerm.toLowerCase());
-    const distanceMatch = typeof item.attributes?.distance === 'number' && item.attributes.distance.toString().includes(searchTerm);
-    const driverMatch = typeof item.driver_name === 'string' && item.driver_name.toLowerCase().includes(searchTerm.toLowerCase());
-    return nameMatch || deviceIdMatch || distanceMatch || driverMatch;
-  });
-  const currentRows = filteredData.slice(startIndex, endIndex);
-  if (data) {
-    console.log("my data",data);
-  }
+
+ 
+ 
 
   useEffect(() => {
     setFilteredRows(data.map((row) => ({ ...row, isSelected: false })));
@@ -196,34 +259,40 @@ export const Tablee = ({ data }) => {
     //  console.log(longitude);
   }, [data]);
 
-  useEffect(() => {
- 
-  }, [filteredRows]);
+  useEffect(() => {}, [filteredRows]);
 
   useEffect(() => {
-    const running = data.filter((row) => row.speed >= 2 && row.speed <= 60 && row.attributes.ignition === true).length;
+    const running = data.filter(
+      (row) =>
+        row.speed >= 2 && row.speed <= 60 && row.attributes.ignition === true
+    ).length;
     setVehicleRunningCount(running);
 
-    const stopped = data.filter((row) => row.speed < 1 && row.attributes.ignition === false).length;
+    const stopped = data.filter(
+      (row) => row.speed < 1 && row.attributes.ignition === false
+    ).length;
     setVehicleStoppedCount(stopped);
 
-    const overspeed = data.filter((row) => row.speed > 60 && row.attributes.ignition === true).length;
+    const overspeed = data.filter(
+      (row) => row.speed > 60 && row.attributes.ignition === true
+    ).length;
     setVehicleOverspeedCount(overspeed);
 
-    const idle = data.filter((row) => row.speed < 2 && row.attributes.ignition === true).length;
+    const idle = data.filter(
+      (row) => row.speed < 2 && row.attributes.ignition === true
+    ).length;
     setVehicleIdleCount(idle);
 
     const currentTime = new Date();
     const thirtyHoursInMilliseconds = 30 * 60 * 60 * 1000;
 
-    const unreachable = data.filter((row) =>row.status === "offline" && currentTime - new Date(row.lastUpdate) > thirtyHoursInMilliseconds).length;
-      setVehicleUnreachableCount(unreachable);
-
+    const unreachable = data.filter(
+      (row) =>
+        row.status === "offline" &&
+        currentTime - new Date(row.lastUpdate) > thirtyHoursInMilliseconds
+    ).length;
+    setVehicleUnreachableCount(unreachable);
   }, [data]);
-
-
-
-
 
   useEffect(() => {
     filterData(filterText);
@@ -327,17 +396,17 @@ export const Tablee = ({ data }) => {
     Cell:
       col.accessor === "select"
         ? ({ row }) => (
-          <input
-            type="checkbox"
-            checked={row.original.isSelected}
-            onChange={() => handleRowSelect(row.index)}
-          />
-        )
+            <input
+              type="checkbox"
+              checked={row.original.isSelected}
+              onChange={() => handleRowSelect(row.index)}
+            />
+          )
         : col.Cell,
   }));
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
-  
+
   const determineStatus = (vehicle) => {
     const currentTime = new Date();
     const lastUpdateTime = new Date(vehicle.lastUpdate); // Assuming vehicle has a lastUpdate property
@@ -382,17 +451,21 @@ export const Tablee = ({ data }) => {
 
     setFilteredAssets(filteredData);
   }, [vehiclesValue, data]);
-  const [selectedSupervisor, setSelectedSupervisor] = useState('');
-  const { selectedVehicle, setSelectedVehicle } = useContext(TotalResponsesContext);
+  const [selectedSupervisor, setSelectedSupervisor] = useState("");
+  const { selectedVehicle, setSelectedVehicle } = useContext(
+    TotalResponsesContext
+  );
   const handleSelectVehicle = (event) => {
     const selectedValue = event.target.value;
-  
+
     if (selectedValue == "All assets") {
       // Clear selection to show all devices
       setSelectedVehicle({});
     } else {
       // Find the selected device and set its details
-      const selectedDevice = data.find((asset) => asset.deviceId == selectedValue);
+      const selectedDevice = data.find(
+        (asset) => asset.deviceId == selectedValue
+      );
       const selectedDeviceDetails = {
         deviceId: selectedDevice.deviceId,
         name: selectedDevice.name,
@@ -400,7 +473,7 @@ export const Tablee = ({ data }) => {
         longitude: selectedDevice.longitude,
       };
       setSelectedVehicle(selectedDeviceDetails);
-      console.log('Selected Device:', selectedDeviceDetails);
+      console.log("Selected Device:", selectedDeviceDetails);
     }
   };
   const [totalResponses, setTotalResponses] = useState(0);
@@ -411,14 +484,15 @@ export const Tablee = ({ data }) => {
 
   const handleRowDoubleClick = (item) => {
     // Assuming `item` has latitude and longitude properties
-    if (item ) {
-      const { latitude, longitude,name } = item;
-      setCoordinates({ latitude, longitude,name});
-      console.log(`Latitude: ${latitude}, Longitude: ${longitude}, deviceName: ${name}`); // Optional: Log the coordinates
+    if (item) {
+      const { latitude, longitude, name } = item;
+      setCoordinates({ latitude, longitude, name });
+      console.log(
+        `Latitude: ${latitude}, Longitude: ${longitude}, deviceName: ${name}`
+      ); // Optional: Log the coordinates
     }
   };
   const fetchData = async (startDate = "", endDate = "") => {
-   
     try {
       let response;
       if (role == 1) {
@@ -451,14 +525,17 @@ export const Tablee = ({ data }) => {
             },
           }
         );
-      }else if(role==4){
-        const token=localStorage.getItem("token");
-        response=await axios.get(`${process.env.REACT_APP_USERBRANCH}/read-children`,{
-          headers:{
-            Authorization:`Bearer ${token}`,
-          },
-        })
-      };
+      } else if (role == 4) {
+        const token = localStorage.getItem("token");
+        response = await axios.get(
+          `${process.env.REACT_APP_USERBRANCH}/read-children`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
 
       console.log("fetch data", response.data); // Log the entire response data
       // fetchgeofencepoint();
@@ -476,11 +553,10 @@ export const Tablee = ({ data }) => {
                     : []
                 )
               )
-              : role == 4
-              ? response?.data.updatedChildData.map((child) => ({
-                  ...child,
-                }))
-              
+            : role == 4
+            ? response?.data.updatedChildData.map((child) => ({
+                ...child,
+              }))
             : role == 2
             ? response?.data.branches.flatMap((branch) =>
                 Array.isArray(branch.children) && branch.children.length > 0
@@ -493,14 +569,13 @@ export const Tablee = ({ data }) => {
         const childNames = allData.map((child) => child.childName);
         // const childNames = response.data; // Replace this with the actual extracted childName array
         setChildrenList(childNames);
-        console.log("All Child Names:", childNames); 
-
-    } else {
+        console.log("All Child Names:", childNames);
+      } else {
         console.error("Expected an array but got:", response.data.children);
       }
     } catch (error) {
       console.error("Error:", error);
-    } 
+    }
   };
 
   // Call fetchData on component mount
@@ -535,9 +610,7 @@ export const Tablee = ({ data }) => {
     fetchGroups();
   }, []);
   // const [areasValue, setAreasValue] = useState('');
-  const [dropdownOptions, setDropdownOptions] = useState([]);
-  const [areas, setAreas] = useState([]);
-  const [drivers, setDrivers] = useState([]);
+
   useEffect(() => {
     const fetchAreasData = async () => {
       try {
@@ -570,7 +643,6 @@ export const Tablee = ({ data }) => {
     fetchAreasData();
   }, []);
 
- 
   const [drivername, setdrivername] = useState([]);
   const fetchDataDriver = async (startDate = "", endDate = "") => {
     // setLoading(true);
@@ -604,14 +676,15 @@ export const Tablee = ({ data }) => {
             },
           }
         );
-      }else if(role==4){
-        response=await axios.get(`${process.env.REACT_APP_USERBRANCH}/getdriverdata`,
+      } else if (role == 4) {
+        response = await axios.get(
+          `${process.env.REACT_APP_USERBRANCH}/getdriverdata`,
           {
-            headers:{
-              Authorization:`Bearer ${token}`,
+            headers: {
+              Authorization: `Bearer ${token}`,
             },
           }
-        )
+        );
       }
 
       console.log("fetch data", response.data);
@@ -621,24 +694,23 @@ export const Tablee = ({ data }) => {
         const allData =
           role == 1
             ? response?.data.data.flatMap((school) =>
-              school.branches.flatMap((branch) =>
-                Array.isArray(branch.drivers) && branch.drivers.length > 0
-                  ? branch.drivers
-                  : []
+                school.branches.flatMap((branch) =>
+                  Array.isArray(branch.drivers) && branch.drivers.length > 0
+                    ? branch.drivers
+                    : []
+                )
               )
-            )
             : role == 2
-              ? response?.data.branches.flatMap((branch) => branch.drivers)
-              : response?.data.drivers;
-
+            ? response?.data.branches.flatMap((branch) => branch.drivers)
+            : response?.data.drivers;
 
         console.log("drivers : ", allData);
 
         console.log("this is drivers data", allData);
         const driverNames = allData.map((child) => child.driverName);
         // const childNames = response.data; // Replace this with the actual extracted childName array
-      
-        console.log("All driver Names:", driverNames); 
+
+        console.log("All driver Names:", driverNames);
         setDrivers(allData); // If no date range, use all data
         setdrivername(driverNames);
       } else {
@@ -650,7 +722,6 @@ export const Tablee = ({ data }) => {
   };
   const [supervisorsNames, setsupervisorsNames] = useState([]);
   const fetchDatasupervisor = async (startDate = "", endDate = "") => {
-
     try {
       const token = localStorage.getItem("token");
       let response;
@@ -682,14 +753,15 @@ export const Tablee = ({ data }) => {
             },
           }
         );
-      }else if(role==4){
-        response=await axios.get(`${process.env.REACT_APP_USERBRANCH}/readSuperviserBybranchgroupuser`,
+      } else if (role == 4) {
+        response = await axios.get(
+          `${process.env.REACT_APP_USERBRANCH}/readSuperviserBybranchgroupuser`,
           {
-            headers:{
-              Authorization:`Bearer ${token}`,
+            headers: {
+              Authorization: `Bearer ${token}`,
             },
           }
-        )
+        );
       }
 
       console.log("fetch data", response.data); // Log the entire response data
@@ -716,21 +788,18 @@ export const Tablee = ({ data }) => {
 
         console.log("supervisirs", allData);
         const SupervisorsNames = allData.map((child) => child.supervisorName);
-       
+
         setsupervisorsNames(SupervisorsNames);
-        
-       
       } else {
         console.error("Expected an array but got:", response.data.supervisors);
       }
     } catch (error) {
       console.error("Error:", error);
-    } 
+    }
   };
   const [parentsNames, setparentsNames] = useState([]);
   const [selectedParent, setSelectedParent] = useState("");
   const fetchDataparent = async (startDate = "", endDate = "") => {
-   
     try {
       const token = localStorage.getItem("token");
       let response;
@@ -761,14 +830,15 @@ export const Tablee = ({ data }) => {
             },
           }
         );
-      }else if(role==4){
-        response=await axios.get(`${process.env.REACT_APP_USERBRANCH}/getparentbybranchgroup`,
+      } else if (role == 4) {
+        response = await axios.get(
+          `${process.env.REACT_APP_USERBRANCH}/getparentbybranchgroup`,
           {
-            headers:{
-              Authorization:`Bearer ${token}`,
+            headers: {
+              Authorization: `Bearer ${token}`,
             },
           }
-        )
+        );
       }
 
       console.log("fetch data", response.data); // Log the entire response data
@@ -777,28 +847,28 @@ export const Tablee = ({ data }) => {
         const allData =
           role == 1
             ? response?.data.data.flatMap((school) =>
-              school.branches.flatMap((branch) =>
-                Array.isArray(branch.parents) && branch.parents.length > 0
-                  ? branch.parents.map((parent) => ({
-                      ...parent,
-                      schoolName: school.schoolName,
-                      branchName: branch.branchName,
-                    }))
+                school.branches.flatMap((branch) =>
+                  Array.isArray(branch.parents) && branch.parents.length > 0
+                    ? branch.parents.map((parent) => ({
+                        ...parent,
+                        schoolName: school.schoolName,
+                        branchName: branch.branchName,
+                      }))
+                    : []
+                )
+              )
+            : role == 4
+            ? response.data.data.flatMap((item) =>
+                Array.isArray(item.branches) && item.branches.length > 0
+                  ? item.branches.flatMap((branch) =>
+                      Array.isArray(branch.parents) && branch.parents.length > 0
+                        ? branch.parents.map((child) => ({
+                            ...child,
+                          }))
+                        : []
+                    )
                   : []
               )
-            )
-           : role==4
-            ?response.data.data.flatMap((item)=>
-            Array.isArray(item.branches)&&item.branches.length>0?
-            item.branches.flatMap((branch)=>
-            Array.isArray(branch.parents)&&branch.parents.length>0?
-            branch.parents.map((child)=>({
-              ...child
-            }))
-            :[]
-            )
-            :[]
-            )
             : role == 2
             ? response?.data.branches.flatMap((branch) =>
                 Array.isArray(branch.parents) && branch.parents.length > 0
@@ -809,112 +879,116 @@ export const Tablee = ({ data }) => {
 
         console.log(allData);
         const ParentsNames = allData.map((child) => child.parentName);
-       
+
         setparentsNames(ParentsNames);
         // Apply local date filtering if dates are provided
-    
       } else {
         console.error("Expected an array but got:", response.data.parents);
       }
     } catch (error) {
       console.error("Error:", error);
-    } 
+    }
   };
 
   const [selectedGeofence, setSelectedGeofence] = useState("");
 
   const [geofencesNames, setgeofencesNames] = useState([]);
   const fetchDatageofences = async (startDate = "", endDate = "") => {
-
     try {
       const token = localStorage.getItem("token");
       let response;
-      
+
       // Fetch data based on role
       if (role == 1) {
-        response = await axios.get(`${process.env.REACT_APP_SUPER_ADMIN_API}/geofences`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      } else if (role == 2) {
-        response = await axios.get(`${process.env.REACT_APP_SCHOOL_API}/geofences`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      } else if (role == 3) {
-        response = await axios.get(`${process.env.REACT_APP_BRANCH_API}/geofences`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      }else if(role==4){
-        response=await axios.get(`${process.env.REACT_APP_USERBRANCH}/getgeofence`,
+        response = await axios.get(
+          `${process.env.REACT_APP_SUPER_ADMIN_API}/geofences`,
           {
-            headers:{
-              Authorization:`Bearer ${token}`,
+            headers: {
+              Authorization: `Bearer ${token}`,
             },
           }
-        )
+        );
+      } else if (role == 2) {
+        response = await axios.get(
+          `${process.env.REACT_APP_SCHOOL_API}/geofences`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 3) {
+        response = await axios.get(
+          `${process.env.REACT_APP_BRANCH_API}/geofences`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 4) {
+        response = await axios.get(
+          `${process.env.REACT_APP_USERBRANCH}/getgeofence`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
       }
-  
+
       console.log("fetch data geofence", response.data);
       if (response?.data) {
         let allData;
-      
+
         // Logic for role 1: Devices and stops
-        if (role ==1) {
+        if (role == 1) {
           allData = Object.entries(response.data).flatMap(([deviceId, stops]) =>
             stops.map((stop) => ({
               ...stop, // Retain all stop properties
               deviceId, // Add deviceId to each stop
             }))
           );
-      
-        // Logic for role 2: Branches and geofences
+
+          // Logic for role 2: Branches and geofences
         } else if (role == 2) {
-          allData = response?.data?.branches.flatMap(branch => 
-            branch.geofences?.map(geofence => ({
-              ...geofence, // Retain all geofence properties
-              branchId: branch.branchId, // Add branchId to each geofence
-              branchName: branch.branchName, // Add branchName to each geofence
-            })) || [] // Handle the case where geofences is undefined or empty
+          allData = response?.data?.branches.flatMap(
+            (branch) =>
+              branch.geofences?.map((geofence) => ({
+                ...geofence, // Retain all geofence properties
+                branchId: branch.branchId, // Add branchId to each geofence
+                branchName: branch.branchName, // Add branchName to each geofence
+              })) || [] // Handle the case where geofences is undefined or empty
           );
-      
-        // Logic for role 3: Branches and devices
-        } 
-       
-      
-        else if (role == 3) {
+
+          // Logic for role 3: Branches and devices
+        } else if (role == 3) {
           allData = response?.data.geofences.map((geofence) => ({
             ...geofence, // Keep all geofence properties
             branchId: response.data.branchId, // Add branchId from the response
             branchName: response.data.branchName, // Add branchName from the response
             schoolName: response.data.schoolName, // Add schoolName from the response
           }));
-        
+
           console.log(allData);
-        }else if (role == 4) {
-          allData = response?.data?.branches.flatMap(branch =>
-            branch.geofences?.map(geofence => ({
-              ...geofence, // Retain all geofence properties
-              branchId: branch.branchId, // Add branchId to each geofence
-              branchName: branch.branchName, // Add branchName to each geofence
-              
-            })) || [] // Handle the case where geofences is undefined or empty
+        } else if (role == 4) {
+          allData = response?.data?.branches.flatMap(
+            (branch) =>
+              branch.geofences?.map((geofence) => ({
+                ...geofence, // Retain all geofence properties
+                branchId: branch.branchId, // Add branchId to each geofence
+                branchName: branch.branchName, // Add branchName to each geofence
+              })) || [] // Handle the case where geofences is undefined or empty
           );
-          console.log("aa",allData);
+          console.log("aa", allData);
         }
-        
+
         const geofencesNames = allData.map((child) => child.name);
-       
+
         setgeofencesNames(geofencesNames);
-      
       } else {
         console.error("Expected an array but got:", response.data.children);
       }
-    
     } catch (error) {
       console.error("Error:", error);
     }
@@ -926,130 +1000,142 @@ export const Tablee = ({ data }) => {
     fetchDatageofences();
   }, []);
 
-
-
-
   // Handle the search input change
   // const handleSearchChange = (event) => {
   //   setSearchTerm(event.target.value);
   // };
 
   // const [searchTerm, setSearchTerm] = useState("");
-const handleSearchChange = (event) => {
-  setSearchTerm(event.target.value);
-};
-
-const { newAddress } = useSelector((state) => state.address)
-
-const fetchAddress = async (vehicleId, longitude, latitude) => {
-  try {
-    const apiKey = 'DG2zGt0KduHmgSi2kifd' // Replace with your actual MapTiler API key
-    const response = await axios.get(
-      `https://api.maptiler.com/geocoding/${longitude},${latitude}.json?key=${apiKey}`,
-    )
-    // console.log(response)
-    const address =
-      response.data.features.length <= 5
-        ? response.data.features[0].place_name_en
-        : response.data.features[1].place_name_en
-
-    setAddress((prevAddresses) => ({
-      ...prevAddresses,
-      [vehicleId]: address, // Update the specific vehicle's address
-    }))
-  } catch (error) {
-    console.error('Error fetching the address:', error)
-    setAddress((prevAddresses) => ({
-      ...prevAddresses,
-      [vehicleId]: 'Error fetching address',
-    }))
-  }
-}
-
-const setNewAddressForRedux = (address) => {
-  if (address) {
-    dispatch(setNewAddress(address))
-  }
-}
-
-useEffect(() => {
-  setNewAddressForRedux(address)
-}, [address])
-
-useEffect(() => {
-  console.log('filtered vehicle', currentRows)
-  currentRows.forEach((vehicle) => {
-    if (vehicle?.deviceId && vehicle.longitude && vehicle.latitude && !address[vehicle.id]) {
-      // Fetch address only if it's not already fetched for this vehicle
-      fetchAddress(vehicle.deviceId, vehicle.longitude, vehicle.latitude)
-    }
-  })
-  // console.log(address)
-}, [currentRows])
-
-
-//updated by sudesh
-useEffect(() => {
-  const filterData = () => {
-    const now = dayjs(); // current time for calculating offline status
-
-    let filtered = data;
-    switch (assetStatusValue) {
-      case "Running":
-        filtered = data.filter(obj => obj.speed > 2 && obj.speed < 60 && obj.attributes.ignition === true);
-        break;
-      case "Over Speed":
-        filtered = data.filter(obj => obj.speed > 60 && obj.attributes.ignition === true);
-        break;
-      case "Parked":
-        filtered = data.filter(obj => obj.speed < 2 && obj.attributes.ignition === false);
-        break;
-      case "Offline":
-        filtered = data.filter(obj => now.diff(dayjs(obj.lastUpdate), 'hour') > 30 && obj.attributes.ignition === false);
-        break;
-      default: // "All assets"
-        filtered = data;
-    }
-    
-
-    setFilteringData(filtered);
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
   };
 
-  filterData();
-}, [assetStatusValue, data]);
-
-const handleVehicle = (event, newValue) => {
-  setAssetsValue(newValue ? newValue : "All assets");
-  setFilteringData(
-    newValue === "All assets"
-      ? data
-      : data.filter((vehicle) => vehicle.name === newValue)
-  );
-};
 
 
-const navigate = useNavigate()
+  const fetchAddress = async (vehicleId, longitude, latitude) => {
+    try {
+      const apiKey = "DG2zGt0KduHmgSi2kifd"; // Replace with your actual MapTiler API key
+      const response = await axios.get(
+        `https://api.maptiler.com/geocoding/${longitude},${latitude}.json?key=${apiKey}`
+      );
+      // console.log(response)
+      const address =
+        response.data.features.length <= 5
+          ? response.data.features[0].place_name_en
+          : response.data.features[1].place_name_en;
+
+      setAddress((prevAddresses) => ({
+        ...prevAddresses,
+        [vehicleId]: address, // Update the specific vehicle's address
+      }));
+    } catch (error) {
+      console.error("Error fetching the address:", error);
+      setAddress((prevAddresses) => ({
+        ...prevAddresses,
+        [vehicleId]: "Error fetching address",
+      }));
+    }
+  };
+
+  const setNewAddressForRedux = (address) => {
+    if (address) {
+      dispatch(setNewAddress(address));
+    }
+  };
+
+  useEffect(() => {
+    setNewAddressForRedux(address);
+  }, [address]);
+
+  useEffect(() => {
+    console.log("filtered vehicle", currentRows);
+    currentRows.forEach((vehicle) => {
+      if (
+        vehicle?.deviceId &&
+        vehicle.longitude &&
+        vehicle.latitude &&
+        !address[vehicle.id]
+      ) {
+        // Fetch address only if it's not already fetched for this vehicle
+        fetchAddress(vehicle.deviceId, vehicle.longitude, vehicle.latitude);
+      }
+    });
+    // console.log(address)
+  }, [currentRows]);
+
+  //updated by sudesh
+  useEffect(() => {
+    const filterData = () => {
+      const now = dayjs(); // current time for calculating offline status
+
+      let filtered = data;
+      switch (assetStatusValue) {
+        case "Running":
+          filtered = data.filter(
+            (obj) =>
+              obj.speed > 2 &&
+              obj.speed < 60 &&
+              obj.attributes.ignition === true
+          );
+          break;
+        case "Over Speed":
+          filtered = data.filter(
+            (obj) => obj.speed > 60 && obj.attributes.ignition === true
+          );
+          break;
+        case "Parked":
+          filtered = data.filter(
+            (obj) => obj.speed < 2 && obj.attributes.ignition === false
+          );
+          break;
+        case "Offline":
+          filtered = data.filter(
+            (obj) =>
+              now.diff(dayjs(obj.lastUpdate), "hour") > 30 &&
+              obj.attributes.ignition === false
+          );
+          break;
+        default: // "All assets"
+          filtered = data;
+      }
+
+      setFilteringData(filtered);
+    };
+
+    filterData();
+  }, [assetStatusValue, data]);
+
+  const handleVehicle = (event, newValue) => {
+    setAssetsValue(newValue ? newValue : "All assets");
+    setFilteringData(
+      newValue === "All assets"
+        ? data
+        : data.filter((vehicle) => vehicle.name === newValue)
+    );
+  };
+
+  const navigate = useNavigate();
   const handleClickOnTrack = (vehicle) => {
-    console.log('trcak clicked')
-    navigate(`/salesman/${vehicle.deviceId}/${vehicle.category}/${vehicle.name}`)
-  }
-//till here
+    console.log("trcak clicked");
+    navigate(
+      `/salesman/${vehicle.deviceId}/${vehicle.category}/${vehicle.name}`
+    );
+  };
+  //till here
   // const [page, setPage] = useState(0);
   //  const [rowsPerPage, setRowsPerPage] = useState(25);
-const handleChangeRowsPerPage = (event) => {
-  const newRowsPerPage = parseInt(event.target.value, 10);
-  setRowsPerPage(newRowsPerPage === -1 ? sortedData.length : newRowsPerPage); // Set to all rows if -1
-  setPage(0); // Reset to the first page
-};
+  const handleChangeRowsPerPage = (event) => {
+    const newRowsPerPage = parseInt(event.target.value, 10);
+    setRowsPerPage(newRowsPerPage === -1 ? sortedData.length : newRowsPerPage); // Set to all rows if -1
+    setPage(0); // Reset to the first page
+  };
 
-const handleChangePage = (event, newPage) => {
-  setPage(newPage);
-};
-const handleModalClose = () => {
-  
-  setModalOpen(false);
-  
-};
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+  const handleModalClose = () => {
+    setModalOpen(false);
+  };
   return (
     <>
       <div style={{ marginTop: "80px" }}>
@@ -1073,236 +1159,228 @@ const handleModalClose = () => {
               >
                 <InputLabel id="asset-status-label-1">Asset Status</InputLabel>
                 <Select
-        labelId="asset-status-label-1"
-        id="asset-status-select-1"
-        value={assetStatusValue}
-        onChange={(e) => setAssetStatusValue(e.target.value)}
-        label="Select Asset Status"
-      >
-        <MenuItem value="All assets">All assets</MenuItem>
-        <MenuItem value="Running">Running</MenuItem>
-        <MenuItem value="Parked">Parked</MenuItem>
-        <MenuItem value="Over Speed">Over Speed</MenuItem>
-        <MenuItem value="Offline">Offline</MenuItem>
-      </Select>
+                  labelId="asset-status-label-1"
+                  id="asset-status-select-1"
+                  value={assetStatusValue}
+                  onChange={(e) => setAssetStatusValue(e.target.value)}
+                  label="Select Asset Status"
+                >
+                  <MenuItem value="All assets">All assets</MenuItem>
+                  <MenuItem value="Running">Running</MenuItem>
+                  <MenuItem value="Parked">Parked</MenuItem>
+                  <MenuItem value="Over Speed">Over Speed</MenuItem>
+                  <MenuItem value="Offline">Offline</MenuItem>
+                </Select>
               </FormControl>
-            
+
               <FormControl
-  variant="outlined"
-  fullWidth
-  sx={{ width: 250, "& .MuiInputBase-root": { height: 50 } }}
->
-  
-  <Autocomplete
-  aria-placeholder="Select Vehicle"
-        options={["All assets", ...data.map((asset) => asset.name)]}
-        value={assetsValue}
-        onChange={handleVehicle}
-        inputValue={searchItem}
-        onInputChange={(event, newInputValue) => {
-          setSearchItem(newInputValue);
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label="Select Assets"
-            variant="outlined"
-          />
-        )}
-      />
-</FormControl>
-          
-            
-   <FormControl
-  variant="outlined"
-  fullWidth
-  sx={{ width: 250, "& .MuiInputBase-root": { height: 50 } }} // Match the width and height of the Assets dropdown
->
-  <InputLabel id="students-label">Student List</InputLabel>
-  <Select
-    labelId="students-label"
-    id="students-select"
-    value={usersValue}
-    onChange={(e) => setUsersValue(e.target.value)}
-    label="Select Student"
-    MenuProps={{
-      PaperProps: {
-        sx: {
-          maxHeight: 200, // Set max height for dropdown
-          minWidth: 150, // Set minimum width for the dropdown menu
-          "& .MuiMenu-list": {
-            maxWidth: 150, // Limit the max width of the menu items
-             // Enable horizontal scrolling for overflow
-          },
-        },
-      },
-       // sx:{overflowX: "auto",}
-    }}
-  >
-    <MenuItem value="All students">All students</MenuItem>
+                variant="outlined"
+                fullWidth
+                sx={{ width: 250, "& .MuiInputBase-root": { height: 50 } }}
+              >
+                <Autocomplete
+                  aria-placeholder="Select Vehicle"
+                  options={["All assets", ...data.map((asset) => asset.name)]}
+                  value={assetsValue}
+                  onChange={handleVehicle}
+                  inputValue={searchItem}
+                  onInputChange={(event, newInputValue) => {
+                    setSearchItem(newInputValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select Assets"
+                      variant="outlined"
+                    />
+                  )}
+                />
+              </FormControl>
 
-    {/* Dynamically create MenuItems from childrenList */}
-    {childrenList.map((child, index) => (
-      <MenuItem 
-        key={index} 
-        value={child}
-        sx={{ maxWidth: 150 }} // Limit item width and add horizontal scrolling
-      >
-        {child}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
+              <FormControl
+                variant="outlined"
+                fullWidth
+                sx={{ width: 250, "& .MuiInputBase-root": { height: 50 } }} // Match the width and height of the Assets dropdown
+              >
+                <InputLabel id="students-label">Student List</InputLabel>
+                <Select
+                  labelId="students-label"
+                  id="students-select"
+                  value={usersValue}
+                  onChange={(e) => setUsersValue(e.target.value)}
+                  label="Select Student"
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        maxHeight: 200, // Set max height for dropdown
+                        minWidth: 150, // Set minimum width for the dropdown menu
+                        "& .MuiMenu-list": {
+                          maxWidth: 150, // Limit the max width of the menu items
+                          // Enable horizontal scrolling for overflow
+                        },
+                      },
+                    },
+                    // sx:{overflowX: "auto",}
+                  }}
+                >
+                  <MenuItem value="All students">All students</MenuItem>
 
+                  {/* Dynamically create MenuItems from childrenList */}
+                  {childrenList.map((child, index) => (
+                    <MenuItem
+                      key={index}
+                      value={child}
+                      sx={{ maxWidth: 150 }} // Limit item width and add horizontal scrolling
+                    >
+                      {child}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
+              <FormControl
+                variant="outlined"
+                fullWidth
+                sx={{ width: 250, "& .MuiInputBase-root": { height: 50 } }} // Match the width and height
+              >
+                <InputLabel id="drivers-label">Driver List</InputLabel>
+                <Select
+                  labelId="drivers-label"
+                  id="drivers-select"
+                  value={selectedDriver}
+                  onChange={(e) => setSelectedDriver(e.target.value)}
+                  label="Select Driver"
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        maxHeight: 200, // Set max height for dropdown
+                        minWidth: 150, // Set minimum width for the dropdown menu
+                        "& .MuiMenu-list": {
+                          maxWidth: 150, // Limit the max width of the menu items
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="All drivers">All drivers</MenuItem>
 
-            
-            <FormControl
-      variant="outlined"
-      fullWidth
-      sx={{ width: 250, "& .MuiInputBase-root": { height: 50 } }} // Match the width and height
-    >
-      <InputLabel id="drivers-label">Driver List</InputLabel>
-      <Select
-        labelId="drivers-label"
-        id="drivers-select"
-        value={selectedDriver}
-        onChange={(e) => setSelectedDriver(e.target.value)}
-        label="Select Driver"
-        MenuProps={{
-          PaperProps: {
-            sx: {
-              maxHeight: 200, // Set max height for dropdown
-              minWidth: 150, // Set minimum width for the dropdown menu
-              "& .MuiMenu-list": {
-                maxWidth: 150, // Limit the max width of the menu items
-              },
-            },
-          },
-        }}
-      >
-        <MenuItem value="All drivers">All drivers</MenuItem>
+                  {/* Dynamically create MenuItems from drivername list */}
+                  {drivername.map((driver, index) => (
+                    <MenuItem key={index} value={driver}>
+                      {driver}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl
+                variant="outlined"
+                fullWidth
+                sx={{ width: 250, "& .MuiInputBase-root": { height: 50 } }} // Match the width and height
+              >
+                <InputLabel id="supervisors-label">Supervisor List</InputLabel>
+                <Select
+                  labelId="supervisors-label"
+                  id="supervisors-select"
+                  value={selectedSupervisor}
+                  onChange={(e) => setSelectedSupervisor(e.target.value)}
+                  label="Select Supervisor"
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        maxHeight: 200, // Set max height for dropdown
+                        minWidth: 150, // Set minimum width for the dropdown menu
+                        "& .MuiMenu-list": {
+                          maxWidth: 150, // Limit the max width of the menu items
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="All supervisors">All Supervisors</MenuItem>
 
-        {/* Dynamically create MenuItems from drivername list */}
-        {drivername.map((driver, index) => (
-          <MenuItem key={index} value={driver}>
-            {driver}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-    <FormControl
-      variant="outlined"
-      fullWidth
-      sx={{ width: 250, "& .MuiInputBase-root": { height: 50 } }} // Match the width and height
-    >
-      <InputLabel id="supervisors-label">Supervisor List</InputLabel>
-      <Select
-        labelId="supervisors-label"
-        id="supervisors-select"
-        value={selectedSupervisor}
-        onChange={(e) => setSelectedSupervisor(e.target.value)}
-        label="Select Supervisor"
-        MenuProps={{
-          PaperProps: {
-            sx: {
-              maxHeight: 200, // Set max height for dropdown
-              minWidth: 150, // Set minimum width for the dropdown menu
-              "& .MuiMenu-list": {
-                maxWidth: 150, // Limit the max width of the menu items
-              },
-            },
-          },
-        }}
-      >
-        <MenuItem value="All supervisors">All Supervisors</MenuItem>
+                  {/* Dynamically create MenuItems from supervisorsNames list */}
+                  {supervisorsNames.map((supervisor, index) => (
+                    <MenuItem key={index} value={supervisor}>
+                      {supervisor}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-        {/* Dynamically create MenuItems from supervisorsNames list */}
-        {supervisorsNames.map((supervisor, index) => (
-          <MenuItem key={index} value={supervisor}>
-            {supervisor}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-            
- <FormControl
-      variant="outlined"
-      fullWidth
-      sx={{ width: 250, "& .MuiInputBase-root": { height: 50 } }}
-    >
-      <InputLabel id="parents-label">Parent List</InputLabel>
-      <Select
-        labelId="parents-label"
-        id="parents-select"
-        value={selectedParent}
-        onChange={(e) => setSelectedParent(e.target.value)}
-        label="Select Parent"
-        MenuProps={{
-          PaperProps: {
-            sx: {
-              maxHeight: 200,
-              minWidth: 150,
-              "& .MuiMenu-list": {
-                maxWidth: 150,
-              },
-            },
-          },
-        }}
-      >
-        <MenuItem value="">All parents</MenuItem>
+              <FormControl
+                variant="outlined"
+                fullWidth
+                sx={{ width: 250, "& .MuiInputBase-root": { height: 50 } }}
+              >
+                <InputLabel id="parents-label">Parent List</InputLabel>
+                <Select
+                  labelId="parents-label"
+                  id="parents-select"
+                  value={selectedParent}
+                  onChange={(e) => setSelectedParent(e.target.value)}
+                  label="Select Parent"
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        maxHeight: 200,
+                        minWidth: 150,
+                        "& .MuiMenu-list": {
+                          maxWidth: 150,
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="">All parents</MenuItem>
 
-        {/* Dynamically create MenuItems from parentsNames list */}
-        {parentsNames.map((parent, index) => (
-          <MenuItem key={index} value={parent}>
-            {parent}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-             
-               <FormControl
-      variant="outlined"
-      fullWidth
-      sx={{
-        width: 250,
-        "& .MuiInputBase-root": { height: 50 },
-        marginBottom: 2,
-      }}
-    >
-      <InputLabel id="geofences-label">Geofence List</InputLabel>
-      <Select
-        labelId="geofences-label"
-        id="geofences-select"
-        value={selectedGeofence}
-        onChange={(e) => setSelectedGeofence(e.target.value)}
-        label="Select Geofence"
-        MenuProps={{
-          PaperProps: {
-            sx: {
-              maxHeight: 200,
-              minWidth: 150,
-               marginBottom: 2,
-              "& .MuiMenu-list": {
-                maxWidth: 150,
-              },
-            },
-          },
-        }}
-      >
-        <MenuItem value="">All geofences</MenuItem>
+                  {/* Dynamically create MenuItems from parentsNames list */}
+                  {parentsNames.map((parent, index) => (
+                    <MenuItem key={index} value={parent}>
+                      {parent}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-      
-        {geofencesNames.map((geofence, index) => (
-          <MenuItem key={index} value={geofence}>
-            {geofence}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
+              <FormControl
+                variant="outlined"
+                fullWidth
+                sx={{
+                  width: 250,
+                  "& .MuiInputBase-root": { height: 50 },
+                  marginBottom: 2,
+                }}
+              >
+                <InputLabel id="geofences-label">Geofence List</InputLabel>
+                <Select
+                  labelId="geofences-label"
+                  id="geofences-select"
+                  value={selectedGeofence}
+                  onChange={(e) => setSelectedGeofence(e.target.value)}
+                  label="Select Geofence"
+                  MenuProps={{
+                    PaperProps: {
+                      sx: {
+                        maxHeight: 200,
+                        minWidth: 150,
+                        marginBottom: 2,
+                        "& .MuiMenu-list": {
+                          maxWidth: 150,
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <MenuItem value="">All geofences</MenuItem>
+
+                  {geofencesNames.map((geofence, index) => (
+                    <MenuItem key={index} value={geofence}>
+                      {geofence}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </div>
-
-          
           </>
         )}
 
@@ -1310,7 +1388,6 @@ const handleModalClose = () => {
         {individualMap ? (
           <IndividualGooglemap
             latitude={latitude}
-
             longitude={longitude}
             setIndividualMap={setIndividualMap}
             style={{ width: "100%" }}
@@ -1350,9 +1427,7 @@ const handleModalClose = () => {
               justifyContent: "center",
               alignItems: "center",
             }}
-          >
-           
-          </div>
+          ></div>
           {/* Horizontal line added here */}
         </>
       )}
@@ -1373,29 +1448,29 @@ const handleModalClose = () => {
               marginBottom: "10px",
             }}
           >
-           <TextField
-  label="Search"
-  variant="outlined"
-  value={searchTerm}
-  onChange={handleSearchChange}
-  sx={{
-    width: '250px', // Adjust width as needed
-    "& .MuiInputBase-root": { height: 40 },
-  }}
-  InputProps={{
-    startAdornment: (
-      <SearchIcon
-        style={{
-          cursor: 'pointer',
-          marginLeft: '8px', // Adjusted margin for better alignment
-        }}
-      />
-    ),
-  }}
-/>
+            <TextField
+              label="Search"
+              variant="outlined"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              sx={{
+                width: "250px", // Adjust width as needed
+                "& .MuiInputBase-root": { height: 40 },
+              }}
+              InputProps={{
+                startAdornment: (
+                  <SearchIcon
+                    style={{
+                      cursor: "pointer",
+                      marginLeft: "8px", // Adjusted margin for better alignment
+                    }}
+                  />
+                ),
+              }}
+            />
 
             {/* Wrapping both buttons in a div */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
               <Button
                 variant="contained"
                 onClick={() => setModalOpen(true)}
@@ -1410,18 +1485,7 @@ const handleModalClose = () => {
               >
                 Manage Columns
               </Button>
-{/* <div>
-  {Object.keys(visibleColumns).map((column) => (
-    <label key={column}>
-      <input
-        type="checkbox"
-        checked={visibleColumns[column]}
-        onChange={() => toggleColumnVisibility(column)}
-      />
-      {column}
-    </label>
-  ))}
-</div> */}
+
               <Button
                 variant="contained"
                 color="primary"
@@ -1444,7 +1508,6 @@ const handleModalClose = () => {
               </Button>
             </div>
           </div>
-
         )}
 
         {/* {individualMap ? <></> : <hr />} */}
@@ -1453,9 +1516,14 @@ const handleModalClose = () => {
         {individualMap ? (
           <></>
         ) : (
-          <div style={{ display: "flex", justifyContent: "center", flexDirection:'column'}}>
-            <div className="paper"
-           >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              flexDirection: "column",
+            }}
+          >
+            <div className="paper">
               <CTable
                 className="my-3 border vehiclesTable mt-0"
                 hover
@@ -1467,8 +1535,8 @@ const handleModalClose = () => {
                 }}
               >
                 <CTableHead
-                //  stickyHeader
-                // aria-label="sticky table"
+                  //  stickyHeader
+                  // aria-label="sticky table"
                   className="text-nowrap "
                   style={{
                     position: "sticky",
@@ -1477,442 +1545,555 @@ const handleModalClose = () => {
                   }}
                 >
                   <CTableRow>
-                  {visibleColumns.srNo && ( <CTableHeaderCell
-                      className="text-center sr-no table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                      }}
-                    >
-                      Sr No.
-                    </CTableHeaderCell>  )}
-                    {visibleColumns.vehicle  && ( <CTableHeaderCell
-                      className="text-center vehicle table-cell headCell"
-                      style={{ position: 'sticky', top: 0 }}
-                    >
-                      Vehicle
-                    </CTableHeaderCell> )}
+                    {visibleColumns.srNo && (
+                      <CTableHeaderCell
+                        className="text-center sr-no table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                        }}
+                      >
+                        Sr No.
+                      </CTableHeaderCell>
+                    )}
+                    {visibleColumns.vehicle && (
+                      <CTableHeaderCell
+                        className="text-center vehicle table-cell headCell"
+                        style={{ position: "sticky", top: 0 }}
+                      >
+                        Vehicle
+                      </CTableHeaderCell>
+                    )}
 
-                    {visibleColumns.deviceName  && (  <CTableHeaderCell
-                      className="text-center device-name table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                      }}
-                    >
-                      Device Name
-                    </CTableHeaderCell>)}
+                    {visibleColumns.deviceName && (
+                      <CTableHeaderCell
+                        className="text-center device-name table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                        }}
+                        onClick={() => handleSort("deviceName")}
+                      >
+                        Device Name
+                        {sortBy === "deviceName" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
+                      </CTableHeaderCell>
+                    )}
 
-                    {visibleColumns.address &&(<CTableHeaderCell
-                      className="text-center address table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                        width: "25%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Address
-                    </CTableHeaderCell>)}
+                    {visibleColumns.address && (
+                      <CTableHeaderCell
+                        className="text-center address table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                          width: "25%",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                        onClick={() => handleSort('address')}
+                      >
+                        Address
+                        {sortBy === 'address' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                      </CTableHeaderCell>
+                    )}
 
-                    {visibleColumns.driver &&(<CTableHeaderCell
-                      className="text-center address table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                        width: "25%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Driver
-                    </CTableHeaderCell>)}
+                    {visibleColumns.driver && (
+                      <CTableHeaderCell
+                        className="text-center address table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                          width: "25%",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                        onClick={() => handleSort('driver')}
+                      >
+                        Driver
+                        {sortBy === 'driver' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                      </CTableHeaderCell>
+                    )}
 
-                    {visibleColumns.lastUpdate &&(<CTableHeaderCell
-                      className="text-center last-update table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                        width: "25%",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      Last Update
-                    </CTableHeaderCell>)}
+                    {visibleColumns.lastUpdate && (
+                      <CTableHeaderCell
+                        className="text-center last-update table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                          width: "25%",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                        onClick={() => handleSort('lastUpdate')}
+                      >
+                        Last Update
+                        {sortBy === 'lastUpdate' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                      </CTableHeaderCell>
+                    )}
 
-                    
+                    {visibleColumns.speed && (
+                      <CTableHeaderCell
+                        className="text-center speed table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                        }}
+                        onClick={() => handleSort('speed')}
+                      >
+                        Sp
+                        {sortBy === 'speed' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                      </CTableHeaderCell>
+                    )}
 
-                    {visibleColumns.speed&&(<CTableHeaderCell
-                      className="text-center speed table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                      }}
-                    >
-                      Sp
-                    </CTableHeaderCell>)}
+                    {visibleColumns.distance && (
+                      <CTableHeaderCell
+                        className="text-center distance table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                        }}
+                        onClick={() => handleSort('distance')}
+                      >
+                        Distance
+                        {sortBy === 'distance' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                      </CTableHeaderCell>
+                    )}
 
-                    {visibleColumns.distance &&(<CTableHeaderCell
-                      className="text-center distance table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                      }}
-                    >
-                      Distance
-                    </CTableHeaderCell>)}
+                    {visibleColumns.satellite && (
+                      <CTableHeaderCell
+                        className="text-center satellite table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                        }}
+                        onClick={() => handleSort('satellite')}
+                      >
+                        Sat
+                        {sortBy === 'satellite' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                      </CTableHeaderCell>
+                    )}
 
-                  
+                    {visibleColumns.ignition && (
+                      <CTableHeaderCell
+                        className="text-center ignition table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                        }}
+                        onClick={() => handleSort('ignition')}
+                      >
+                        Ig
+                        {sortBy === 'ignition' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                      </CTableHeaderCell>
+                    )}
 
-                    {visibleColumns.satellite &&(<CTableHeaderCell
-                      className="text-center satellite table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                      }}
-                    >
-                      Sat
-                    </CTableHeaderCell>)}
+                    {visibleColumns.gps && (
+                      <CTableHeaderCell
+                        className="text-center gps table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                        }}
+                        onClick={() => handleSort('gps')}
+                      >
+                        GPS
+                        {sortBy === 'gps' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                      </CTableHeaderCell>
+                    )}
 
-                    {visibleColumns.ignition &&(<CTableHeaderCell
-                      className="text-center ignition table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                      }}
-                    >
-                      Ig
-                    </CTableHeaderCell>)}
+                    {visibleColumns.power && (
+                      <CTableHeaderCell
+                        className="text-center power table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                        }}
+                        onClick={() => handleSort('power')}
+                      >
+                        Power
+                        {sortBy === 'power' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                      </CTableHeaderCell>
+                    )}
 
-                    {visibleColumns.gps&&(<CTableHeaderCell
-                      className="text-center gps table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                      }}
-                    >
-                      GPS
-                    </CTableHeaderCell>)}
-
-                    {visibleColumns.power &&(<CTableHeaderCell
-                      className="text-center power table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                      }}
-                    >
-                      Power
-                    </CTableHeaderCell>)}
-
-                    {visibleColumns.track &&(<CTableHeaderCell
-                      className="text-center status table-cell headCell"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                        width: "15%",
-                      }}
-                    >
-                      Track
-                    </CTableHeaderCell>)}
+                    {visibleColumns.track && (
+                      <CTableHeaderCell
+                        className="text-center status table-cell headCell"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                          width: "15%",
+                        }}
+                        onClick={() => handleSort('track')}
+                      >
+                        Track
+                        {sortBy === 'track' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                      </CTableHeaderCell>
+                    )}
                   </CTableRow>
                 </CTableHead>
-               
-                <CTableBody >
-                  {currentRows.map((item, index) => (
+
+                <CTableBody>
+                  {sortedRows.map((item, index) => (
                     <CTableRow
                       key={index}
                       className={`table-row collapsed trans`}
                       onDoubleClick={() => handleRowDoubleClick(item)}
                     >
                       {/* Sr No. */}
-                      {visibleColumns.srNo &&(<CTableDataCell className="text-center sr-no table-cell">
-                        {index + 1}
-                      </CTableDataCell>)}
+                      {visibleColumns.srNo && (
+                        <CTableDataCell className="text-center sr-no table-cell">
+                          {index + 1}
+                        </CTableDataCell>
+                      )}
 
-                      {visibleColumns.vehicle &&  (<CTableDataCell className="text-center vehicle table-cell">
-                        <div>
+                      {visibleColumns.vehicle && (
+                        <CTableDataCell className="text-center vehicle table-cell">
+                          <div>
+                            <img
+                              src={busY}
+                              className="dashimg upperdata"
+                              alt="vehicle"
+                            />
+                          </div>
+                        </CTableDataCell>
+                      )}
 
-                          <img
-                            src={busY}
-                            className="dashimg upperdata"
-                            alt="vehicle"
-                          />
-
-                        </div>
-
-                      </CTableDataCell>)}
-
-                      {visibleColumns.deviceName &&(<CTableDataCell className="device-name table-cell n text-center">
-                        {(() => {
-                          // const device = salesman.find((device) => device.id === item.deviceId)
-                          if (item && item.name) {
-                            const nameParts = item.name.split(" ");
-                            const firstWord = nameParts[0];
-                            const remainingWords = nameParts.slice(1).join(" "); // Join remaining words
-
-                            return (
-                              <>
-                                <div className="upperdata">
-                                  <div>{firstWord}</div>{" "}
-                                  {/* First word on the first line */}
-                                  {remainingWords && (
-                                    <div>{remainingWords}</div>
-                                  )}{" "}
-                                  {/* Remaining words on the second line if present */}
-                                </div>
-                              </>
-                            );
-                          }
-                          return <div className="upperdata">Unknown</div>;
-                        })()}
-                      </CTableDataCell>)}
-
-                     
-                  
-                      {visibleColumns.address &&(<CTableDataCell
-  className="text-center address table-cell"
-  style={{ width: "18rem" }}
->
-  <div
-    className="upperdata"
-    style={{
-      fontSize: "0.7rem",
-      wordWrap: "break-word", // Ensures long words break to fit within the container
-      overflowWrap: "break-word", // Provides compatibility for older browsers
-      whiteSpace: "normal", // Allows text wrapping instead of keeping it on a single line
-    }}
-  >
-    {newAddress[item.deviceId] || 'Loading...'}
-  </div>
-</CTableDataCell>)}
-
-{visibleColumns.driver &&(<CTableDataCell
-                        className="text-center address table-cell"
-                        style={{ width: "20rem" }}
-                      >
-                        <div className="upperdata" style={{ fontSize: "1rem" }}>
+                      {visibleColumns.deviceName && (
+                        <CTableDataCell className="device-name table-cell n text-center">
                           {(() => {
-                            // Find the driver based on the matching deviceId from item
-                            const driver = drivers.find(driver => driver.deviceId == item.deviceId);
+                            // const device = salesman.find((device) => device.id === item.deviceId)
+                            if (item && item.name) {
+                              const nameParts = item.name.split(" ");
+                              const firstWord = nameParts[0];
+                              const remainingWords = nameParts
+                                .slice(1)
+                                .join(" "); // Join remaining words
 
-                            // Return driver name or "N/A" if not found
-                            return driver ? driver.driverName : "N/A";
+                              return (
+                                <>
+                                  <div className="upperdata">
+                                    <div>{firstWord}</div>{" "}
+                                    {/* First word on the first line */}
+                                    {remainingWords && (
+                                      <div>{remainingWords}</div>
+                                    )}{" "}
+                                    {/* Remaining words on the second line if present */}
+                                  </div>
+                                </>
+                              );
+                            }
+                            return <div className="upperdata">Unknown</div>;
                           })()}
-                        </div>
-                      </CTableDataCell>)}
-                      {/* {visibleColumns.lastUpdate && ( */}
-                      {visibleColumns.lastUpdate &&(<CTableDataCell className="text-center last-update table-cell">
-                        {(() => {
-                          // const device = salesman.find((device) => device.id === item.deviceId)
-                          if (item && item.lastUpdate) {
-                            const date = dayjs(item.lastUpdate).format(
-                              "YYYY-MM-DD"
-                            ); // Format date
-                            const time = dayjs(item.lastUpdate).format(
-                              "HH:mm:ss"
-                            ); // Format time
-                            return (
-                              <div className="upperdata ld">
-                                <div>{date}</div> {/* Date on one line */}
-                                <div>{time}</div> {/* Time on the next line */}
-                              </div>
-                            );
-                          }
-                          return <div>N/A</div>;
-                        })()}
-                      </CTableDataCell>)}
-                     
-                      {visibleColumns.speed &&(<CTableDataCell className="text-center sp speed table-cell">
-                        <div className="upperdata">{`${Math.round(
-                          item.speed
-                        )} kmph`}</div>
-                      </CTableDataCell>)}
-                      {/* )} */}
-                      {/* {visibleColumns.distance && ( */}
-                      {visibleColumns.distance &&(<CTableDataCell className="text-center d distance table-cell">
-                        {`${Math.round(item.attributes.distance)} km`}
-                      </CTableDataCell>)}
+                        </CTableDataCell>
+                      )}
 
-                     
-                      {visibleColumns.satellite &&(<CTableDataCell className="text-center satelite table-cell">
-                        <div
-                          style={{
-                            position: "relative",
-                            display: "inline-block",
-                          }}
+                      {visibleColumns.address && (
+                        <CTableDataCell
+                          className="text-center address table-cell"
+                          style={{ width: "18rem" }}
                         >
-                          <MdGpsNotFixed style={{ fontSize: "1.6rem" }} />{" "}
-                          {/* Adjust icon size as needed */}
-                          <span
+                          <div
+                            className="upperdata"
                             style={{
-                              position: "absolute",
-                              top: "50%",
-                              left: "49%",
-                              transform: "translate(-50%, -50%)",
-                              fontSize: "0.8rem", // Adjust text size
-                              color: "black",
-                              fontWeight: "bold",
+                              fontSize: "0.7rem",
+                              wordWrap: "break-word", // Ensures long words break to fit within the container
+                              overflowWrap: "break-word", // Provides compatibility for older browsers
+                              whiteSpace: "normal", // Allows text wrapping instead of keeping it on a single line
                             }}
                           >
-                            {item.attributes.sat}
-                          </span>
-                        </div>
-                      </CTableDataCell>)}
+                            {newAddress[item.deviceId] || "Loading..."}
+                          </div>
+                        </CTableDataCell>
+                      )}
+
+                      {visibleColumns.driver && (
+                        <CTableDataCell
+                          className="text-center address table-cell"
+                          style={{ width: "20rem" }}
+                        >
+                          <div
+                            className="upperdata"
+                            style={{ fontSize: "1rem" }}
+                          >
+                            {(() => {
+                              // Find the driver based on the matching deviceId from item
+                              const driver = drivers.find(
+                                (driver) => driver.deviceId == item.deviceId
+                              );
+
+                              // Return driver name or "N/A" if not found
+                              return driver ? driver.driverName : "N/A";
+                            })()}
+                          </div>
+                        </CTableDataCell>
+                      )}
+                      {/* {visibleColumns.lastUpdate && ( */}
+                      {visibleColumns.lastUpdate && (
+                        <CTableDataCell className="text-center last-update table-cell">
+                          {(() => {
+                            // const device = salesman.find((device) => device.id === item.deviceId)
+                            if (item && item.lastUpdate) {
+                              const date = dayjs(item.lastUpdate).format(
+                                "YYYY-MM-DD"
+                              ); // Format date
+                              const time = dayjs(item.lastUpdate).format(
+                                "HH:mm:ss"
+                              ); // Format time
+                              return (
+                                <div className="upperdata ld">
+                                  <div>{date}</div> {/* Date on one line */}
+                                  <div>{time}</div>{" "}
+                                  {/* Time on the next line */}
+                                </div>
+                              );
+                            }
+                            return <div>N/A</div>;
+                          })()}
+                        </CTableDataCell>
+                      )}
+
+                      {visibleColumns.speed && (
+                        <CTableDataCell className="text-center sp speed table-cell">
+                          <div className="upperdata">{`${Math.round(
+                            item.speed
+                          )} kmph`}</div>
+                        </CTableDataCell>
+                      )}
+                      {/* )} */}
+                      {/* {visibleColumns.distance && ( */}
+                      {visibleColumns.distance && (
+                        <CTableDataCell className="text-center d distance table-cell">
+                          {`${Math.round(item.attributes.distance)} km`}
+                        </CTableDataCell>
+                      )}
+
+                      {visibleColumns.satellite && (
+                        <CTableDataCell className="text-center satelite table-cell">
+                          <div
+                            style={{
+                              position: "relative",
+                              display: "inline-block",
+                            }}
+                          >
+                            <MdGpsNotFixed style={{ fontSize: "1.6rem" }} />{" "}
+                            {/* Adjust icon size as needed */}
+                            <span
+                              style={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "49%",
+                                transform: "translate(-50%, -50%)",
+                                fontSize: "0.8rem", // Adjust text size
+                                color: "black",
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {item.attributes.sat}
+                            </span>
+                          </div>
+                        </CTableDataCell>
+                      )}
                       {/* // )} */}
-                      {visibleColumns.ignition &&(<CTableDataCell className="text-center ignition table-cell">
-                        {(() => {
-                          const { ignition } = item.attributes;
+                      {visibleColumns.ignition && (
+                        <CTableDataCell className="text-center ignition table-cell">
+                          {(() => {
+                            const { ignition } = item.attributes;
 
-                          let iconColor = "gray"; // Default color
-                          let iconText = "N/A"; // Default text
+                            let iconColor = "gray"; // Default color
+                            let iconText = "N/A"; // Default text
 
-                          if (ignition) {
-                            iconColor = "green";
-                            iconText = "On";
-                          } else if (ignition === false) {
-                            iconColor = "red";
-                            iconText = "Off";
-                          }
+                            if (ignition) {
+                              iconColor = "green";
+                              iconText = "On";
+                            } else if (ignition === false) {
+                              iconColor = "red";
+                              iconText = "Off";
+                            }
 
-                          return (
-                            <div
-                              style={{ color: iconColor, fontSize: "1.1rem" }}
-                            >
-                              <PiEngineFill />
-                            </div>
-                          );
-                        })()}
-                      </CTableDataCell>)}
+                            return (
+                              <div
+                                style={{ color: iconColor, fontSize: "1.1rem" }}
+                              >
+                                <PiEngineFill />
+                              </div>
+                            );
+                          })()}
+                        </CTableDataCell>
+                      )}
                       {/* {visibleColumns.gps && ( */}
-                      {visibleColumns.gps &&(<CTableDataCell className="text-center gps table-cell">
-                        {(() => {
-                          const { valid } = item;
+                      {visibleColumns.gps && (
+                        <CTableDataCell className="text-center gps table-cell">
+                          {(() => {
+                            const { valid } = item;
 
-                          let iconColor = "gray"; // Default color
-                          let iconText = "N/A"; // Default text
+                            let iconColor = "gray"; // Default color
+                            let iconText = "N/A"; // Default text
 
-                          if (valid) {
-                            iconColor = "green";
-                            iconText = "On";
-                          } else if (valid === false) {
-                            iconColor = "red";
-                            iconText = "Off";
-                          }
+                            if (valid) {
+                              iconColor = "green";
+                              iconText = "On";
+                            } else if (valid === false) {
+                              iconColor = "red";
+                              iconText = "Off";
+                            }
 
-                          return (
-                            <div
-                              style={{ color: iconColor, fontSize: "1.1rem" }}
-                            >
-                              <MdGpsFixed />
-                            </div>
-                          );
-                        })()}
-                      </CTableDataCell>)}
+                            return (
+                              <div
+                                style={{ color: iconColor, fontSize: "1.1rem" }}
+                              >
+                                <MdGpsFixed />
+                              </div>
+                            );
+                          })()}
+                        </CTableDataCell>
+                      )}
                       {/* )} */}
                       {/* {visibleColumns.power && ( */}
-                      {visibleColumns.power &&(<CTableDataCell className="text-center power table-cell">
-                        {(() => {
-                          const power = item.attributes.battery;
+                      {visibleColumns.power && (
+                        <CTableDataCell className="text-center power table-cell">
+                          {(() => {
+                            const power = item.attributes.battery;
 
-                          let iconColor = "gray"; // Default color
-                          let iconText = "N/A"; // Default text
+                            let iconColor = "gray"; // Default color
+                            let iconText = "N/A"; // Default text
 
-                          if (power) {
-                            iconColor = "green";
-                            iconText = "On";
-                          } else if (power === false) {
-                            iconColor = "red";
-                            iconText = "Off";
-                          }
+                            if (power) {
+                              iconColor = "green";
+                              iconText = "On";
+                            } else if (power === false) {
+                              iconColor = "red";
+                              iconText = "Off";
+                            }
 
-                          return (
-                            <div
-                              style={{ color: iconColor, fontSize: "1.2rem" }}
-                            >
-                              <IoMdBatteryCharging />
-                            </div>
-                          );
-                        })()}
-                      </CTableDataCell>)}
+                            return (
+                              <div
+                                style={{ color: iconColor, fontSize: "1.2rem" }}
+                              >
+                                <IoMdBatteryCharging />
+                              </div>
+                            );
+                          })()}
+                        </CTableDataCell>
+                      )}
                       {/* )} */}
-                      {visibleColumns.track &&(<CTableDataCell className="text-center status table-cell">
-                        <button
-                          className="btn btn-primary"
-                        onClick={() => handleClickOnTrack(item)}
-                        >
-                          Live Track
-                        </button>
-                      </CTableDataCell>)}
+                      {visibleColumns.track && (
+                        <CTableDataCell className="text-center status table-cell">
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => handleClickOnTrack(item)}
+                          >
+                            Live Track
+                          </button>
+                        </CTableDataCell>
+                      )}
                     </CTableRow>
                   ))}
                 </CTableBody>
-                
               </CTable>
-
-              
             </div>
             <StyledTablePagination>
-                <TablePagination
-                  rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-                  component="div"
-                  count={sortedData.length}
-                  rowsPerPage={rowsPerPage == sortedData.length ? -1 : rowsPerPage}
-                  page={page}
-                  onPageChange={(event, newPage) => {
-                    console.log("Page changed:", newPage);
-                    handleChangePage(event, newPage);
-                  }}
-                  onRowsPerPageChange={(event) => {
-                    console.log("Rows per page changed:", event.target.value);
-                    handleChangeRowsPerPage(event);
-                  }}
-                />
-              </StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[
+                  { label: "All", value: -1 },
+                  10,
+                  25,
+                  100,
+                  1000,
+                ]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={
+                  rowsPerPage == sortedData.length ? -1 : rowsPerPage
+                }
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
           </div>
         )}
 
-      
-
-<Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-            {/* <h2></h2> */}
+        <Modal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 500, // Increased width for better spacing
+              height: 400, // Defined height
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Modal Header */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
-          {/* Checkbox for column visibility */}
-          <div style={{ marginBottom: '12px', display: 'flex',flexDirection:'column' }}>
-  {Object.keys(visibleColumns).map((column) => (
-    <label key={column}>
-      <input
-        type="checkbox"
-        checked={visibleColumns[column]}
-        onChange={() => toggleColumnVisibility(column)}
-      />
-      {column}
-    </label>
-  ))}
-</div>
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "20px",
+              }}
+            >
+              <Typography variant="h6">Column Visibility</Typography>
+              <IconButton onClick={() => setModalOpen(false)}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+
+            {/* Content Section with Two-Part Layout */}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr", // Two equal columns
+                gap: 2, // Space between columns
+                overflowY: "auto", // Scrollable if content overflows
+              }}
+            >
+              {Object.keys(visibleColumns).map((column, index) => (
+                <Box
+                  key={column}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "10px",
+                    borderRadius: 1,
+                    backgroundColor: "grey.100",
+                  }}
+                >
+                  <Typography sx={{ fontSize: "0.9rem", fontWeight: "500" }}>
+                    {column}
+                  </Typography>
+                  <Switch
+                    checked={visibleColumns[column]}
+                    onChange={() => toggleColumnVisibility(column)}
+                    color="primary"
+                  />
+                </Box>
+              ))}
+            </Box>
           </Box>
-          </Modal>
+        </Modal>
+
         <Modal
           open={assetDetailsModalOpen}
           onClose={() => setAssetDetailsModalOpen(false)}
@@ -2004,7 +2185,6 @@ const handleModalClose = () => {
             </Grid>
           </Box>
         </Modal>
-       
       </div>
     </>
   );

@@ -88,10 +88,7 @@ const pages = [
       { name: 'Dashboard', icon: <DashboardIcon /> }
     ]
   },
-  // { title: 'Master', icon: <DriveEtaIcon />, arr: ['Server','Device','Groups','Assets','School', 'Assets Type','Assets Command','Assets Category','Assets Class','Assets Group','Users','Assets URL','User Profile','Users Assets Mapping','User Menu Master','Import Location','Assets Division','Assets Owner','Driver Master','Over speed setting','Device Settings','Geo Data', 'Landmark Group','Commands','Top Main Menu Master','Import Trip','Top Menu Master','Broker','Address Book','Main Menu Master','Address Book Group','User Display Settings','RFID','Telecom Master','Landmark Images','Landmark Waypoints','Emails'] },
-  // { title: 'Masterupdated', icon: <DriveEtaIcon />, arr: ['Preferences', 'Notifications', 'Account', 'Devices', 'Geofences', 'Groups', 'Drivers', 'Calendars', 'Computed Attributes', 'Maintenance', 'Saved Commands', 'Server', 'Userrr'] },
-
-  // { title: 'School', icon: <SchoolIcon />, arr: ['Student Detail', 'Geofence', 'Pickup And Drop List', 'Absent', 'Present', 'Leave', 'Status', 'Approved Request', 'Denied Request'] },
+ 
   { 
     title: 'School', 
     icon: <SchoolIcon />, 
@@ -142,11 +139,7 @@ const pages = [
     ]
   },
   
-  // // { title: 'Geofencing', icon: <DriveEtaIcon />, arr: ['Create Landmark', 'Edit Landmarks','Create Route','Edit Routes','Create Area','Edit Areas','Create Zone','Edit Zones','Trips'] },
-  //  { title: 'Reports', icon: <BarChartIcon />, arr: ['Summary', 'Stop Report', 'Area In/Out Report', 'Area Report', 'Landmark Distance', 'Landmark Report', 'Location Wise Distance', 'Distance Report', 'Run Report', 'Distance Graph', 'Speed Graph', 'Trip Report', 'All Point Report','RFID','Distance Between Report','Vehicle Average','Alerts','Data Logs','AC Report', 'Petrolling Report','Bin Details Report','ETA details report','ETA details'] },
-  // { title: 'Reports', icon: <BarChartIcon />, arr: ['Device Status', 'Route', 'Event', 'Trips', 'Stops', 'Summary', 'Statistics'] },
-  // // {title: 'Institutestudent', icon: <BarChartIcon />, arr: ['Combined1','Route1','Events1','Trips1','Stops1','Summary1','Statistics1','Newdemo',"New2","Server2"]}
-  // { title: 'Maintenance', icon: <SettingsIcon />, arr: ['Search','Add maintenance','Type of operation','Custom Profile'] },
+  
 ];
 
 export const Navbar = (props) => {
@@ -210,6 +203,11 @@ export const Navbar = (props) => {
 
   
   const handleNavClick = (arr, title) => {
+    if (title === "Home") {
+      props.onHomeClick(); // Directly trigger Dashboard
+      props.propBool(false);
+      return; // Exit early to prevent sidebar from opening
+    }
     console.log("Role:", role);
     console.log("Original Array:", arr);
     console.log("Title:", title);
@@ -242,7 +240,7 @@ export const Navbar = (props) => {
     props.propBool(true);
     setSelectedPage(title);
   };
-  
+
   const handleRedAlert = () => {
     setOpenModal(true);
   }
@@ -462,11 +460,8 @@ export const Navbar = (props) => {
                 </div>
               </Tooltip>
             </CHeaderNav>
-            {/* <Tooltip title='Red Zone Alert'>
-              <IconButton sx={{ p: 0 }} onClick={handleRedAlert}>
-                <ReportProblemOutlinedIcon style={{ color: 'red', marginRight: 10 }} />
-              </IconButton>
-            </Tooltip> */}
+            {/* 
+             */}
             <Tooltip title='Refresh Page'>
               <IconButton sx={{ p: 0 }} onClick={() => window.location.reload()}>
                 <LoopSharpIcon style={{ color: 'black' }} />

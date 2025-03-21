@@ -18,44 +18,9 @@ import {Present} from "./Components/VariousTables/School/Present/Present.jsx"
 import {User} from "./Components/VariousTables/School/User/User.jsx"
 
 import { AnalyticsDashboard } from "./Components/VariousTables/Home/Analytics.js";
-// import {School}  from "./Components/VariousTables/Master/School/School.jsx";
-// import { AssetsType } from "./Components/VariousTables/Master/AssetsType/AssetsType.jsx";
-// import { AssetsCommand } from "./Components/VariousTables/Master/AssetsCommand/AssetsCommand.jsx";
-// import { AssetsClass } from "./Components/VariousTables/Master/AssetsClass/AssetsClass.jsx";
-// import { AssetsGroup } from "./Components/VariousTables/Master/AssetsGroup/AssetsGroup.jsx";
-// import { Users } from "./Components/VariousTables/Master/Users/Users.jsx";
-// import { CreateLandmark } from "./Components/VariousTables/Geofencing/CreateLandmark.jsx";
-// import { EditLandmarks } from "./Components/VariousTables/Geofencing/EditLandmarks/EditLandmarks.jsx";
-// import { CreateRoute } from "./Components/VariousTables/Geofencing/CreateRoute.jsx";
-// import { EditRoutes } from "./Components/VariousTables/Geofencing/EditRoutes/EditRoutes.jsx";
-// import { CreateArea } from "./Components/VariousTables/Geofencing/CreateArea.jsx";
-// import { AssetsDivision } from "./Components/VariousTables/Master/AssetsDivision/AssetsDivision.jsx";
-// import { AssetsOwner } from "./Components/VariousTables/Master/AssetsOwner/AssetsOwner.jsx";
+
 import {Absent} from "./Components/VariousTables/School/Absent/Absent.jsx"
-// import { AddressBook } from "./Components/VariousTables/Master/AddressBook/AddressBook.jsx";
-// import { AddressBookGroup } from "./Components/VariousTables/Master/AddressBookGroup/AddressBookGroup.jsx";
-// import { AssetsURL } from "./Components/VariousTables/Master/AssetsURL/AssetsURL.jsx";
-// import { Broker } from "./Components/VariousTables/Master/Broker/Broker.jsx";
-// import { Commands } from "./Components/VariousTables/Master/Commands/Commands.jsx";
-// import { DeviceSettings } from "./Components/VariousTables/Master/DeviceSettings/DeviceSettings.jsx";
-// import { DriverMaster } from "./Components/VariousTables/Master/DriverMaster/DriverMaster.jsx";
-// import { Emails } from "./Components/VariousTables/Master/Emails/Emails.jsx";
-// import { GeoData } from "./Components/VariousTables/Master/GeoData/GeoData.jsx";
-// import { ImportLocation } from "./Components/VariousTables/Master/ImportLocation/ImportLocation.jsx";
-// import { LandmarkGroup } from "./Components/VariousTables/Master/LandmarkGroup/LandmarkGroup.jsx";
-// import { LandmarkImages } from "./Components/VariousTables/Master/LandmarkImages/LandmarkImages.jsx";
-// import { LandmarkWaypoints } from "./Components/VariousTables/Master/LandmarkWaypoints/LandmarkWaypoints.jsx";
-// import { MainMenuMaster } from "./Components/VariousTables/Master/MainMenuMaster/MainMenuMaster.jsx";
-// import { RFID } from "./Components/VariousTables/Master/RFID/RFID.jsx";
-// import { TelecomMaster } from "./Components/VariousTables/Master/TelecomMaster/TelecomMaster.jsx";
-// import { TopMainMenuMaster } from "./Components/VariousTables/Master/TopMainMenuMaster/TopMainMenuMaster.jsx";
-// import { TopMenuMaster } from "./Components/VariousTables/Master/TopMenuMaster/TopMenuMaster.jsx";
-// import { UserMenuMaster } from "./Components/VariousTables/Master/UserMenuMaster/UserMenuMaster.jsx";
-// import { UserProfile } from "./Components/VariousTables/Master/UserProfile/UserProfile.jsx";
-// import { UsersAssetsMapping } from "./Components/VariousTables/Master/UsersAssetsMapping/UsersAssetsMapping.jsx";
-// import { EditAreas } from "./Components/VariousTables/Geofencing/EditAreas/EditArea.js";
-// import { EditZones } from "./Components/VariousTables/Geofencing/EditZones/EditZones.jsx";
-// import { Trips } from "./Components/VariousTables/Geofencing/Trips/Trips.jsx";
+
 import {Driver} from "./Components/VariousTables/Users/Driver/Driver.jsx";
 import {Parent} from "./Components/VariousTables/Users/Parent/Parent.jsx";
 import { Supervisor } from "./Components/VariousTables/Users/Supervisor/Supervisor.jsx";
@@ -336,190 +301,7 @@ function App() {
   }
   
 
-//!main shruti
-  /*  useEffect(() => {
-    const fetchBuses = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const apiUrl =
-          role == 1
-            ? `${process.env.REACT_APP_SUPER_ADMIN_API}/read-devices`
-            : role == 2
-            ? `${process.env.REACT_APP_SCHOOL_API}/read-devices`
-            : role==3
-            ? `${process.env.REACT_APP_BRANCH_API}/read-devices`
-            :`${process.env.REACT_APP_USERBRANCH}/getdevicebranchgroupuser`
-  
-        const response = await axios.get(apiUrl, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
-        let allData = [];
-        let deviceIdsFromBuses = []; // To store deviceIds from the buses
-  
-        if (role == 1) {
-          // Loop through each school
-          response.data.data.forEach((school) => {
-            const schoolName = school.schoolName;
-  
-            // Loop through each branch of the school
-            school.branches.forEach((branch) => {
-              const branchName = branch.branchName;
-  
-              // Loop through each device in the branch and store relevant data
-              branch.devices.forEach((device) => {
-                allData.push({
-                  schoolId: school.schoolId,
-                  schoolName: schoolName,
-                  branchId: branch.branchId,
-                  branchName: branchName,
-                  actualDeviceId: device.actualDeviceId,
-                  deviceId: device.deviceId, // This is the deviceId from buses
-                  deviceName: device.deviceName,
-                });
-  
-                // Collect deviceIds
-                deviceIdsFromBuses.push(device.deviceId);
-              });
-            });
-          });
-        }else if (role == 2) {
-          // Handling for role 2 (School Admin)
-          response.data.branches.forEach((branch) => {
-            const branchName = branch.branchName;
-            branch.devices.forEach((device) => {
-              allData.push({
-                schoolId: response.data.schoolId, // Directly from the response
-                branchId: branch.branchId,
-                branchName: branchName,
-                actualDeviceId: device.actualDeviceId,
-                deviceId: device.deviceId,
-                deviceName: device.deviceName,
-              });
-              deviceIdsFromBuses.push(device.deviceId);
-            });
-          });
-        }else if (role == 3) {
-          // Handling for role 3 (Branch Admin)
-          const schoolName = response.data.schoolName;
-          const branchName = response.data.branchName;
-  
-          response.data.devices.forEach((device) => {
-            allData.push({
-              schoolName: schoolName,
-              branchName: branchName,
-              actualDeviceId: device.actualDeviceId,
-              deviceId: device.deviceId,
-              deviceName: device.deviceName,
-            });
-  
-            // Collect deviceIds
-            deviceIdsFromBuses.push(device.deviceId);
-          });
-        }if (role == 4) {
-          allData = response.data.data.flatMap((school) =>
-              Array.isArray(school.branches) && school.branches.length > 0
-                  ? school.branches.flatMap((branch) =>
-                        Array.isArray(branch.devices) && branch.devices.length > 0
-                            ? branch.devices.map((device) => ({
-                                  deviceId: device.deviceId,
-                                  deviceName: device.deviceName,
-                                  actualDeviceId: device.actualDeviceId,
-                                  branchName: branch.branchName,
-                                  schoolName: school.schoolName,
-                              }))
-                            : []
-                    )
-                  : []
-          );
-      
-          // Collect all deviceIds into deviceIdsFromBuses
-          const deviceIds = allData.map((device) => device.deviceId);
-          deviceIdsFromBuses.push(...deviceIds);
-      }
-      
-        
-        // Store the hierarchy data for further use
-        sethierarchydeviceData(allData);
-        console.log("Hierarchy device data:", allData);
-  
-        // Call fetchDeviceData now with the collected deviceIds
-        await fetchDeviceData(deviceIdsFromBuses);
-      } catch (error) {
-        console.error("Error fetching buses:", error);
-      }
-    };
-  
-    const fetchDeviceData = async (deviceIdsFromBuses) => {
-      try {
-        const token = btoa(`${username}:${password}`); // Base64 encode the username and password
-        const response1 = await axios.get(
-          "https://rocketsalestracker.com/api/devices",
-          {
-            headers: {
-              Authorization: `Basic ${token}`, // Replace with your actual token
-            },
-          }
-        );
-    
-        // Log the data for debugging
-        console.log("Device API Data:", response1.data);
-        console.log("Device IDs from Buses:", deviceIdsFromBuses);
-    
-        // Ensure both are strings for comparison
-        const filteredDeviceData = response1.data.filter((device) =>
-          deviceIdsFromBuses.includes(String(device.id)) // Convert device.id to string
-        );
-    
-        // Log the filtered result
-        console.log("Filtered Device Data:", filteredDeviceData);
-    
-        // Store the filtered device data
-        setDeviceApiData(filteredDeviceData);
-      } catch (error) {
-        console.error("Error fetching device data:", error);
-      }
-    };
-    
-  
-    const fetchPositionData = async () => {
-      try {
-        const token = btoa(`${username}:${password}`); // Base64 encode the username and password
-        const response2 = await axios.get(
-          "https://rocketsalestracker.com/api/positions",
-          {
-            headers: {
-              Authorization: `Basic ${token}`,
-            },
-          }
-        );
-  
-        setPositionApiData(response2.data); // Update state variable with position API data
-      } catch (error) {
-        console.error("Error fetching position data:", error);
-      }
-    };
-  
-    // Trigger fetching data when the component mounts
-    fetchBuses();
-    fetchPositionData();
-  }, []); // Empty dependency array ensures this effect runs only once on component mount
-  
-  useEffect(() => {
-    if (deviceApiData?.length > 0 && positionApiData?.length > 0) {
-      // Assuming both APIs have a common key to merge data, e.g., 'deviceId'
-      const merged = deviceApiData.map((device) => {
-        const position = positionApiData.find(
-          (pos) => pos.deviceId == device.id
-        );
-        return { ...device, ...position };
-      });
-      setMergedData(merged);
-      console.log("Merged data:", merged);
-    }
-  }, [deviceApiData, positionApiData]);  */
+
   
 
   const handleClickSideBar = (data) => {
@@ -722,6 +504,11 @@ function App() {
         {/* <VehicleDetails /> */}
         <Navbar propFunc={handleClickNav} propBool={setSideBarBool} />
 
+<Navbar 
+  propFunc={handleClickNav} 
+  propBool={setSideBarBool} 
+  onHomeClick={() => handleSidebarItemClick("Dashboard")}
+/>
         <div style={{ marginTop: "64px" }}>
           {/* <CustomTabs tabs={tabs} selectedTab={selectedTab} handleRemoveTab={handleRemoveTab}/><br/> */}
 
@@ -750,75 +537,7 @@ function App() {
             <StudentDetail data={mergedData} />
           )}
          
-          {/* {component === "AnalyticsDashboard" && (
-            <AnalyticsDashboard data={mergedData} />
-          )}
-          {component === "AssetsType" && <AssetsType data={mergedData} />}
-          {component === "AssetsCommand" && <AssetsCommand data={mergedData} />}
-          {component === "AssetsClass" && <AssetsClass data={mergedData} />}
-          {component === "AssetsGroup" && <AssetsGroup data={mergedData} />} */}
-          {/* {component === "Users" && <Users data={mergedData} />} */}
-          {/* {component === "CreateLandmark" && (
-            <CreateLandmark data={mergedData} />
-          )} */}
-          {/* {component === "EditLandmarks" && <EditLandmarks data={mergedData} />}
-          {component === "CreateRoute" && <CreateRoute data={mergedData} />}
-          {component === "EditRoutes" && <EditRoutes data={mergedData} />}
-          {component === "CreateArea" && <CreateArea data={mergedData} />}
-          {component === "AssetsDivision" && (
-            <AssetsDivision data={mergedData} />
-          )}
-          {component === "AssetsOwner" && <AssetsOwner data={mergedData} />}
-          {component === "AddressBook" && <AddressBook data={mergedData} />}
-          {component === "AddressBookGroup" && ( */}
-            {/* <AddressBookGroup data={mergedData} />
-          )}
-          {component === "AssetsURL" && <AssetsURL data={mergedData} />}
-          {component === "Broker" && <Broker data={mergedData} />}
-          {component === "Commands" && <Commands data={mergedData} />}
-          {component === "DeviceSettings" && (
-            <DeviceSettings data={mergedData} />
-          )} */}
-          {/* {component === "DriverMaster" && <DriverMaster data={mergedData} />} */}
-          {/* {component === "Emails" && <Emails data={mergedData} />}
-          {component === "GeoData" && <GeoData data={mergedData} />} */}
-          {/* {component === "ImportLocation" && (
-            <ImportLocation data={mergedData} />
-          )} */}
-          {/* {component === "LandmarkGroup" && <LandmarkGroup data={mergedData} />} */}
-          {/* {component === "LandmarkImages" && (
-            <LandmarkImages data={mergedData} />
-          )}
-          {component === "LandmarkWaypoints" && (
-            <LandmarkWaypoints data={mergedData} />
-          )}
-          {component === "MainMenuMaster" && (
-            <MainMenuMaster data={mergedData} />
-          )}
-          {component === "RFID" && <RFID data={mergedData} />}
-          {component === "TelecomMaster" && <TelecomMaster data={mergedData} />}
-          {component === "TopMainMenuMaster" && (
-            <TopMainMenuMaster data={mergedData} />
-          )}
-            {/* {component === "School" && (
-            <School data={mergedData} />
-          )} */}
-          {/* {component === "TopMenuMaster" && <TopMenuMaster data={mergedData} />} */} 
-          {/* {component === "UserMenuMaster" && (
-            <UserMenuMaster data={mergedData} />
-          )}
-          
-          {component === "UserProfile" && <UserProfile data={mergedData} />}
          
-         */}
-
-
-           
-
-          {/* {component === "EditAreas" && <EditAreas data={mergedData} />}
-          {component === "EditZones" && <EditZones data={mergedData} />} */}
-          {/* {component === "Trips" && <Trips data={mergedData} />} */}
-
           {component === "Absent" && <Absent data={mergedData} />}
           {component === "User" && <User data={mergedData} />}
           {component === "Present" && <Present data={mergedData} />}
@@ -859,11 +578,7 @@ function App() {
           {component === "UrgentExcel" && <UrgentExcel data={mergedData} />}
           {component === "Notification" && <Notification data={mergedData} />}
           {component === "GeofenceReport" && <GeofenceReport data={mergedData} />}
-          {/* {component === "Newdemo" && <Newdemo data={mergedData} />}
-          {component === "New2" && <New2 data={mergedData} />} */}
-           {/* {component === "ComputedAttributs" && <ComputedAttributes data={mergedData} />} */}
-          {/* {component === "School" && <AssetsType data={mergedData} />} */}
-          {/* <BasicSpeedDial /> */}
+         
           {![
             
             "Dashboard",

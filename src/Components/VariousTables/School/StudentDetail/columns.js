@@ -22,7 +22,7 @@ export const COLUMNS = () => [
   },
 
   {
-    Header: "Roll No.",
+    Header: "Route No.",
     accessor: "rollno",
   },
   {
