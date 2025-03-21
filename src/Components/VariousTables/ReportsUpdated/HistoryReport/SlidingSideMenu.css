@@ -1,0 +1,237 @@
+.menu-toggle-button {
+  position: absolute;
+  top: 20px;
+  right: 0;
+  z-index: 1000;
+  background: black;
+  color: white;
+  border: none;
+  font-size: 21px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50% 0 0 50%;
+  transition: all 0.3s ease;
+}
+
+.sliding-menu {
+  position: absolute;
+  top: 20px;
+  right: -350px;
+  width: 300px;
+  height: 70%;
+  background: #f8f9fa;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: right 0.3s ease;
+  border-radius: 6px;
+  border: 2px solid gray;
+  z-index: 9999;
+}
+
+.sliding-menu.open {
+  right: 0;
+}
+
+.control-trips {
+  padding: 20px;
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.custom-div {
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.divide {
+  margin: 5px 0;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.trip-summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.custom-popup {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+}
+
+.custom-popup h4 {
+  font-size: 16px;
+  color: #d9534f;
+  /* Emphasize the stop number */
+}
+
+.custom-popup p {
+  margin: 5px 0;
+  line-height: 1.4;
+}
+
+.custom-popup strong {
+  display: inline-block;
+  width: 50px;
+  /* Adjust width as needed for alignment */
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  gap: 15px;
+}
+
+.table-responsive {
+  overflow-x: scroll !important;
+  overflow-y: hidden !important;
+}
+
+/* Customize scrollbar for Webkit-based browsers (Chrome, Safari, Edge) */
+.table-responsive::-webkit-scrollbar {
+  height: 4px !important;
+  /* Make the scrollbar height thin */
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: #0a2d63 !important;
+  /* Scrollbar color */
+  border-radius: 2px !important;
+  /* Rounded edges */
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background-color: #555 !important;
+  /* Darker color on hover */
+}
+
+.summary-box {
+  text-align: center;
+}
+
+.label {
+  font-weight: bold;
+  font-size: 14px;
+  color: #333;
+}
+
+.value {
+  font-size: 16px;
+  color: #007bff;
+  margin-top: 5px;
+}
+
+.toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-button:hover {
+  background-color: #0056b3;
+}
+
+.divider {
+  border: none;
+  border-top: 2px solid #ddd;
+  margin: 10px 0;
+}
+
+.trip-card {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.trip-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.indicator-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dot {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+}
+
+.green {
+  background-color: green;
+}
+
+.red {
+  background-color: red;
+}
+
+.dashed-line {
+  height: 75px;
+  border-left: 2px dashed black;
+  margin: 4px 0;
+}
+
+.trip-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.time-address {
+  margin-bottom: 5px;
+}
+
+.time {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.address {
+  font-size: 13px;
+  color: #555;
+}
+
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.metric-box {
+  flex: 1 1 45%;
+  min-width: 100px;
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
