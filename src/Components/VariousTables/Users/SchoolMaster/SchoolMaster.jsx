@@ -35,7 +35,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import Export from "../../Export"
 
-//import { TextField } from '@mui/material';
+
 
 const style = {
   position: "absolute",
@@ -82,7 +82,7 @@ const SchoolMaster = () => {
   const [originalRows, setOriginalRows] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
+const [errors, setErrors] = useState({});
   // const fetchData = async (startDate = "", endDate = "") => {
   //   setLoading(true);
   //   try {
@@ -610,11 +610,33 @@ const SchoolMaster = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    let newErrors = { ...errors }; // Copy previous errors
+
+    if (name === "schoolMobile") {
+        // Allow only numbers and limit to 10 digits
+        if (!/^\d{0,10}$/.test(value)) return; // Prevent input if it exceeds 10 digits
+
+        newErrors.schoolMobile = value.length === 10 ? "" : "Phone number must be exactly 10 digits";
+    } 
+
+    if (name === "password") {
+        // Password must have at least 1 uppercase letter, 1 special character, and be at least 8 characters long
+        const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
+
+        newErrors.password = passwordPattern.test(value)
+            ? ""
+            : "Password must have 1 uppercase, 1 special character, and be at least 8 characters long";
+    }
+
+    setErrors(newErrors); // Update error state first
+
+    // Update form data
     setFormData({
-      ...formData,
-      [name]: value,
+        ...formData,
+        [name]: value,
     });
-  };
+};
+
 
   const handleEditSubmit = async () => {
     // Define the API URL and authentication token
@@ -1198,7 +1220,7 @@ const SchoolMaster = () => {
                 <CloseIcon />
               </IconButton>
             </Box>
-            {COLUMNS().map((col) => (
+            {/* {COLUMNS().map((col) => (
               <TextField
                 key={col.accessor}
                 label={col.Header}
@@ -1211,12 +1233,32 @@ const SchoolMaster = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      {col.icon}  {/* Add Face6Icon in the input field */}
+                      {col.icon} 
                     </InputAdornment>
                   ),
                 }}
               />
-            ))}
+            ))} */}
+            {COLUMNS().map((col) => (
+  <TextField
+    key={col.accessor}
+    label={col.Header}
+    variant="outlined"
+    name={col.accessor}
+    value={formData[col.accessor] || ""}
+    onChange={handleInputChange}
+    sx={{ marginBottom: "10px" }}
+    fullWidth
+    error={Boolean(errors[col.accessor])} // Shows red border if an error exists
+    helperText={errors[col.accessor] || ""} // Displays error message
+    InputProps={{
+      startAdornment: col.icon ? (
+        <InputAdornment position="start">{col.icon}</InputAdornment>
+      ) : null,
+    }}
+  />
+))}
+
             <Button
               variant="contained"
               color="primary"
@@ -1242,24 +1284,26 @@ const SchoolMaster = () => {
               </IconButton>
             </Box>
             {COLUMNS().map((col) => (
-              <TextField
-                key={col.accessor}
-                label={col.Header}
-                variant="outlined"
-                name={col.accessor}
-                value={formData[col.accessor] || ""}
-                onChange={handleInputChange}
-                sx={{ marginBottom: "10px" }}
-                fullWidth 
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      {col.icon} {/* Add Face6Icon in the input field */}
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            ))}
+  <TextField
+    key={col.accessor}
+    label={col.Header}
+    variant="outlined"
+    name={col.accessor}
+    value={formData[col.accessor] || ""}
+    onChange={handleInputChange}
+    sx={{ marginBottom: "10px" }}
+    fullWidth
+    error={Boolean(errors[col.accessor])} // Shows red border if error exists
+    helperText={errors[col.accessor] || ""} // Displays error message
+    InputProps={{
+      startAdornment: col.icon ? (
+        <InputAdornment position="start">{col.icon}</InputAdornment>
+      ) : null,
+    }}
+  />
+))}
+
+
             <Button
               variant="contained"
               color="primary"

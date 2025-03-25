@@ -113,6 +113,7 @@ export const StudentDetail = () => {
   const [schools, setSchools] = useState();
   const [branches, setBranches] = useState();
   const [buses, setBuses] = useState();
+  const [errors, setErrors] = useState({});
 
   
   const fetchData = async (startDate = "", endDate = "") => {
@@ -694,90 +695,189 @@ export const StudentDetail = () => {
     console.log("Filtered Geofences:", geofencesForSelectedDevice);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   let newErrors = { ...errors }; // Copy previous errors
 
-    if (name === "schoolName") {
-      setFormData({
-        ...formData,
-        [name]: value,
-        branchName: "", // Reset branch when school changes
-      });
+  //   if (name === "password") {
+  //     const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*])/;
+  //     if (!passwordPattern.test(value)) {
+  //         newErrors.password = "Password must include 1 special character & 1 uppercase letter";
+  //     } else {
+  //         delete newErrors.password;
+  //     }
+  // }
 
-      // Filter branches for the selected school
-      const selectedSchool = schools.find(
-        (school) => school.schoolName === value
-      );
-      if (selectedSchool) {
-        const branches = selectedSchool.branches.map((branch) => ({
-          branchName: branch.branchName,
-          branchId: branch.branchId,
-        }));
-        setBranches(branches);
+  //   if (name === "phone") {
+  //     // Allow only numbers and limit to 10 digits
+  //     if (!/^\d{0,10}$/.test(value)) return; // Prevent input if it exceeds 10 digits
 
-        // Filter devices for the selected school
-        const filteredDevices = allDevices.filter(
-          (device) => device.schoolName === value
-        );
-        setBuses(filteredDevices); // Update buses based on selected school
-      }
-    } else if (name === "branchName") {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+  //     setFormData({
+  //         ...formData,
+  //         [name]: value,
+  //     });
 
-      // Filter devices for the selected branch
-      const filteredDevices = allDevices.filter((device) =>
-        role === 1
-          ? device.schoolName === formData.schoolName && device.branchName === value
-          : device.branchName === value
-      );
-      setBuses(filteredDevices); // Update buses based on selected branch
-    }
-    if (name === "deviceId") {
-      setSelectedDeviceId(value); // Set the selected device ID
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+  //     // Show an error if the phone number is not exactly 10 digits
+  //     setErrors({
+  //         ...errors,
+  //         phone: value.length === 10 ? "" : "Phone number must be exactly 10 digits",
+  //     });
+  // } else {
+  //     setFormData({
+  //         ...formData,
+  //         [name]: value,
+  //     });
+  // }
+  //   if (name === "schoolName") {
+  //     setFormData({
+  //       ...formData,
+  //       [name]: value,
+  //       branchName: "", // Reset branch when school changes
+  //     });
 
-      // Filter geofences based on the selected bus (deviceId)
-      const selectedDeviceGeofences = pickupPointsData[value] || []; // Access geofences using the deviceId as the key
-      setFilteredGeofences(selectedDeviceGeofences); // Update geofences in state
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    }
-    if (name === "dateOfBirth" && value) {
-      // Calculate the age based on Date of Birth
-      const birthDate = new Date(value);
-      const age = new Date().getFullYear() - birthDate.getFullYear();
-      const monthDifference = new Date().getMonth() - birthDate.getMonth();
+  //     // Filter branches for the selected school
+  //     const selectedSchool = schools.find(
+  //       (school) => school.schoolName === value
+  //     );
+  //     if (selectedSchool) {
+  //       const branches = selectedSchool.branches.map((branch) => ({
+  //         branchName: branch.branchName,
+  //         branchId: branch.branchId,
+  //       }));
+  //       setBranches(branches);
 
-      // Adjust the age if the birthday hasn't occurred this year yet
-      const calculatedAge =
-        monthDifference < 0 ||
-        (monthDifference === 0 && new Date().getDate() < birthDate.getDate())
-          ? age - 1
-          : age;
+  //       // Filter devices for the selected school
+  //       const filteredDevices = allDevices.filter(
+  //         (device) => device.schoolName === value
+  //       );
+  //       setBuses(filteredDevices); // Update buses based on selected school
+  //     }
+  //   } else if (name === "branchName") {
+  //     setFormData({
+  //       ...formData,
+  //       [name]: value,
+  //     });
 
-      setFormData((prevData) => ({
-        ...prevData,
-        dateOfBirth: value,
-        childAge: calculatedAge, // Set the calculated age
-      }));
-    } else {
-      // For other inputs, just update the form data
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    }
-  };
+  //     // Filter devices for the selected branch
+  //     const filteredDevices = allDevices.filter((device) =>
+  //       role === 1
+  //         ? device.schoolName === formData.schoolName && device.branchName === value
+  //         : device.branchName === value
+  //     );
+  //     setBuses(filteredDevices); // Update buses based on selected branch
+  //   }
+  //   if (name === "deviceId") {
+  //     setSelectedDeviceId(value); // Set the selected device ID
+  //     setFormData({
+  //       ...formData,
+  //       [name]: value,
+  //     });
+
+  //     // Filter geofences based on the selected bus (deviceId)
+  //     const selectedDeviceGeofences = pickupPointsData[value] || []; // Access geofences using the deviceId as the key
+  //     setFilteredGeofences(selectedDeviceGeofences); // Update geofences in state
+  //   } else {
+  //     setFormData({
+  //       ...formData,
+  //       [name]: value,
+  //     });
+  //   }
+  //   if (name === "dateOfBirth" && value) {
+  //     // Calculate the age based on Date of Birth
+  //     const birthDate = new Date(value);
+  //     const age = new Date().getFullYear() - birthDate.getFullYear();
+  //     const monthDifference = new Date().getMonth() - birthDate.getMonth();
+
+  //     // Adjust the age if the birthday hasn't occurred this year yet
+  //     const calculatedAge =
+  //       monthDifference < 0 ||
+  //       (monthDifference === 0 && new Date().getDate() < birthDate.getDate())
+  //         ? age - 1
+  //         : age;
+
+  //     setFormData((prevData) => ({
+  //       ...prevData,
+  //       dateOfBirth: value,
+  //       childAge: calculatedAge, // Set the calculated age
+  //     }));
+  //   } else {
+  //     // For other inputs, just update the form data
+  //     setFormData((prevData) => ({
+  //       ...prevData,
+  //       [name]: value,
+  //     }));
+  //   }
+  // };
 //! 1st use effect
+
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+  let newErrors = { ...errors };
+  let updatedData = { ...formData, [name]: value };
+
+  // Password Validation
+  if (name === "password") {
+    const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*])/;
+    newErrors.password = passwordPattern.test(value)
+      ? ""
+      : "Password must include 1 special character & 1 uppercase letter";
+  }
+
+  // Phone Number Validation
+  if (name === "phone") {
+    if (!/^\d*$/.test(value)) return; // Prevent non-numeric input
+    updatedData.phone = value.slice(0, 10); // Limit to 10 digits
+    newErrors.phone = updatedData.phone.length === 10 ? "" : "Phone number must be exactly 10 digits";
+  }
+
+  // School Name Selection
+  if (name === "schoolName") {
+    updatedData.branchName = ""; // Reset branch on school change
+
+    const selectedSchool = schools.find((school) => school.schoolName === value);
+    if (selectedSchool) {
+      setBranches(selectedSchool.branches.map(({ branchName, branchId }) => ({ branchName, branchId })));
+      setBuses(allDevices.filter((device) => device.schoolName === value));
+    }
+  }
+
+  // Branch Name Selection
+  if (name === "branchName") {
+    const filteredDevices = allDevices.filter((device) =>
+      role === 1
+        ? device.schoolName === formData.schoolName && device.branchName === value
+        : device.branchName === value
+    );
+    setBuses(filteredDevices);
+  }
+
+  // Device Selection
+  if (name === "deviceId") {
+    setSelectedDeviceId(value);
+    setFilteredGeofences(pickupPointsData[value] || []);
+  }
+
+  // Date of Birth & Age Calculation
+  if (name === "dateOfBirth" && value) {
+    const birthDate = new Date(value);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    if (
+      today.getMonth() < birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
+    ) {
+      age -= 1;
+    }
+
+    updatedData.childAge = age;
+  }
+
+  // Update form data & errors
+  setFormData(updatedData);
+  setErrors(newErrors);
+};
+
 const [allDevices, setAllDevices] = useState([]);
 
   useEffect(() => {
@@ -2094,7 +2194,7 @@ console.log("my geofences",response.data)
                 ),
               }}
             />
-            <TextField
+            {/* <TextField
               key={"phone"}
               label={"Phone Number"}
               variant="outlined"
@@ -2106,11 +2206,32 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PhoneInTalkIcon />  {/* Add Face6Icon in the input field */}
+                    <PhoneInTalkIcon />  
                   </InputAdornment>
                 ),
               }}
-            />
+            /> */}
+           <TextField
+    key="phone"
+    label="Phone Number"
+    variant="outlined"
+    name="phone"
+    value={formData["phone"] || ""}
+    onChange={handleInputChange}
+    error={Boolean(errors.phone)} // Show error state if there's an error
+    helperText={errors.phone} // Display validation error message
+    sx={{ marginBottom: "10px" }}
+    fullWidth
+    InputProps={{
+        startAdornment: (
+            <InputAdornment position="start">
+                <PhoneInTalkIcon />
+            </InputAdornment>
+        ),
+    }}
+/>
+
+
             <TextField
               key={"email"}
               label={"Parent's Email"}
@@ -2128,13 +2249,32 @@ console.log("my geofences",response.data)
                 ),
               }}
             />
-            <TextField
+            {/* <TextField
               key={"password"}
               label={"Password"}
               variant="outlined"
               name="password"
               value={formData["password"] || ""}
               onChange={handleInputChange}
+              sx={{ marginBottom: "10px" }}
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PasswordIcon /> 
+                  </InputAdornment>
+                ),
+              }}
+            /> */}
+              <TextField
+              key={"password"}
+              label={"Password"}
+              variant="outlined"
+              name="password"
+              value={formData["password"] || ""}
+              onChange={handleInputChange}
+              error={Boolean(errors.password)}
+              helperText={errors.password}
               sx={{ marginBottom: "10px" }}
               fullWidth
               InputProps={{
@@ -2676,7 +2816,7 @@ console.log("my geofences",response.data)
                 ),
               }}
             />
-            <TextField
+            {/* <TextField
               key={"phone"}
               label={"Phone Number"}
               variant="outlined"
@@ -2688,11 +2828,31 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PhoneInTalkIcon />  {/* Add Face6Icon in the input field */}
+                    <PhoneInTalkIcon />  
                   </InputAdornment>
                 ),
               }}
-            />
+            /> */}
+            <TextField
+    key="phone"
+    label="Phone Number"
+    variant="outlined"
+    name="phone"
+    value={formData["phone"] || ""}
+    onChange={handleInputChange}
+    error={Boolean(errors.phone)} // Show error state if there's an error
+    helperText={errors.phone} // Display validation error message
+    sx={{ marginBottom: "10px" }}
+    fullWidth
+    InputProps={{
+        startAdornment: (
+            <InputAdornment position="start">
+                <PhoneInTalkIcon />
+            </InputAdornment>
+        ),
+    }}
+/>
+
             <TextField
               key={"email"}
               label={"Parent's Email"}
@@ -2717,6 +2877,8 @@ console.log("my geofences",response.data)
               name="password"
               value={formData["password"] || ""}
               onChange={handleInputChange}
+              error={Boolean(errors.password)}
+              helperText={errors.password}
               sx={{ marginBottom: "10px" }}
               fullWidth
               InputProps={{
@@ -2727,6 +2889,16 @@ console.log("my geofences",response.data)
                 ),
               }}
             />
+            {/* <TextField
+    label="Password"
+    variant="outlined"
+    name="password"
+    value={formData.password || ""}
+    onChange={handleInputChange}
+    error={Boolean(errors.password)}
+    helperText={errors.password}
+/> */}
+
             {/* <FormControl fullWidth sx={{ marginBottom: "10px" }}>
   <InputLabel id="device-id-label">Select Device</InputLabel>
   <Select

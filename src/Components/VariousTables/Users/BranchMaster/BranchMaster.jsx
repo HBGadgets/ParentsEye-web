@@ -1436,6 +1436,8 @@ const BranchMaster = () => {
   const [endDate, setEndDate] = useState("");
   const [schools, setSchools] = useState([]);
   const role = localStorage.getItem("role");
+ 
+  const [errors, setErrors] = useState({});
 
   const fetchData = async (startDate = "", endDate = "") => {
     setLoading(true);
@@ -1759,24 +1761,81 @@ const BranchMaster = () => {
     setSnackbarOpen(false);
   };
 
+  // const handleInputChange = (e) => {
+  //   const { name, value } = e.target;
+  //   const school = localStorage.getItem("token");
+  //   const decoded = jwtDecode(school);
+  //   console.log(decoded.id);
+
+  //   if (name === "schoolMobile") {
+  //     // Allow only numbers and limit to 10 digits
+  //     if (!/^\d{0,10}$/.test(value)) return; // Prevent input if it exceeds 10 digits
+
+  //     setFormData({
+  //         ...formData,
+  //         [name]: value,
+  //     });
+
+  //     // Show an error if the phone number is not exactly 10 digits
+  //     setErrors({
+  //         ...errors,
+  //         phone: value.length === 10 ? "" : "Phone number must be exactly 10 digits",
+  //     });
+  // } else {
+  //     setFormData({
+  //         ...formData,
+  //         [name]: value,
+  //     });
+  // }
+  //   if (role == 2 && name == "branchName") {
+  //     setFormData({
+  //       ...formData,
+  //       ["schoolId"]: decoded.id,
+  //       [name]: value,
+  //     });
+  //   } else {
+  //     setFormData({
+  //       ...formData,
+  //       [name]: value,
+  //     });
+  //   }
+  // };
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const school = localStorage.getItem("token");
     const decoded = jwtDecode(school);
-    console.log(decoded.id);
-    if (role == 2 && name == "branchName") {
-      setFormData({
-        ...formData,
-        ["schoolId"]: decoded.id,
-        [name]: value,
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+    let newErrors = { ...errors }; // Copy previous errors
+
+    // Validation for `schoolMobile`
+    if (name === "schoolMobile") {
+        if (!/^\d{0,10}$/.test(value)) return; // Allow only numbers and limit to 10 digits
+        newErrors.schoolMobile = value.length === 10 ? "" : "Phone number must be exactly 10 digits";
     }
-  };
+
+    // Validation for `password`
+    if (name === "password") {
+        const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
+        newErrors.password = passwordPattern.test(value)
+            ? ""
+            : "Password must have 1 uppercase, 1 special character, and be at least 8 characters long";
+    }
+
+    setErrors(newErrors); // Update error state
+
+    // Update formData based on role and conditions
+    if (role == 2 && name == "branchName") {
+        setFormData({
+            ...formData,
+            schoolId: decoded.id,
+            [name]: value,
+        });
+    } else {
+        setFormData({
+            ...formData,
+            [name]: value,
+        });
+    }
+};
 
   const handleSchoolChange = (e) => {
     const { name, value } = e.target;
@@ -1851,7 +1910,7 @@ const BranchMaster = () => {
           : role == 2
           ? `${process.env.REACT_APP_SCHOOL_API}/edit-branch/${selectedRow._id}`
           : null; 
-
+console.log("my edit usrl",apiUrl)
       const token = localStorage.getItem("token");
       // Prepare the updated data
       const updatedData = {
@@ -2646,42 +2705,46 @@ const BranchMaster = () => {
                   </FormControl>
                 ) : (<>{
                   col.Header !== 'School Name' ? (
+                    // <TextField
+                    //   key={col.accessor}
+                    //   label={col.Header}
+                    //   variant="outlined"
+                    //   name={col.accessor}
+                    //   value={formData[col.accessor] || ""}
+                    //   onChange={handleInputChange}
+                    //   sx={{ marginBottom: "10px" }}
+                    //   fullWidth
+                    //   InputProps={{
+                    //     startAdornment: (
+                    //       <InputAdornment position="start">
+                    //         {col.icon}  {/* Add Face6Icon in the input field */}
+                    //       </InputAdornment>
+                    //     ),
+                    //   }}
+                    // />
                     <TextField
-                      key={col.accessor}
-                      label={col.Header}
-                      variant="outlined"
-                      name={col.accessor}
-                      value={formData[col.accessor] || ""}
-                      onChange={handleInputChange}
-                      sx={{ marginBottom: "10px" }}
-                      fullWidth
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            {col.icon}  {/* Add Face6Icon in the input field */}
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
+  key={col.accessor}
+  label={col.Header}
+  variant="outlined"
+  name={col.accessor}
+  value={formData[col.accessor] || ""}
+  onChange={handleInputChange}
+  sx={{ marginBottom: "10px" }}
+  fullWidth
+  error={Boolean(errors[col.accessor])} // Shows red border if an error exists
+  helperText={errors[col.accessor] || ""} // Displays error message
+  InputProps={{
+    startAdornment: (
+      <InputAdornment position="start">
+        {col.icon}  {/* Add icon if available */}
+      </InputAdornment>
+    ),
+  }}
+/>
+
                   ) : null
                 }</>
-                  // <TextField
-                  //   key={col.accessor}
-                  //   label={col.Header}
-                  //   variant="outlined"
-                  //   name={col.accessor}
-                  //   value={formData[col.accessor] || ""}
-                  //   onChange={handleInputChange}
-                  //   sx={{ marginBottom: "10px" }}
-                  //   fullWidth
-                  //   InputProps={{
-                  //     startAdornment: (
-                  //       <InputAdornment position="start">
-                  //         {col.icon}  {/* Add Face6Icon in the input field */}
-                  //       </InputAdornment>
-                  //     ),
-                  //   }}
-                  // />
+                
                 )
               )}
             <Button
