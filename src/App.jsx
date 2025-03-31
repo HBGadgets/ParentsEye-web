@@ -19,10 +19,10 @@ import { User } from "./Components/VariousTables/School/User/User.jsx";
 
 import { AnalyticsDashboard } from "./Components/VariousTables/Home/Analytics.js";
 
-import {Absent} from "./Components/VariousTables/School/Absent/Absent.jsx"
+import { Absent } from "./Components/VariousTables/School/Absent/Absent.jsx";
 
-import {Driver} from "./Components/VariousTables/Users/Driver/Driver.jsx";
-import {Parent} from "./Components/VariousTables/Users/Parent/Parent.jsx";
+import { Driver } from "./Components/VariousTables/Users/Driver/Driver.jsx";
+import { Parent } from "./Components/VariousTables/Users/Parent/Parent.jsx";
 import { Supervisor } from "./Components/VariousTables/Users/Supervisor/Supervisor.jsx";
 import SchoolMaster from "./Components/VariousTables/Users/SchoolMaster/SchoolMaster.jsx";
 import BranchMaster from "./Components/VariousTables/Users/BranchMaster/BranchMaster.jsx";
@@ -75,7 +75,7 @@ function App() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [component, setComponent] = useState("");
   const [apiData, setApiData] = useState([]);
-
+  const [historyDeviceId, setHistoryDeviceId] = useState("");
   const role = localStorage.getItem("role");
   const [deviceApiData, setDeviceApiData] = useState([]); // State variable to store device API data
   const [positionApiData, setPositionApiData] = useState([]); // State variable to store position API data
@@ -298,9 +298,6 @@ function App() {
     return null; // Prevent rendering if token is invalid
   }
 
-
-  
-
   const handleClickSideBar = (data) => {
     setState(data);
   };
@@ -500,11 +497,11 @@ function App() {
         {/* <VehicleDetails /> */}
         <Navbar propFunc={handleClickNav} propBool={setSideBarBool} />
 
-<Navbar 
-  propFunc={handleClickNav} 
-  propBool={setSideBarBool} 
-  onHomeClick={() => handleSidebarItemClick("Dashboard")}
-/>
+        <Navbar
+          propFunc={handleClickNav}
+          propBool={setSideBarBool}
+          onHomeClick={() => handleSidebarItemClick("Dashboard")}
+        />
         <div style={{ marginTop: "64px" }}>
           {/* <CustomTabs tabs={tabs} selectedTab={selectedTab} handleRemoveTab={handleRemoveTab}/><br/> */}
 
@@ -516,24 +513,24 @@ function App() {
             onItemClick={handleSidebarItemClick}
           />
 
-          {component === "Dashboard" && <Tablee data={mergedData} />}
+          {component === "Dashboard" && (
+            <Tablee
+              data={mergedData}
+              onCardClick={handleSidebarItemClick}
+              historyDeviceId={historyDeviceId}
+              setHistoryDeviceId={setHistoryDeviceId}
+            />
+          )}
 
           {/* {component === "Assets" && <Assets data={mergedData} />} */}
           {/* {component === "School" && <School data={mergedData} />} */}
           {/* {component === "AssetsCategory" && ( */}
           {/* <AssetsCategory data={mergedData} /> */}
           {/* )} */}
-          {component === "Leave" && (
-            <Leave data={mergedData} />
-          )}
-          {component === "Status" && (
-            <Status data={mergedData} />
-          )}
-           {component === "StudentDetail" && (
-            <StudentDetail data={mergedData} />
-          )}
-         
-         
+          {component === "Leave" && <Leave data={mergedData} />}
+          {component === "Status" && <Status data={mergedData} />}
+          {component === "StudentDetail" && <StudentDetail data={mergedData} />}
+
           {component === "Absent" && <Absent data={mergedData} />}
           {component === "User" && <User data={mergedData} />}
           {component === "Present" && <Present data={mergedData} />}
@@ -581,8 +578,16 @@ function App() {
           )}
           {component === "UrgentExcel" && <UrgentExcel data={mergedData} />}
           {component === "Notification" && <Notification data={mergedData} />}
-          {component === "GeofenceReport" && <GeofenceReport data={mergedData} />}
-         
+          {component === "GeofenceReport" && (
+            <GeofenceReport data={mergedData} />
+          )}
+          {component === "HistoryReport" && (
+            <HistoryReport
+              data={mergedData}
+              historyDeviceId={historyDeviceId}
+            />
+          )}
+
           {![
             "Dashboard",
             "School",
@@ -673,7 +678,13 @@ function App() {
             "HistoryReport",
             //  "Newdemo",
             //  "New2"
-          ].includes(component) && <Tablee data={mergedData} />}
+          ].includes(component) && (
+            <Tablee
+              data={mergedData}
+              onCardClick={handleSidebarItemClick}
+              setHistoryDeviceId={setHistoryDeviceId}
+            />
+          )}
         </div>
       </div>
     </>

@@ -46,6 +46,7 @@ import Draggable from "react-draggable";
 import GeofenceForm from "./GeofenceForm";
 import Tooltip from "@mui/material/Tooltip";
 import { io } from "socket.io-client";
+import { FiRefreshCw } from "react-icons/fi";
 
 import {
   Box,
@@ -209,6 +210,8 @@ const IndividualTrack = (lat, long) => {
   const [socketId, setSocketId] = useState(null);
   const [etaAlert, setEtaAlert] = useState(null);
   const socketRef = useRef(null); // Store the socket instance
+  const [timerCount, setTimerCount] = useState(10); // Timer count state
+  const [showTimer, setShowTimer] = useState(true); // Timer visibility state
   // const [isCrossed,setIsCrossed] = useState(false);
   useEffect(() => {
     if (!socketRef.current) {
@@ -291,11 +294,25 @@ const IndividualTrack = (lat, long) => {
 
     return image; // Return a default image if no match found
   };
-
+  useEffect(() => {
+    let interval;
+    if (showTimer && timerCount > 0) {
+      interval = setInterval(() => {
+        setTimerCount((prev) => prev - 1);
+      }, 1000);
+    } else if (timerCount === 0) {
+      setShowTimer(false); // Hide the timer when it reaches 0
+      setTimerCount(10); // Reset the timer count to 10 seconds
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [showTimer, timerCount]);
   useEffect(() => {
     if (vehicleData) {
       setIndividualSalesMan(vehicleData[0]);
       console.log(vehicleData[0]);
+      // setShowTimer(true);
     }
   }, [vehicleData]);
 
@@ -488,6 +505,47 @@ const IndividualTrack = (lat, long) => {
 
   return (
     <>
+      {showTimer && (
+        <div
+          style={{
+            background: "rgba(255, 255, 255, 0.2)",
+            backdropFilter: "blur(5px)",
+            color: "black",
+            WebkitBackdropFilter: "blur(10px)",
+            padding: "8px 25px",
+            borderRadius: "10px",
+            zIndex: 1000,
+            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+            fontSize: "16px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            position: "absolute",
+            top: "90px",
+            right: "90vh",
+          }}
+        >
+          <FiRefreshCw
+            style={{
+              animation: "spin 1s linear infinite",
+            }}
+            size={15}
+          />
+          <style>
+            {`
+            @keyframes spin {
+              from {
+                transform: rotate(0deg);
+              }
+              to {
+                transform: rotate(360deg);
+              }
+            }
+          `}
+          </style>
+          Refresh in {timerCount} seconds
+        </div>
+      )}
       <div className="row">
         <div className="head">
           <h2>Tracking {name ? name : "User Name"}</h2>

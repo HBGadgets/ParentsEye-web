@@ -24,11 +24,13 @@ import HistoryMap from "./HistoryMap";
 import "./HistoryReport.css";
 import Select from "react-select";
 
-export const HistoryReport = () => {
+export const HistoryReport = (historyDeviceId) => {
   const { deviceId: urlDeviceId, category, name } = useParams(); // Retrieve params from URL
   const [fromDateTime, setFromDateTime] = useState("");
   const [toDateTime, setToDateTime] = useState("");
-  const [deviceId, setDeviceId] = useState(urlDeviceId || "");
+  const [deviceId, setDeviceId] = useState(
+    historyDeviceId.historyDeviceId || ""
+  );
   const [fetch, setFetch] = useState(false);
   const [historyOn, setHistoryOn] = useState(false);
 
@@ -54,7 +56,7 @@ export const HistoryReport = () => {
 
     return true;
   };
-
+  console.log("😂deviceId", deviceId);
   const handleSubmit = (e) => {
     e.preventDefault();
     if (fromDateTime === "" || toDateTime === "" || deviceId === "") {

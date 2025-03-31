@@ -64,7 +64,6 @@ const Item = styled(Paper)(({ theme }) => ({
   textAlign: "center",
   color: theme.palette.text.secondary,
 }));
-
 const style = {
   position: "absolute",
   top: "50%",
@@ -80,7 +79,12 @@ const style = {
   flexDirection: "column",
 };
 
-export const Tablee = ({ data }) => {
+export const Tablee = ({
+  data,
+  onCardClick,
+  historyDeviceId,
+  setHistoryDeviceId,
+}) => {
   // console.log(data);
   const [page, setPage] = useState(0);
   const [individualDataObj, setIndividualDataObj] = useState({});
@@ -88,6 +92,8 @@ export const Tablee = ({ data }) => {
   const [filteredRows, setFilteredRows] = useState(
     MOCK_DATA.map((row) => ({ ...row, isSelected: false }))
   );
+  const [selectedCard, setSelectedCard] = useState(null);
+
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -223,7 +229,6 @@ export const Tablee = ({ data }) => {
     return 0;
   });
 
- 
   // Handle page change
   const handlePageClick = (data) => {
     setCurrentPage(data.selected); // Update the current page state
@@ -239,11 +244,8 @@ export const Tablee = ({ data }) => {
   const pageCount = Math.ceil(data.length / rowsPerPage);
 
   // Get the current rows based on the selected page
-  
-  // const   currentRows = data.slice(startIndex, endIndex);
 
- 
- 
+  // const   currentRows = data.slice(startIndex, endIndex);
 
   useEffect(() => {
     setFilteredRows(data.map((row) => ({ ...row, isSelected: false })));
@@ -1010,8 +1012,6 @@ export const Tablee = ({ data }) => {
     setSearchTerm(event.target.value);
   };
 
-
-
   const fetchAddress = async (vehicleId, longitude, latitude) => {
     try {
       const apiKey = "DG2zGt0KduHmgSi2kifd"; // Replace with your actual MapTiler API key
@@ -1057,7 +1057,7 @@ export const Tablee = ({ data }) => {
         !address[vehicle.id]
       ) {
         // Fetch address only if it's not already fetched for this vehicle
-        fetchAddress(vehicle.deviceId, vehicle.longitude, vehicle.latitude);
+        // fetchAddress(vehicle.deviceId, vehicle.longitude, vehicle.latitude);
       }
     });
     // console.log(address)
@@ -1415,6 +1415,8 @@ export const Tablee = ({ data }) => {
       ) : (
         <>
           <Cards
+            onCardClick={onCardClick}
+            setAssetStatusValue={setAssetStatusValue}
             vehicleRunningCount={vehicleRunningCount}
             vehicleStoppedCount={vehicleStoppedCount}
             vehicleOverspeedCount={vehicleOverspeedCount}
@@ -1591,10 +1593,11 @@ export const Tablee = ({ data }) => {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                         }}
-                        onClick={() => handleSort('address')}
+                        onClick={() => handleSort("address")}
                       >
                         Address
-                        {sortBy === 'address' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                        {sortBy === "address" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
                       </CTableHeaderCell>
                     )}
 
@@ -1609,10 +1612,11 @@ export const Tablee = ({ data }) => {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                         }}
-                        onClick={() => handleSort('driver')}
+                        onClick={() => handleSort("driver")}
                       >
                         Driver
-                        {sortBy === 'driver' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                        {sortBy === "driver" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
                       </CTableHeaderCell>
                     )}
 
@@ -1627,10 +1631,11 @@ export const Tablee = ({ data }) => {
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                         }}
-                        onClick={() => handleSort('lastUpdate')}
+                        onClick={() => handleSort("lastUpdate")}
                       >
                         Last Update
-                        {sortBy === 'lastUpdate' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                        {sortBy === "lastUpdate" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
                       </CTableHeaderCell>
                     )}
 
@@ -1641,10 +1646,11 @@ export const Tablee = ({ data }) => {
                           position: "sticky",
                           top: 0,
                         }}
-                        onClick={() => handleSort('speed')}
+                        onClick={() => handleSort("speed")}
                       >
                         Sp
-                        {sortBy === 'speed' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                        {sortBy === "speed" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
                       </CTableHeaderCell>
                     )}
 
@@ -1655,10 +1661,11 @@ export const Tablee = ({ data }) => {
                           position: "sticky",
                           top: 0,
                         }}
-                        onClick={() => handleSort('distance')}
+                        onClick={() => handleSort("distance")}
                       >
                         Distance
-                        {sortBy === 'distance' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                        {sortBy === "distance" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
                       </CTableHeaderCell>
                     )}
 
@@ -1669,10 +1676,11 @@ export const Tablee = ({ data }) => {
                           position: "sticky",
                           top: 0,
                         }}
-                        onClick={() => handleSort('satellite')}
+                        onClick={() => handleSort("satellite")}
                       >
                         Sat
-                        {sortBy === 'satellite' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                        {sortBy === "satellite" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
                       </CTableHeaderCell>
                     )}
 
@@ -1683,10 +1691,11 @@ export const Tablee = ({ data }) => {
                           position: "sticky",
                           top: 0,
                         }}
-                        onClick={() => handleSort('ignition')}
+                        onClick={() => handleSort("ignition")}
                       >
                         Ig
-                        {sortBy === 'ignition' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                        {sortBy === "ignition" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
                       </CTableHeaderCell>
                     )}
 
@@ -1697,10 +1706,11 @@ export const Tablee = ({ data }) => {
                           position: "sticky",
                           top: 0,
                         }}
-                        onClick={() => handleSort('gps')}
+                        onClick={() => handleSort("gps")}
                       >
                         GPS
-                        {sortBy === 'gps' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                        {sortBy === "gps" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
                       </CTableHeaderCell>
                     )}
 
@@ -1711,10 +1721,11 @@ export const Tablee = ({ data }) => {
                           position: "sticky",
                           top: 0,
                         }}
-                        onClick={() => handleSort('power')}
+                        onClick={() => handleSort("power")}
                       >
                         Power
-                        {sortBy === 'power' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                        {sortBy === "power" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
                       </CTableHeaderCell>
                     )}
 
@@ -1726,10 +1737,11 @@ export const Tablee = ({ data }) => {
                           top: 0,
                           width: "15%",
                         }}
-                        onClick={() => handleSort('track')}
+                        onClick={() => handleSort("track")}
                       >
                         Track
-                        {sortBy === 'track' && (sortOrder === 'asc' ? ' ↑' : ' ↓')}
+                        {sortBy === "track" &&
+                          (sortOrder === "asc" ? " ↑" : " ↓")}
                       </CTableHeaderCell>
                     )}
                   </CTableRow>
@@ -1986,6 +1998,17 @@ export const Tablee = ({ data }) => {
                             onClick={() => handleClickOnTrack(item)}
                           >
                             Live Track
+                          </button>
+                          <button
+                            style={{ marginLeft: "5px" }}
+                            className="btn btn-primary"
+                            onClick={() => {
+                              setHistoryDeviceId(item.deviceId);
+                              // Set the state with the clicked item
+                              onCardClick("History Report");
+                            }}
+                          >
+                            History
                           </button>
                         </CTableDataCell>
                       )}

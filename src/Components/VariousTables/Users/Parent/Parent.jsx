@@ -97,7 +97,6 @@
 //   const [branches, setBranches] = useState();
 //   const [buses, setBuses] = useState();
 
-
 //   const fetchData = async (startDate = "", endDate = "") => {
 //     setLoading(true);
 //     try {
@@ -615,7 +614,6 @@
 //           // isSelected: false,
 //         };
 //       }
-      
 
 //       console.log(newRow);
 
@@ -652,7 +650,6 @@
 //       // Handle the error appropriately (e.g., show a notification to the user)
 //     }
 //   };
-  
 
 //   const [rowStatuses, setRowStatuses] = useState({});
 
@@ -1181,7 +1178,7 @@
 //                           >
 //                             {row.numChildren}
 //                           </TableCell>
-                      
+
 // <TableCell
 //   style={{
 //     borderRight: "1px solid #e0e0e0",
@@ -1591,9 +1588,6 @@
 //   );
 // };
 
-
-
-
 import React, { useState, useEffect, useContext, Component } from "react";
 import axios from "axios";
 import Paper from "@mui/material/Paper";
@@ -1643,26 +1637,26 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import dayjs from "dayjs";
-import { Autocomplete,Popper  } from "@mui/material";
+import { Autocomplete, Popper } from "@mui/material";
 //import { TextField } from '@mui/material';
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
 import InputAdornment from "@mui/material/InputAdornment"; // Add this import
 import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
-import CakeIcon from '@mui/icons-material/Cake';
-import Face6Icon from '@mui/icons-material/Face6';  // Import Face6Icon
-import PinIcon from '@mui/icons-material/Pin';
-import HolidayVillageIcon from '@mui/icons-material/HolidayVillage';
-import SchoolIcon from '@mui/icons-material/School';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-import ShareLocationIcon from '@mui/icons-material/ShareLocation';
-import AbcIcon from '@mui/icons-material/Abc';
-import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
-import MailIcon from '@mui/icons-material/Mail';
-import PasswordIcon from '@mui/icons-material/Password';
-import TripOriginIcon from '@mui/icons-material/TripOrigin';
-import ClassIcon from '@mui/icons-material/Class';
-import WcIcon from '@mui/icons-material/Wc';
+import CakeIcon from "@mui/icons-material/Cake";
+import Face6Icon from "@mui/icons-material/Face6"; // Import Face6Icon
+import PinIcon from "@mui/icons-material/Pin";
+import HolidayVillageIcon from "@mui/icons-material/HolidayVillage";
+import SchoolIcon from "@mui/icons-material/School";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import ShareLocationIcon from "@mui/icons-material/ShareLocation";
+import AbcIcon from "@mui/icons-material/Abc";
+import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
+import MailIcon from "@mui/icons-material/Mail";
+import PasswordIcon from "@mui/icons-material/Password";
+import TripOriginIcon from "@mui/icons-material/TripOrigin";
+import ClassIcon from "@mui/icons-material/Class";
+import WcIcon from "@mui/icons-material/Wc";
 const style = {
   position: "absolute",
   top: "50%",
@@ -1710,7 +1704,7 @@ export const Parent = () => {
   const [schools, setSchools] = useState();
   const [branches, setBranches] = useState();
   const [buses, setBuses] = useState();
-
+  const [errors, setErrors] = useState({});
 
   const fetchData = async (startDate = "", endDate = "") => {
     setLoading(true);
@@ -1744,12 +1738,15 @@ export const Parent = () => {
             },
           }
         );
-      }else if(role==4){
-        response=await axios.get(`http://63.142.251.13:4000/branchgroupuser/getparentbybranchgroup`,{
-          headers:{
-            Authorization:`Bearer ${token}`,
+      } else if (role == 4) {
+        response = await axios.get(
+          `http://63.142.251.13:4000/branchgroupuser/getparentbybranchgroup`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        })
+        );
       }
 
       console.log("my parent fetch data", response.data); // Log the entire response data
@@ -1758,37 +1755,39 @@ export const Parent = () => {
         const allData =
           role == 1
             ? response?.data.data.flatMap((school) =>
-              school.branches.flatMap((branch) =>
-                Array.isArray(branch.parents) && branch.parents.length > 0
-                  ? branch.parents.map((parent) => ({
-                      ...parent,
-                      schoolName: school.schoolName,
-                      branchName: branch.branchName,
-                    }))
-                  : []
+                school.branches.flatMap((branch) =>
+                  Array.isArray(branch.parents) && branch.parents.length > 0
+                    ? branch.parents.map((parent) => ({
+                        ...parent,
+                        schoolName: school.schoolName,
+                        branchName: branch.branchName,
+                      }))
+                    : []
+                )
               )
-            )
             : role == 2
             ? response?.data.branches.flatMap((branch) =>
                 Array.isArray(branch.parents) && branch.parents.length > 0
                   ? branch.parents
                   : []
               )
-              :role==3
+            : role == 3
             ? response.data.parents
-            :response.data.data.flatMap((branch)=>
-              Array.isArray(branch.branches)&&branch.branches.length>0?
-            branch.branches.flatMap((newbranch)=>
-            Array.isArray(newbranch.parents)&& newbranch.parents.length>0?
-            newbranch.parents.flatMap((child)=>({
-              ...child,
-              schoolName:branch.schoolName,
-              branchName:newbranch.branchName,
-            })):
-            []
-            )
-          :[])
-console.log("role is:",role)
+            : response.data.data.flatMap((branch) =>
+                Array.isArray(branch.branches) && branch.branches.length > 0
+                  ? branch.branches.flatMap((newbranch) =>
+                      Array.isArray(newbranch.parents) &&
+                      newbranch.parents.length > 0
+                        ? newbranch.parents.flatMap((child) => ({
+                            ...child,
+                            schoolName: branch.schoolName,
+                            branchName: newbranch.branchName,
+                          }))
+                        : []
+                    )
+                  : []
+              );
+        console.log("role is:", role);
         console.log(allData);
 
         // Apply local date filtering if dates are provided
@@ -1880,7 +1879,7 @@ console.log("role is:",role)
     setRowsPerPage(newRowsPerPage === -1 ? sortedData.length : newRowsPerPage); // Set to all rows if -1
     setPage(0); // Reset to the first page
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -2003,9 +2002,9 @@ console.log("role is:",role)
           ? `${process.env.REACT_APP_SUPER_ADMIN_API}/delete-parent`
           : role == 2
           ? `${process.env.REACT_APP_SCHOOL_API}/delete-parent`
-          :role==3
+          : role == 3
           ? `${process.env.REACT_APP_BRANCH_API}/delete-parent`
-          :`http://63.142.251.13:4000/branchgroupuser/deleteparentbybranchgroup`
+          : `http://63.142.251.13:4000/branchgroupuser/deleteparentbybranchgroup`;
       const token = localStorage.getItem("token");
       // Send delete requests for each selected ID
       const deleteRequests = selectedIds.map((id) =>
@@ -2089,61 +2088,60 @@ console.log("role is:",role)
   };
   const handleBusChange = (e) => {
     const { value } = e.target;
-  
+
     if (!buses || !Array.isArray(buses)) {
-        console.error("Buses data is not available or not an array");
-        return;
+      console.error("Buses data is not available or not an array");
+      return;
     }
-  
+
     // Find the selected bus by its deviceId
-    const selectedBus = buses.find(bus => bus.deviceId === value);
-  
+    const selectedBus = buses.find((bus) => bus.deviceId === value);
+
     if (!selectedBus) {
-        console.error("Selected bus not found");
-        return;
+      console.error("Selected bus not found");
+      return;
     }
-  
+
     // Update the form data with the selected device details
     setFormData((prevData) => ({
-        ...prevData,
-        deviceId: selectedBus.deviceId,
-        deviceName: selectedBus.deviceName,
-        pickupPoint: '', // Reset geofence selection
+      ...prevData,
+      deviceId: selectedBus.deviceId,
+      deviceName: selectedBus.deviceName,
+      pickupPoint: "", // Reset geofence selection
     }));
-  
+
     let geofencesForSelectedDevice = [];
-  
+
     if (role == 2) {
-        // For role == 2, look up geofences in pickupPointsData by the selectedBus.deviceId
-        geofencesForSelectedDevice = pickupPointsData[selectedBus.deviceId] || [];
-  
-        if (geofencesForSelectedDevice.length === 0) {
-            console.error("No geofences found for this deviceId");
-        }
+      // For role == 2, look up geofences in pickupPointsData by the selectedBus.deviceId
+      geofencesForSelectedDevice = pickupPointsData[selectedBus.deviceId] || [];
+
+      if (geofencesForSelectedDevice.length === 0) {
+        console.error("No geofences found for this deviceId");
+      }
     } else if (role == 1) {
-        const geofenceKey = `deviceId: ${selectedBus.deviceId}`;
-        geofencesForSelectedDevice = pickupPointsData[geofenceKey] || [];
-  
-        if (geofencesForSelectedDevice.length === 0) {
-            console.error("No geofences found for this deviceId");
-        }
+      const geofenceKey = `deviceId: ${selectedBus.deviceId}`;
+      geofencesForSelectedDevice = pickupPointsData[geofenceKey] || [];
+
+      if (geofencesForSelectedDevice.length === 0) {
+        console.error("No geofences found for this deviceId");
+      }
     } else if (role == 3) {
       // Handling for role 3
       geofencesForSelectedDevice = pickupPointsData[selectedBus.deviceId] || [];
-  
-        if (geofencesForSelectedDevice.length === 0) {
-            console.error("No geofences found for this deviceId");
-        }
-    }else if (role == 4) {
+
+      if (geofencesForSelectedDevice.length === 0) {
+        console.error("No geofences found for this deviceId");
+      }
+    } else if (role == 4) {
       // Handling for role 3
       geofencesForSelectedDevice = pickupPointsData[selectedBus.deviceId] || [];
-  
-        if (geofencesForSelectedDevice.length === 0) {
-            console.error("No geofences found for this deviceId");
-        }
+
+      if (geofencesForSelectedDevice.length === 0) {
+        console.error("No geofences found for this deviceId");
+      }
     }
-    
-  
+
     // Update the filtered geofences state
     setFilteredGeofences(geofencesForSelectedDevice);
     console.log("Filtered Geofences:", geofencesForSelectedDevice);
@@ -2151,77 +2149,83 @@ console.log("role is:",role)
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-  
-    if (name === "schoolName") {
-      setFormData({
-        ...formData,
-        [name]: value,
-        branchName: "", // Reset branch when school changes
-      });
-      
-      // Filter branches for the selected school
-      const selectedSchool = schools.find(school => school.schoolName === value);
-      if (selectedSchool) {
-        const branches = selectedSchool.branches.map(branch => ({
-          branchName: branch.branchName,
-          branchId: branch.branchId,
-        }));
-        setBranches(branches);
-  
-        // Filter devices for the selected school
-        const filteredDevices = allDevices.filter(device => device.schoolName === value);
-        setBuses(filteredDevices); // Update buses based on selected school
-      }
-    } else if (name === "branchName") {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-  
-      // Filter devices for the selected branch
-      const filteredDevices = allDevices.filter(device => device.branchName === value);
-      setBuses(filteredDevices); // Update buses based on selected branch
-    } if (name === "deviceId") {
-      setSelectedDeviceId(value); // Set the selected device ID
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-  
-      // Filter geofences based on the selected bus (deviceId)
-      const selectedDeviceGeofences = pickupPointsData[value] || []; // Access geofences using the deviceId as the key
-      setFilteredGeofences(selectedDeviceGeofences); // Update geofences in state
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    }if (name === "dateOfBirth" && value) {
-      // Calculate the age based on Date of Birth
-      const birthDate = new Date(value);
-      const age = new Date().getFullYear() - birthDate.getFullYear();
-      const monthDifference = new Date().getMonth() - birthDate.getMonth();
+    let newErrors = { ...errors };
+    let updatedData = { ...formData, [name]: value };
 
-      // Adjust the age if the birthday hasn't occurred this year yet
-      const calculatedAge =
-        monthDifference < 0 ||
-        (monthDifference === 0 && new Date().getDate() < birthDate.getDate())
-          ? age - 1
-          : age;
-
-      setFormData((prevData) => ({
-        ...prevData,
-        dateOfBirth: value,
-        childAge: calculatedAge, // Set the calculated age
-      }));
-    } else {
-      // For other inputs, just update the form data
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
+    // Password Validation (At least 8 characters, 1 uppercase, 1 special character)
+    if (name === "password") {
+      const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
+      newErrors.password = passwordPattern.test(value)
+        ? ""
+        : "Password must be at least 8 characters long, include 1 uppercase letter & 1 special character.";
     }
+
+    // Phone Number Validation (Only digits, max 10 characters)
+    if (name === "phone") {
+      if (!/^\d*$/.test(value)) return; // Prevent non-numeric input
+      updatedData.phone = value.slice(0, 10); // Limit to 10 digits
+      newErrors.phone =
+        updatedData.phone.length === 10
+          ? ""
+          : "Phone number must be exactly 10 digits";
+    }
+
+    // Handling School Name Selection
+    if (name === "schoolName") {
+      updatedData.branchName = ""; // Reset branch when school changes
+
+      // Find the selected school and update branches
+      const selectedSchool = schools.find(
+        (school) => school.schoolName === value
+      );
+      if (selectedSchool) {
+        setBranches(
+          selectedSchool.branches.map((branch) => ({
+            branchName: branch.branchName,
+            branchId: branch.branchId,
+          }))
+        );
+
+        // Filter devices for the selected school
+        setBuses(allDevices.filter((device) => device.schoolName === value));
+      }
+    }
+
+    // Handling Branch Name Selection
+    if (name === "branchName") {
+      // Filter devices for the selected branch
+      setBuses(allDevices.filter((device) => device.branchName === value));
+    }
+
+    // Handling Device Selection (Filtering Geofences)
+    if (name === "deviceId") {
+      setSelectedDeviceId(value);
+      const selectedDeviceGeofences = pickupPointsData[value] || [];
+      setFilteredGeofences(selectedDeviceGeofences);
+    }
+
+    // Handling Date of Birth & Age Calculation
+    if (name === "dateOfBirth" && value) {
+      const birthDate = new Date(value);
+      const currentDate = new Date();
+      let age = currentDate.getFullYear() - birthDate.getFullYear();
+      const monthDifference = currentDate.getMonth() - birthDate.getMonth();
+
+      if (
+        monthDifference < 0 ||
+        (monthDifference === 0 && currentDate.getDate() < birthDate.getDate())
+      ) {
+        age -= 1;
+      }
+
+      updatedData.childAge = age; // Set calculated age
+    }
+
+    // Updating Form State
+    setFormData(updatedData);
+    setErrors(newErrors);
   };
+
   const [selectedValue, setSelectedValue] = useState("");
   const [otherSelectedValue, setOtherSelectedValue] = useState("");
   const handleSelectChange = (event) => {
@@ -2238,7 +2242,7 @@ console.log("role is:",role)
     });
     setOtherSelectedValue(event.target.value);
   };
-  
+
   // const handleBusChange = (e) => {
   //   const { value } = e.target;
 
@@ -2260,9 +2264,9 @@ console.log("role is:",role)
         ? `${process.env.REACT_APP_SUPER_ADMIN_API}/update-parent`
         : role == 2
         ? `${process.env.REACT_APP_SCHOOL_API}/update-parent`
-        : role==3
-        ?`${process.env.REACT_APP_BRANCH_API}/update-parent`
-        :`${process.env.REACT_APP_USERBRANCH}/updateparentbybranchgroup`
+        : role == 3
+        ? `${process.env.REACT_APP_BRANCH_API}/update-parent`
+        : `${process.env.REACT_APP_USERBRANCH}/updateparentbybranchgroup`;
     const token = localStorage.getItem("token");
     // Prepare the updated data
     const updatedData = {
@@ -2325,9 +2329,9 @@ console.log("role is:",role)
 
   const handleAddSubmit = async () => {
     try {
-      const decoded = jwtDecode(localStorage.getItem('token'));
+      const decoded = jwtDecode(localStorage.getItem("token"));
       let newRow;
-      if(role == 3){
+      if (role == 3) {
         newRow = {
           ...formData,
           schoolName: decoded.schoolName,
@@ -2335,26 +2339,25 @@ console.log("role is:",role)
           // id: filteredRows.length + 1,
           // isSelected: false,
         };
-      }else if (role == 2) {
+      } else if (role == 2) {
         newRow = {
           ...formData,
           schoolName: decoded.schoolName,
           // id: filteredRows.length + 1,
           // isSelected: false,
         };
-      }else if(role==4){
-        newRow={
+      } else if (role == 4) {
+        newRow = {
           ...formData,
-          schoolName:decoded.schoolName,
-        }
-      }else {
+          schoolName: decoded.schoolName,
+        };
+      } else {
         newRow = {
           ...formData,
           // id: filteredRows.length + 1,
           // isSelected: false,
         };
       }
-      
 
       console.log(newRow);
 
@@ -2391,483 +2394,496 @@ console.log("role is:",role)
       // Handle the error appropriately (e.g., show a notification to the user)
     }
   };
-  
 
   const [rowStatuses, setRowStatuses] = useState({});
 
-const handleApprove = async (_id) => {
-  try {
-    const token = localStorage.getItem("token");
-    let response;
-
-    if (role == 1) {
-      response = await axios.post(
-        `${process.env.REACT_APP_SUPER_ADMIN_API}/registerStatus/${_id}`,
-        { action: "approve" },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    } else if (role == 2) {
-      response = await axios.post(
-        `${process.env.REACT_APP_SCHOOL_API}/registerStatus/${_id}`,
-        { action: "approve" },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    } else if (role == 3) {
-      response = await axios.post(
-        `${process.env.REACT_APP_BRANCH_API}/registerStatus/${_id}`,
-        { action: "approve" },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    }
-    else if(role==4){
-      response=await axios.post(`http://63.142.251.13:4000/branchgroupuser/approveParentByBranchgroup/${_id}`,
-        {
-          action:"approve"
-        },
-        {
-          headers:{
-            Authorization:`Bearer ${token}`
-          }
-        }
-      )
-    }
-
-    if (response && response.status === 200) {
-      setSnackbarOpen(true);
-      fetchData(); // Refresh data
-
-      // Update the status for this row
-      setRowStatuses((prevStatuses) => ({
-        ...prevStatuses,
-        [_id]: "approved",
-      }));
-
-      alert("Your request is approved");
-    }
-  } catch (error) {
-    console.error("Error approving request:", error);
-  }
-};
-
-const handleReject = async (_id) => {
-  try {
-    const token = localStorage.getItem("token");
-    let response;
-
-    if (role == 1) {
-      response = await axios.post(
-        `${process.env.REACT_APP_SUPER_ADMIN_API}/registerStatus/${_id}`,
-        { action: "reject" },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    } else if (role == 2) {
-      response = await axios.post(
-        `${process.env.REACT_APP_SCHOOL_API}/registerStatus/${_id}`,
-        { action: "reject" },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    } else if (role == 3) {
-      response = await axios.post(
-        `${process.env.REACT_APP_BRANCH_API}/registerStatus/${_id}`,
-        { action: "reject" },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-    }else if(role==4){
-      response=await axios.post(`http://63.142.251.13:4000/branchgroupuser/approveParentByBranchgroup/${_id}`,
-        {
-          action:'reject'
-        },
-        {
-          headers:
-          {
-             Authorization:`Bearer ${token}`
-           }
-        }
-      
-      )
-    }
-
-    if (response && response.status === 200) {
-      setSnackbarOpen(true);
-      fetchData(); // Refresh data
-
-      // Update the status for this row
-      setRowStatuses((prevStatuses) => ({
-        ...prevStatuses,
-        [_id]: "rejected",
-      }));
-
-      alert("Request is rejected");
-    }
-  } catch (error) {
-    console.error("Error rejecting request:", error);
-  }
-};
-
-const [pickupPointsData, setPickupPointsData] = useState([]); // Use descriptive state name
-const [selectedDeviceId, setSelectedDeviceId] = useState("");
-const [filteredGeofences, setFilteredGeofences] = useState([]); 
-useEffect(() => {
-  const fetchSchool = async (startDate = "", endDate = "") => {
-    setLoading(true);
-    if (role == 1) {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${process.env.REACT_APP_SUPER_ADMIN_API}/getschools`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        
-        console.log("School data fetched:", response.data);
-
-        if (Array.isArray(response.data.schools)) {
-          setSchools(response.data.schools);
-        }
-      } catch (error) {
-        console.error("Error fetching schools:", error);
-      } finally {
-        setLoading(false);
-      }
-    } else if (role == 2) {
-      // Fetch branches for role 2 (School Admin)
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${process.env.REACT_APP_SCHOOL_API}/branches`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log("Branch data fetched:", response.data);
-        setBranches(response.data.school.branches);
-      } catch (error) {
-        console.error("Error fetching branches:", error);
-      }
-    }else if(role==4){
-    try {
-      const token=localStorage.getItem("token");
-      const response=await axios.get(`${process.env.REACT_APP_USERBRANCH}/getdevicebranchgroupuser`,
-        {
-          headers:{
-            Authorization:`Bearer ${token}`
-          }
-        }
-      )
-      const branchname=response.data.data.flatMap((element1)=>
-      Array.isArray(element1.branches)&&element1.branches.length>0?
-    element1.branches.map((branch)=>(
-      {branchName:branch.branchName}
-    )
-     )
-    :[])
-console.log("mybranch::",branchname);
-setBranches(branchname);
-    } catch (error) {
-      console.log("error while fetch branch",error)
-    }
-    }
-  }
-
-  const fetchBuses = async () => {
+  const handleApprove = async (_id) => {
     try {
       const token = localStorage.getItem("token");
-      const apiUrl =
-        role == 1
-          ? `${process.env.REACT_APP_SUPER_ADMIN_API}/read-devices`
-          : role == 2
-          ? `${process.env.REACT_APP_SCHOOL_API}/read-devices`
-          :role==3
-          ? `${process.env.REACT_APP_BRANCH_API}/read-devices`
-          :`${process.env.REACT_APP_USERBRANCH}/getdevicebranchgroupuser`
-      const response = await axios.get(apiUrl, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-  
-      let allData = [];
+      let response;
+
       if (role == 1) {
-        allData = response?.data.data.flatMap((school) =>
-          school.branches.flatMap((branch) =>
-            Array.isArray(branch.devices) && branch.devices.length > 0
-              ? branch.devices.map((device) => ({
-                  ...device,
-                  schoolName: school.schoolName,
+        response = await axios.post(
+          `${process.env.REACT_APP_SUPER_ADMIN_API}/registerStatus/${_id}`,
+          { action: "approve" },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 2) {
+        response = await axios.post(
+          `${process.env.REACT_APP_SCHOOL_API}/registerStatus/${_id}`,
+          { action: "approve" },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 3) {
+        response = await axios.post(
+          `${process.env.REACT_APP_BRANCH_API}/registerStatus/${_id}`,
+          { action: "approve" },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 4) {
+        response = await axios.post(
+          `http://63.142.251.13:4000/branchgroupuser/approveParentByBranchgroup/${_id}`,
+          {
+            action: "approve",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+
+      if (response && response.status === 200) {
+        setSnackbarOpen(true);
+        fetchData(); // Refresh data
+
+        // Update the status for this row
+        setRowStatuses((prevStatuses) => ({
+          ...prevStatuses,
+          [_id]: "approved",
+        }));
+
+        alert("Your request is approved");
+      }
+    } catch (error) {
+      console.error("Error approving request:", error);
+    }
+  };
+
+  const handleReject = async (_id) => {
+    try {
+      const token = localStorage.getItem("token");
+      let response;
+
+      if (role == 1) {
+        response = await axios.post(
+          `${process.env.REACT_APP_SUPER_ADMIN_API}/registerStatus/${_id}`,
+          { action: "reject" },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 2) {
+        response = await axios.post(
+          `${process.env.REACT_APP_SCHOOL_API}/registerStatus/${_id}`,
+          { action: "reject" },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 3) {
+        response = await axios.post(
+          `${process.env.REACT_APP_BRANCH_API}/registerStatus/${_id}`,
+          { action: "reject" },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 4) {
+        response = await axios.post(
+          `http://63.142.251.13:4000/branchgroupuser/approveParentByBranchgroup/${_id}`,
+          {
+            action: "reject",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+
+      if (response && response.status === 200) {
+        setSnackbarOpen(true);
+        fetchData(); // Refresh data
+
+        // Update the status for this row
+        setRowStatuses((prevStatuses) => ({
+          ...prevStatuses,
+          [_id]: "rejected",
+        }));
+
+        alert("Request is rejected");
+      }
+    } catch (error) {
+      console.error("Error rejecting request:", error);
+    }
+  };
+
+  const [pickupPointsData, setPickupPointsData] = useState([]); // Use descriptive state name
+  const [selectedDeviceId, setSelectedDeviceId] = useState("");
+  const [filteredGeofences, setFilteredGeofences] = useState([]);
+  useEffect(() => {
+    const fetchSchool = async (startDate = "", endDate = "") => {
+      setLoading(true);
+      if (role == 1) {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await axios.get(
+            `${process.env.REACT_APP_SUPER_ADMIN_API}/getschools`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          console.log("School data fetched:", response.data);
+
+          if (Array.isArray(response.data.schools)) {
+            setSchools(response.data.schools);
+          }
+        } catch (error) {
+          console.error("Error fetching schools:", error);
+        } finally {
+          setLoading(false);
+        }
+      } else if (role == 2) {
+        // Fetch branches for role 2 (School Admin)
+        try {
+          const token = localStorage.getItem("token");
+          const response = await axios.get(
+            `${process.env.REACT_APP_SCHOOL_API}/branches`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          console.log("Branch data fetched:", response.data);
+          setBranches(response.data.school.branches);
+        } catch (error) {
+          console.error("Error fetching branches:", error);
+        }
+      } else if (role == 4) {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await axios.get(
+            `${process.env.REACT_APP_USERBRANCH}/getdevicebranchgroupuser`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          const branchname = response.data.data.flatMap((element1) =>
+            Array.isArray(element1.branches) && element1.branches.length > 0
+              ? element1.branches.map((branch) => ({
                   branchName: branch.branchName,
                 }))
               : []
-          )
-        );
-      } else if (role == 2) {
-        allData = response?.data.branches.flatMap((branch) =>
-          Array.isArray(branch.devices) && branch.devices.length > 0
-            ? branch.devices.map((device) => ({
-                ...device,
-                branchName: branch.branchName,
-                schoolName: response.data.schoolName,
-              }))
-            : []
-        );
-      } else if (role == 3) {
-        const branchName = response.data.branchName;
-        const schoolName = response.data.schoolName;
-  
-        allData = Array.isArray(response.data.devices)
-          ? response.data.devices.map((device) => ({
-              ...device,
-              branchName,
-              schoolName,
-            }))
-          : [];
+          );
+          console.log("mybranch::", branchname);
+          setBranches(branchname);
+        } catch (error) {
+          console.log("error while fetch branch", error);
+        }
       }
-      // else if(role==4){
-      //   allData=response.data.data.flatMap((devices1)=>
-      //   Array.isArray(devices1.branches)&&devices1.branches.length>0?
-      //  devices1.data.flatMap((devicedata)=>
-      // Array.isArray(devicedata.devices)&&devicedata.devices.length>0?
-      //  devicedata.map((item)=>({
-      //   ...item,
-      //   branchName:devices1.branches.branchName,
-      //   schoolName:devices1.schoolName,
-      //  }))
-      //  :[]
-      // )
-      //   :[]) 
-      // }
-      else if (role == 4) {
-        allData = response.data.data.flatMap((school) =>
-            Array.isArray(school.branches) && school.branches.length > 0
-                ? school.branches.flatMap((branch) =>
-                      Array.isArray(branch.devices) && branch.devices.length > 0
-                          ? branch.devices.map((device) => ({
-                                ...device,
-                                branchName: branch.branchName,
-                                schoolName: school.schoolName,
-                            }))
-                          : []
-                  )
+    };
+
+    const fetchBuses = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const apiUrl =
+          role == 1
+            ? `${process.env.REACT_APP_SUPER_ADMIN_API}/read-devices`
+            : role == 2
+            ? `${process.env.REACT_APP_SCHOOL_API}/read-devices`
+            : role == 3
+            ? `${process.env.REACT_APP_BRANCH_API}/read-devices`
+            : `${process.env.REACT_APP_USERBRANCH}/getdevicebranchgroupuser`;
+        const response = await axios.get(apiUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        let allData = [];
+        if (role == 1) {
+          allData = response?.data.data.flatMap((school) =>
+            school.branches.flatMap((branch) =>
+              Array.isArray(branch.devices) && branch.devices.length > 0
+                ? branch.devices.map((device) => ({
+                    ...device,
+                    schoolName: school.schoolName,
+                    branchName: branch.branchName,
+                  }))
                 : []
-        );
-    }
-      setAllDevices(allData); // Store all devices
-      setBuses(allData); // Set initial buses as well
-      console.log("filter devices according to branch",allData)
-    } catch (error) {
-      console.error("Error fetching buses:", error);
-    }
-  };
-  
-  // const fetchGeofence = async (startDate = "", endDate = "") => {
-  //   // setLoading(true);
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     let response;
-  
-  //     // Fetch data based on role
-  //     if (role == 1) {
-  //       response = await axios.get(`${process.env.REACT_APP_SUPER_ADMIN_API}/geofences`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-  //     } else if (role == 2) {
-  //       response = await axios.get(`${process.env.REACT_APP_SCHOOL_API}/geofences`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-  //     } else if (role == 3) {
-  //       response = await axios.get(`${process.env.REACT_APP_BRANCH_API}/geofences`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-  //     }
-  
-  //     if (response?.data) {
-  //       let fetchedData = {};
-  
-  //       if (role == 1) {
-  //         // Structure geofences by deviceId
-  //         Object.entries(response.data).forEach(([deviceId, stops]) => {
-  //           fetchedData[deviceId] = stops.map(stop => ({
-  //             ...stop,
-  //             deviceId, // Include deviceId in each stop
-  //           }));
-  //         });
-  //       } else if (role == 2) {
-  //         // For role 2, assuming response contains branches with geofences
-  //         response.data?.branches.forEach(branch => {
-  //           if (branch.geofences) {
-  //             branch.geofences.forEach(geofence => {
-  //               if (!fetchedData[branch.deviceId]) {
-  //                 fetchedData[branch.deviceId] = [];
-  //               }
-  //               fetchedData[branch.deviceId].push({
-  //                 ...geofence,
-  //                 branchId: branch.branchId,
-  //                 branchName: branch.branchName,
-  //               });
-  //             });
-  //           }
-  //         });
-  //       } else if (role == 3) {
-  //         // For role 3, handle geofences by device
-  //         response.data.devices.forEach(device => {
-  //           device.geofences.forEach(geofence => {
-  //             if (!fetchedData[device.deviceId]) {
-  //               fetchedData[device.deviceId] = [];
-  //             }
-  //             fetchedData[device.deviceId].push({
-  //               ...geofence,
-  //               deviceId: device.deviceId,
-  //             });
-  //           });
-  //         });
-  //       }
-  
-  //       console.log("role is:", role);
-  //       console.log("geofences are:", fetchedData);
-  //       // Update the state with fetched data
-  //       setPickupPointsData(fetchedData);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // };
-  
-  const fetchGeofence = async (startDate = "", endDate = "") => {
-    // setLoading(true);
-    try {
+            )
+          );
+        } else if (role == 2) {
+          allData = response?.data.branches.flatMap((branch) =>
+            Array.isArray(branch.devices) && branch.devices.length > 0
+              ? branch.devices.map((device) => ({
+                  ...device,
+                  branchName: branch.branchName,
+                  schoolName: response.data.schoolName,
+                }))
+              : []
+          );
+        } else if (role == 3) {
+          const branchName = response.data.branchName;
+          const schoolName = response.data.schoolName;
+
+          allData = Array.isArray(response.data.devices)
+            ? response.data.devices.map((device) => ({
+                ...device,
+                branchName,
+                schoolName,
+              }))
+            : [];
+        }
+        // else if(role==4){
+        //   allData=response.data.data.flatMap((devices1)=>
+        //   Array.isArray(devices1.branches)&&devices1.branches.length>0?
+        //  devices1.data.flatMap((devicedata)=>
+        // Array.isArray(devicedata.devices)&&devicedata.devices.length>0?
+        //  devicedata.map((item)=>({
+        //   ...item,
+        //   branchName:devices1.branches.branchName,
+        //   schoolName:devices1.schoolName,
+        //  }))
+        //  :[]
+        // )
+        //   :[])
+        // }
+        else if (role == 4) {
+          allData = response.data.data.flatMap((school) =>
+            Array.isArray(school.branches) && school.branches.length > 0
+              ? school.branches.flatMap((branch) =>
+                  Array.isArray(branch.devices) && branch.devices.length > 0
+                    ? branch.devices.map((device) => ({
+                        ...device,
+                        branchName: branch.branchName,
+                        schoolName: school.schoolName,
+                      }))
+                    : []
+                )
+              : []
+          );
+        }
+        setAllDevices(allData); // Store all devices
+        setBuses(allData); // Set initial buses as well
+        console.log("filter devices according to branch", allData);
+      } catch (error) {
+        console.error("Error fetching buses:", error);
+      }
+    };
+
+    // const fetchGeofence = async (startDate = "", endDate = "") => {
+    //   // setLoading(true);
+    //   try {
+    //     const token = localStorage.getItem("token");
+    //     let response;
+
+    //     // Fetch data based on role
+    //     if (role == 1) {
+    //       response = await axios.get(`${process.env.REACT_APP_SUPER_ADMIN_API}/geofences`, {
+    //         headers: { Authorization: `Bearer ${token}` },
+    //       });
+    //     } else if (role == 2) {
+    //       response = await axios.get(`${process.env.REACT_APP_SCHOOL_API}/geofences`, {
+    //         headers: { Authorization: `Bearer ${token}` },
+    //       });
+    //     } else if (role == 3) {
+    //       response = await axios.get(`${process.env.REACT_APP_BRANCH_API}/geofences`, {
+    //         headers: { Authorization: `Bearer ${token}` },
+    //       });
+    //     }
+
+    //     if (response?.data) {
+    //       let fetchedData = {};
+
+    //       if (role == 1) {
+    //         // Structure geofences by deviceId
+    //         Object.entries(response.data).forEach(([deviceId, stops]) => {
+    //           fetchedData[deviceId] = stops.map(stop => ({
+    //             ...stop,
+    //             deviceId, // Include deviceId in each stop
+    //           }));
+    //         });
+    //       } else if (role == 2) {
+    //         // For role 2, assuming response contains branches with geofences
+    //         response.data?.branches.forEach(branch => {
+    //           if (branch.geofences) {
+    //             branch.geofences.forEach(geofence => {
+    //               if (!fetchedData[branch.deviceId]) {
+    //                 fetchedData[branch.deviceId] = [];
+    //               }
+    //               fetchedData[branch.deviceId].push({
+    //                 ...geofence,
+    //                 branchId: branch.branchId,
+    //                 branchName: branch.branchName,
+    //               });
+    //             });
+    //           }
+    //         });
+    //       } else if (role == 3) {
+    //         // For role 3, handle geofences by device
+    //         response.data.devices.forEach(device => {
+    //           device.geofences.forEach(geofence => {
+    //             if (!fetchedData[device.deviceId]) {
+    //               fetchedData[device.deviceId] = [];
+    //             }
+    //             fetchedData[device.deviceId].push({
+    //               ...geofence,
+    //               deviceId: device.deviceId,
+    //             });
+    //           });
+    //         });
+    //       }
+
+    //       console.log("role is:", role);
+    //       console.log("geofences are:", fetchedData);
+    //       // Update the state with fetched data
+    //       setPickupPointsData(fetchedData);
+    //     }
+    //   } catch (error) {
+    //     console.error("Error:", error);
+    //   }
+    // };
+
+    const fetchGeofence = async (startDate = "", endDate = "") => {
+      // setLoading(true);
+      try {
         const token = localStorage.getItem("token");
         let response;
 
         // Fetch data based on role
         if (role == 1) {
-            response = await axios.get(`${process.env.REACT_APP_SUPER_ADMIN_API}/geofences`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-        } else if (role == 2) {
-            response = await axios.get(`${process.env.REACT_APP_SCHOOL_API}/geofences`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-        } else if (role == 3) {
-            response = await axios.get(`${process.env.REACT_APP_BRANCH_API}/geofences`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-        }else if(role==4){
-          response=await axios.get(`${process.env.REACT_APP_USERBRANCH}/getgeofence`,{
-            headers:{
-              Authorization:`Bearer ${token}`
+          response = await axios.get(
+            `${process.env.REACT_APP_SUPER_ADMIN_API}/geofences`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
             }
-          })
+          );
+        } else if (role == 2) {
+          response = await axios.get(
+            `${process.env.REACT_APP_SCHOOL_API}/geofences`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+        } else if (role == 3) {
+          response = await axios.get(
+            `${process.env.REACT_APP_BRANCH_API}/geofences`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+        } else if (role == 4) {
+          response = await axios.get(
+            `${process.env.REACT_APP_USERBRANCH}/getgeofence`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
         }
 
         if (response?.data) {
-            let fetchedData = {};
+          let fetchedData = {};
 
-            if (role == 1) {
-                // Structure geofences by deviceId
-                Object.entries(response.data).forEach(([deviceId, stops]) => {
-                    fetchedData[deviceId] = stops.map(stop => ({
-                        ...stop,
-                        deviceId, // Include deviceId in each stop
-                    }));
-                });
-            } else if (role == 2) {
-                // For role 2, assuming response contains branches with geofences
-                response.data?.branches.forEach(branch => {
-                    if (branch.geofences) {
-                        branch.geofences.forEach(geofence => {
-                            if (!fetchedData[geofence.deviceId]) { // Use geofence.deviceId
-                                fetchedData[geofence.deviceId] = [];
-                            }
-                            fetchedData[geofence.deviceId].push({
-                                ...geofence,
-                                branchId: branch.branchId,
-                                branchName: branch.branchName,
-                            });
-                        });
-                    }
-                });
-            } else if (role == 3) {
-                // For role 3, handle geofences by device
-                response.data.devices.forEach(device => {
-                    device.geofences.forEach(geofence => {
-                        if (!fetchedData[device.deviceId]) {
-                            fetchedData[device.deviceId] = [];
-                        }
-                        fetchedData[device.deviceId].push({
-                            ...geofence,
-                            deviceId: device.deviceId,
-                        });
-                    });
-                });
-            }if (role == 4) {
-              // const fetchedData = {}; // Initialize an empty object to store the data
-            
-              response.data.branches.forEach((branch) => {
-                if (branch.geofences) {
-                  branch.geofences.forEach((geofence) => {
-                    if (!fetchedData[geofence.deviceId]) {
-                      fetchedData[geofence.deviceId] = [];
-                    }
-                    fetchedData[geofence.deviceId].push({
-                      ...geofence,
-                      branchName: branch.branchName,
-                      branchId: branch.branchId,
-                    });
+          if (role == 1) {
+            // Structure geofences by deviceId
+            Object.entries(response.data).forEach(([deviceId, stops]) => {
+              fetchedData[deviceId] = stops.map((stop) => ({
+                ...stop,
+                deviceId, // Include deviceId in each stop
+              }));
+            });
+          } else if (role == 2) {
+            // For role 2, assuming response contains branches with geofences
+            response.data?.branches.forEach((branch) => {
+              if (branch.geofences) {
+                branch.geofences.forEach((geofence) => {
+                  if (!fetchedData[geofence.deviceId]) {
+                    // Use geofence.deviceId
+                    fetchedData[geofence.deviceId] = [];
+                  }
+                  fetchedData[geofence.deviceId].push({
+                    ...geofence,
+                    branchId: branch.branchId,
+                    branchName: branch.branchName,
                   });
+                });
+              }
+            });
+          } else if (role == 3) {
+            // For role 3, handle geofences by device
+            response.data.devices.forEach((device) => {
+              device.geofences.forEach((geofence) => {
+                if (!fetchedData[device.deviceId]) {
+                  fetchedData[device.deviceId] = [];
                 }
+                fetchedData[device.deviceId].push({
+                  ...geofence,
+                  deviceId: device.deviceId,
+                });
               });
-            
-              console.log("Fetched Data:", fetchedData);
-            
-              // Use fetchedData as needed in your application
-            }
+            });
+          }
+          if (role == 4) {
+            // const fetchedData = {}; // Initialize an empty object to store the data
 
-            console.log("role is:", role);
-            console.log("geofences are:", fetchedData);
-            // Update the state with fetched data
-            setPickupPointsData(fetchedData);
+            response.data.branches.forEach((branch) => {
+              if (branch.geofences) {
+                branch.geofences.forEach((geofence) => {
+                  if (!fetchedData[geofence.deviceId]) {
+                    fetchedData[geofence.deviceId] = [];
+                  }
+                  fetchedData[geofence.deviceId].push({
+                    ...geofence,
+                    branchName: branch.branchName,
+                    branchId: branch.branchId,
+                  });
+                });
+              }
+            });
+
+            console.log("Fetched Data:", fetchedData);
+
+            // Use fetchedData as needed in your application
+          }
+
+          console.log("role is:", role);
+          console.log("geofences are:", fetchedData);
+          // Update the state with fetched data
+          setPickupPointsData(fetchedData);
         }
-    } catch (error) {
+      } catch (error) {
         console.error("Error:", error);
-    }
-};
-  
-  fetchBuses();
-  fetchSchool();
-  fetchGeofence();
-}, [role]);
-const [allDevices, setAllDevices] = useState([]);
-const columns = COLUMNS();
-const lastSecondColumn = columns[columns.length - 2]; // Last second column
-const lastThirdColumn = columns[columns.length - 3];
+      }
+    };
+
+    fetchBuses();
+    fetchSchool();
+    fetchGeofence();
+  }, [role]);
+  const [allDevices, setAllDevices] = useState([]);
+  const columns = COLUMNS();
+  const lastSecondColumn = columns[columns.length - 2]; // Last second column
+  const lastThirdColumn = columns[columns.length - 3];
 
   return (
     <>
@@ -2882,54 +2898,54 @@ const lastThirdColumn = columns[columns.length - 3];
             marginBottom: "10px",
           }}
         >
-           <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Smaller width
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Set a fixed height to reduce it
-        padding: '0px', // Reduce padding to shrink height
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position
-        fontSize: '14px', // Slightly smaller label font
-      }
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
-          style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
-          }}
-        />
-      ),
-    }}
-  />
-           <Button
-  onClick={() => setModalOpen(true)}
-  sx={{
-    backgroundColor: "rgb(85, 85, 85)",
-    color: "white",
-    fontWeight: "bold",
-    marginRight: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    "&:hover": {
-      fontWeight: "bolder", // Make text even bolder on hover
-      backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
-    },
-  }}
->
-  <ImportExportIcon />
-  Column Visibility
-</Button>
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Smaller width
+              "& .MuiOutlinedInput-root": {
+                height: "36px", // Set a fixed height to reduce it
+                padding: "0px", // Reduce padding to shrink height
+              },
+              "& .MuiInputLabel-root": {
+                top: "-6px", // Adjust label position
+                fontSize: "14px", // Slightly smaller label font
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
+          <Button
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              "&:hover": {
+                fontWeight: "bolder", // Make text even bolder on hover
+                backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
+          </Button>
 
           <Button
             variant="contained"
@@ -2966,8 +2982,14 @@ const lastThirdColumn = columns[columns.length - 3];
           >
             Import
           </Button>
-          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"PARENT DETAIL LIST"} pdfFilename={"ParentApprove.pdf"} excelFilename={"ParentApprove.xlsx"}/>
-
+          <Export
+            columnVisibility={columnVisibility}
+            COLUMNS={COLUMNS}
+            filteredRows={filteredRows}
+            pdfTitle={"PARENT DETAIL LIST"}
+            pdfFilename={"ParentApprove.pdf"}
+            excelFilename={"ParentApprove.xlsx"}
+          />
         </div>
         <div
           style={{
@@ -3255,36 +3277,50 @@ const lastThirdColumn = columns[columns.length - 3];
                           >
                             {row.numChildren}
                           </TableCell>
-                      
-<TableCell
-  style={{
-    borderRight: "1px solid #e0e0e0",
-    paddingTop: "4px",
-    paddingBottom: "4px",
-    borderBottom: "none",
-    display: "flex",
-    textAlign: "center",
-    justifyContent: "space-around",
-    backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-    fontSize: "smaller",
-  }}
->
-  {row.statusOfRegister === "pending" ? (
-    <>
-      <Button onClick={() => handleApprove(role==3?row._id:row.parentId)} color="primary">
-        Approve
-      </Button>
-      <Button onClick={() => handleReject(role==3?row.id:row.parentId)} color="secondary">
-        Reject
-      </Button>
-    </>
-  ) : row.statusOfRegister === "approved" ? (
-    <span style={{ color: "green" }}>Approved</span>
-  ) : row.statusOfRegister === "rejected" ? (
-    <span style={{ color: "red" }}>Rejected</span>
-  ) : null}
-</TableCell>
 
+                          <TableCell
+                            style={{
+                              borderRight: "1px solid #e0e0e0",
+                              paddingTop: "4px",
+                              paddingBottom: "4px",
+                              borderBottom: "none",
+                              display: "flex",
+                              textAlign: "center",
+                              justifyContent: "space-around",
+                              backgroundColor:
+                                index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                              fontSize: "smaller",
+                            }}
+                          >
+                            {row.statusOfRegister === "pending" ? (
+                              <>
+                                <Button
+                                  onClick={() =>
+                                    handleApprove(
+                                      role == 3 ? row._id : row.parentId
+                                    )
+                                  }
+                                  color="primary"
+                                >
+                                  Approve
+                                </Button>
+                                <Button
+                                  onClick={() =>
+                                    handleReject(
+                                      role == 3 ? row.id : row.parentId
+                                    )
+                                  }
+                                  color="secondary"
+                                >
+                                  Reject
+                                </Button>
+                              </>
+                            ) : row.statusOfRegister === "approved" ? (
+                              <span style={{ color: "green" }}>Approved</span>
+                            ) : row.statusOfRegister === "rejected" ? (
+                              <span style={{ color: "red" }}>Rejected</span>
+                            ) : null}
+                          </TableCell>
                         </TableRow>
                       ))
                   )}
@@ -3292,40 +3328,48 @@ const lastThirdColumn = columns[columns.length - 3];
               </Table>
             </TableContainer>
             <StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[
+                  { label: "All", value: -1 },
+                  10,
+                  25,
+                  100,
+                  1000,
+                ]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={
+                  rowsPerPage === sortedData.length ? -1 : rowsPerPage
+                }
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
-       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -3335,91 +3379,11 @@ const lastThirdColumn = columns[columns.length - 3];
                 />
                 {col.Header}
               </div>
-              
             ))}
           </Box>
         </Modal>
         <Modal open={editModalOpen} onClose={handleModalClose}>
-          {/* <Box sx={style}>
-           
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "20px",
-              }}
-            >
-              <h2 style={{ flexGrow: 1 }}>Edit Student Details</h2>
-              <IconButton onClick={handleModalClose}>
-                <CloseIcon />
-              </IconButton>
-            </Box>
-            {COLUMNS()
-              .slice(0, -3)
-              .map((col) => (
-                <TextField
-                  key={col.accessor}
-                  label={col.Header}
-                  variant="outlined"
-                  name={col.accessor}
-                  value={formData[col.accessor] || ""}
-                  onChange={handleInputChange}
-                  sx={{ marginBottom: "10px" }}
-                  fullWidth
-                />
-              ))}
-           
-            <FormControl
-              variant="outlined"
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-            >
-              <InputLabel>{lastThirdColumn.Header}</InputLabel>
-
-              <Select
-                value={formData[lastThirdColumn.accessor] || ""}
-                onChange={handleOtherSelectChange}
-                name={lastThirdColumn.accessor}
-                label={lastThirdColumn.Header}
-              >
-                {otherDropdownOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl
-              variant="outlined"
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-            >
-              <InputLabel>{lastSecondColumn.Header}</InputLabel>
-
-              <Select
-                value={formData[lastSecondColumn.accessor] || ""}
-                onChange={handleSelectChange}
-                name={lastSecondColumn.accessor}
-                label={lastSecondColumn.Header}
-              >
-                {dropdownOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-           
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleEditSubmit}
-            >
-              Submit
-            </Button>
-          </Box> */}
-           <Box sx={style}>
+          <Box sx={style}>
             {/* <h2>Add Row</h2> */}
             <Box
               sx={{
@@ -3434,806 +3398,350 @@ const lastThirdColumn = columns[columns.length - 3];
               </IconButton>
             </Box>
 
-         {/*    <TextField
-              key={"childName"}
-              label={"Student Name"}
-              variant="outlined"
-              name="childName"
-              value={formData["childName"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-             
-            /> */}
-
-         {/*    <FormControl
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <FormLabel
-                id="demo-row-radio-buttons-group-label"
-                sx={{ marginRight: 4 }} // Add some space between label and radio group
-              >
-                Gender
-              </FormLabel>
-              <RadioGroup
-                row
-                aria-labelledby="demo-row-radio-buttons-group-label"
-                name="gender"
-                onChange={handleInputChange}
-              >
-                <FormControlLabel
-                  value="female"
-                  control={<Radio />}
-                  label="Female"
-                />
-                <FormControlLabel
-                  value="male"
-                  control={<Radio />}
-                  label="Male"
-                />
-              </RadioGroup>
-            </FormControl> */}
-
-            {/* <FormControl
-              sx={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <FormLabel
-                id="demo-row-radio-buttons-group-label"
-                sx={{ marginRight: 4 }} // Add some space between label and radio group
-              >
-                Date of Birth
-              </FormLabel>
- */}
-           {/*    <TextField
-                key={"childAge"}
-                label={ "Date of Birth"}
-                type="date"
-                placeholder="Date of Birth"
-                variant="outlined"
-                name="dateOfBirth"
-                value={formData["dateOfBirth"] || ""}
-                onChange={handleInputChange}
-                sx={{ marginBottom: "10px", width: "200px" }}
-                fullWidth
-               
-              />
-            </FormControl> */}
-
-           {/*  <TextField
-              key={"childAge"}
-              label={"Student Age"}
-              variant="outlined"
-              name="childAge"
-              // value={formData["childAge"] || ""}
-               value={formData.childAge || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-             
-            />
- */}
-            {/* <FormControl fullWidth sx={{ marginBottom: "10px" }}>
-              <InputLabel id="demo-simple-select-label">Class</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                name="class"
-                value={formData["class"] || ""}
-                label="Class"
-                onChange={handleInputChange}
-              >
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={2}>2</MenuItem>
-                <MenuItem value={3}>3</MenuItem>
-                <MenuItem value={4}>4</MenuItem>
-                <MenuItem value={5}>5</MenuItem>
-                <MenuItem value={6}>6</MenuItem>
-                <MenuItem value={7}>7</MenuItem>
-                <MenuItem value={8}>8</MenuItem>
-                <MenuItem value={9}>9</MenuItem>
-                <MenuItem value={10}>10</MenuItem>
-              </Select>
-            </FormControl> */}
-{/* <FormControl fullWidth sx={{ marginBottom: "10px" }}>
-  <Autocomplete
-    id="searchable-select"
-    options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}  // Array of values to choose from
-    getOptionLabel={(option) => option.toString()}  // Convert numeric values to string for display
-    value={formData["class"] || null}
-    onChange={(event, newValue) => {
-      handleInputChange({
-        target: { name: "class", value: newValue },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Class"
-        variant="outlined"
-        name="class"
-      />
-    )}
-  />
-</FormControl> */}
-           {/*  <TextField
-              key={"roleno"}
-              label={"Roll No"}
-              variant="outlined"
-              name="rollno"
-              value={formData["rollno"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-            /> */}
-           {/*  <TextField
-              key={"section"}
-              label={"Section"}
-              variant="outlined"
-              name="section"
-              value={formData["section"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-            />
-             */}
             {role == 1 ? (
               <>
-               <FormControl
-              variant="outlined"
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-            >
-              <TextField
-              key={"parent"}
-              label={"Parent Name"}
-              variant="outlined"
-              name="parentName"
-              value={formData["parentName"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <AbcIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"phone"}
-              label={"Phone Number"}
-              variant="outlined"
-              name="phone"
-              value={formData["phone"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneInTalkIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"email"}
-              label={"Parent's Email"}
-              variant="outlined"
-              name="email"
-              value={formData["email"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <MailIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"password"}
-              label={"Password"}
-              variant="outlined"
-              name="password"
-              value={formData["password"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PasswordIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            </FormControl> 
-                {/* <FormControl
+                <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
                   fullWidth
                 >
-                  <InputLabel>{"School Name"}</InputLabel>
-
-                  <Select
-                    value={formData["schoolName"] || ""}
+                  <TextField
+                    key={"parent"}
+                    label={"Parent Name"}
+                    variant="outlined"
+                    name="parentName"
+                    value={formData["parentName"] || ""}
                     onChange={handleInputChange}
-                    name="schoolName"
-                    label={"School Name"}
-                  >
-                    {schools?.map((option) => (
-                      <MenuItem key={option._id} value={option.schoolName}>
-                        {option.schoolName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl> */}
-                {/* <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-  <Autocomplete
-    id="searchable-school-select"
-    options={schools || []} // List of school objects
-    getOptionLabel={(option) => option.schoolName || ""} // Display school name
-    value={schools.find(school => school.schoolName === formData["schoolName"]) || null} // Find the selected school
-    onChange={(event, newValue) => {
-      handleInputChange({
-        target: { name: "schoolName", value: newValue?.schoolName || "" },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="School Name"
-        variant="outlined"
-        name="schoolName"
-      />
-    )}
-  />
-</FormControl> */}
-{/* <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-  <Autocomplete
-    id="searchable-school-select"
-    options={schools || []} // Ensure schools is an array
-    getOptionLabel={(option) => option.schoolName || ""} // Display school name
-    value={Array.isArray(schools) ? schools.find(school => school.schoolName === formData["schoolName"]) : null} // Safely find the selected school
-    onChange={(event, newValue) => {
-      handleInputChange({
-        target: { name: "schoolName", value: newValue?.schoolName || "" },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="School Name"
-        variant="outlined"
-        name="schoolName"
-        
-      />
-    )}
-  />
-</FormControl> */}
-
-                {/* <FormControl
-                  variant="outlined"
-                  sx={{ marginBottom: "10px" }}
-                  fullWidth
-                >
-                  <InputLabel>{"Branch Name"}</InputLabel>
-
-                  <Select
-                    value={formData["branchName"] || ""}
+                    sx={{ marginBottom: "10px" }}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <AbcIcon /> {/* Add Face6Icon in the input field */}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    key="phone"
+                    label="Phone Number"
+                    variant="outlined"
+                    name="phone"
+                    value={formData["phone"] || ""}
                     onChange={handleInputChange}
-                    name="branchName"
-                    label={"Branch Name"}
-                  >
-                    {branches?.map((option) => (
-                      <MenuItem key={option.branchId} value={option.branchName}>
-                        {option.branchName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl> */}
-               {/* <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-  <Autocomplete
-    id="searchable-branch-select"
-    options={Array.isArray(branches) ? branches : []} // Ensure branches is an array
-    getOptionLabel={(option) => option.branchName || ""} // Display branch name
-    value={Array.isArray(branches) ? branches.find(branch => branch.branchName === formData["branchName"]) : null} // Safely find the selected branch
-    onChange={(event, newValue) => {
-      handleInputChange({
-        target: { name: "branchName", value: newValue?.branchName || "" },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Branch Name"
-        variant="outlined"
-        name="branchName"
-        
-      />
-    )}
-  />
-</FormControl> */}
-
+                    sx={{ marginBottom: "10px" }}
+                    fullWidth
+                    error={!!errors.phone} // Show error if exists
+                    helperText={errors.phone} // Display error message
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PhoneInTalkIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    key={"email"}
+                    label={"Parent's Email"}
+                    variant="outlined"
+                    name="email"
+                    value={formData["email"] || ""}
+                    onChange={handleInputChange}
+                    sx={{ marginBottom: "10px" }}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <MailIcon /> {/* Add Face6Icon in the input field */}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    key="password"
+                    label="Password"
+                    variant="outlined"
+                    name="password"
+                    // type="password"
+                    value={formData["password"] || ""}
+                    onChange={handleInputChange}
+                    sx={{ marginBottom: "10px" }}
+                    fullWidth
+                    error={!!errors.password} // Show error if exists
+                    helperText={errors.password} // Display error message
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PasswordIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </FormControl>
               </>
-            ) :role == 4 ? (<>
-             
-               {/* <FormControl
+            ) : role == 4 ? (
+              <>
+                <FormControl
+                  variant="outlined"
+                  sx={{ marginBottom: "10px" }}
+                  fullWidth
+                >
+                  <TextField
+                    key={"parent"}
+                    label={"Parent Name"}
+                    variant="outlined"
+                    name="parentName"
+                    value={formData["parentName"] || ""}
+                    onChange={handleInputChange}
+                    sx={{ marginBottom: "10px" }}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <AbcIcon /> {/* Add Face6Icon in the input field */}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    key="phone"
+                    label="Phone Number"
+                    variant="outlined"
+                    name="phone"
+                    value={formData["phone"] || ""}
+                    onChange={handleInputChange}
+                    sx={{ marginBottom: "10px" }}
+                    fullWidth
+                    error={!!errors.phone} // Show error if exists
+                    helperText={errors.phone} // Display error message
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PhoneInTalkIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    key={"email"}
+                    label={"Parent's Email"}
+                    variant="outlined"
+                    name="email"
+                    value={formData["email"] || ""}
+                    onChange={handleInputChange}
+                    sx={{ marginBottom: "10px" }}
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <MailIcon /> {/* Add Face6Icon in the input field */}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    key="password"
+                    label="Password"
+                    variant="outlined"
+                    name="password"
+                    // type="password"
+                    value={formData["password"] || ""}
+                    onChange={handleInputChange}
+                    sx={{ marginBottom: "10px" }}
+                    fullWidth
+                    error={!!errors.password} // Show error if exists
+                    helperText={errors.password} // Display error message
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PasswordIcon />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </FormControl>
+              </>
+            ) : role == 2 ? (
+              <FormControl
                 variant="outlined"
                 sx={{ marginBottom: "10px" }}
                 fullWidth
               >
-                <Autocomplete
-                  id="searchable-branch-select"
-                  options={branches || []} // Ensure branches is an array
-                  getOptionLabel={(option) => option.branchName || ""} // Display branch name
-                  value={
-                    Array.isArray(branches)
-                      ? branches.find(
-                          (branch) =>
-                            branch.branchName === formData["branchName"]
-                        ) || null
-                      : null
-                  } // Safeguard find method
-                  onChange={(event, newValue) => {
-                    handleInputChange({
-                      target: {
-                        name: "branchName",
-                        value: newValue?.branchName || "",
-                      },
-                    });
+                <TextField
+                  key={"parent"}
+                  label={"Parent Name"}
+                  variant="outlined"
+                  name="parentName"
+                  value={formData["parentName"] || ""}
+                  onChange={handleInputChange}
+                  sx={{ marginBottom: "10px" }}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <AbcIcon /> {/* Add Face6Icon in the input field */}
+                      </InputAdornment>
+                    ),
                   }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Branch Name"
-                      variant="outlined"
-                      name="branchName"
-                    />
-                  )}
                 />
-              </FormControl>  */}
+                <TextField
+                  key="phone"
+                  label="Phone Number"
+                  variant="outlined"
+                  name="phone"
+                  value={formData["phone"] || ""}
+                  onChange={handleInputChange}
+                  sx={{ marginBottom: "10px" }}
+                  fullWidth
+                  error={!!errors.phone} // Show error if exists
+                  helperText={errors.phone} // Display error message
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneInTalkIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  key={"email"}
+                  label={"Parent's Email"}
+                  variant="outlined"
+                  name="email"
+                  value={formData["email"] || ""}
+                  onChange={handleInputChange}
+                  sx={{ marginBottom: "10px" }}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <MailIcon /> {/* Add Face6Icon in the input field */}
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  key="password"
+                  label="Password"
+                  variant="outlined"
+                  name="password"
+                  // type="password"
+                  value={formData["password"] || ""}
+                  onChange={handleInputChange}
+                  sx={{ marginBottom: "10px" }}
+                  fullWidth
+                  error={!!errors.password} // Show error if exists
+                  helperText={errors.password} // Display error message
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PasswordIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </FormControl>
+            ) : role == 3 ? (
               <FormControl
-              variant="outlined"
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-            >
-              <TextField
-              key={"parent"}
-              label={"Parent Name"}
-              variant="outlined"
-              name="parentName"
-              value={formData["parentName"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <AbcIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"phone"}
-              label={"Phone Number"}
-              variant="outlined"
-              name="phone"
-              value={formData["phone"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneInTalkIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"email"}
-              label={"Parent's Email"}
-              variant="outlined"
-              name="email"
-              value={formData["email"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <MailIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"password"}
-              label={"Password"}
-              variant="outlined"
-              name="password"
-              value={formData["password"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PasswordIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            </FormControl> 
-            </>
+                variant="outlined"
+                sx={{ marginBottom: "10px" }}
+                fullWidth
+              >
+                <TextField
+                  key={"parent"}
+                  label={"Parent Name"}
+                  variant="outlined"
+                  name="parentName"
+                  value={formData["parentName"] || ""}
+                  onChange={handleInputChange}
+                  sx={{ marginBottom: "10px" }}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <AbcIcon /> {/* Add Face6Icon in the input field */}
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  key="phone"
+                  label="Phone Number"
+                  variant="outlined"
+                  name="phone"
+                  value={formData["phone"] || ""}
+                  onChange={handleInputChange}
+                  sx={{ marginBottom: "10px" }}
+                  fullWidth
+                  error={!!errors.phone} // Show error if exists
+                  helperText={errors.phone} // Display error message
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneInTalkIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  key={"email"}
+                  label={"Parent's Email"}
+                  variant="outlined"
+                  name="email"
+                  value={formData["email"] || ""}
+                  onChange={handleInputChange}
+                  sx={{ marginBottom: "10px" }}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <MailIcon /> {/* Add Face6Icon in the input field */}
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                {/* <TextField
+                  key={"password"}
+                  label={"Password"}
+                  variant="outlined"
+                  name="password"
+                  value={formData["password"] || ""}
+                  onChange={handleInputChange}
+                  sx={{ marginBottom: "10px" }}
+                  fullWidth
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PasswordIcon />{" "}
+                        
+                      </InputAdornment>
+                    ),
+                  }}
+                /> */}
+                <TextField
+                  key="password"
+                  label="Password"
+                  variant="outlined"
+                  name="password"
+                  // type="password"
+                  value={formData["password"] || ""}
+                  onChange={handleInputChange}
+                  sx={{ marginBottom: "10px" }}
+                  fullWidth
+                  error={!!errors.password} // Show error if exists
+                  helperText={errors.password} // Display error message
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PasswordIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </FormControl>
+            ) : null}
 
-            ): role == 2 ? (
-              <FormControl
-              variant="outlined"
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-            >
-              <TextField
-              key={"parent"}
-              label={"Parent Name"}
-              variant="outlined"
-              name="parentName"
-              value={formData["parentName"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <AbcIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"phone"}
-              label={"Phone Number"}
-              variant="outlined"
-              name="phone"
-              value={formData["phone"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneInTalkIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"email"}
-              label={"Parent's Email"}
-              variant="outlined"
-              name="email"
-              value={formData["email"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <MailIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"password"}
-              label={"Password"}
-              variant="outlined"
-              name="password"
-              value={formData["password"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PasswordIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            </FormControl> 
-              // <FormControl
-              //   variant="outlined"
-              //   sx={{ marginBottom: "10px" }}
-              //   fullWidth
-              // >
-              //   <InputLabel>{"Branch Name"}</InputLabel>
-
-              //   <Select
-              //     value={formData["branchName"] || ""}
-              //     onChange={handleInputChange}
-              //     name="branchName"
-              //     label={"Branch Name"}
-              //   >
-              //     {branches?.map((option) => (
-              //       <MenuItem key={option.branchId} value={option.branchName}>
-              //         {option.branchName}
-              //       </MenuItem>
-              //     ))}
-              //   </Select>
-              // </FormControl>
-//               <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-//   <Autocomplete
-//     id="searchable-branch-select"
-//     options={branches || []} // List of branch objects
-//     getOptionLabel={(option) => option.branchName || ""} // Display branch name
-//     value={branches.find(branch => branch.branchName === formData["branchName"]) || null} // Find the selected branch
-//     onChange={(event, newValue) => {
-//       handleInputChange({
-//         target: { name: "branchName", value: newValue?.branchName || "" },
-//       });
-//     }}
-//     renderInput={(params) => (
-//       <TextField
-//         {...params}
-//         label="Branch Name"
-//         variant="outlined"
-//         name="branchName"
-//       />
-//     )}
-//   />
-// </FormControl>
-//  <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-//   <Autocomplete
-//     id="searchable-branch-select"
-//     options={branches || []} // List of branch objects
-//     getOptionLabel={(option) => option.branchName || ""} // Display branch name
-//     value={Array.isArray(branches) ? branches.find(branch => branch.branchName === formData["branchName"]) || null : null} // Ensure branches is an array before find
-//     onChange={(event, newValue) => {
-//       handleInputChange({
-//         target: { name: "branchName", value: newValue?.branchName || "" },
-//       });
-//     }}
-//     renderInput={(params) => (
-//       <TextField
-//         {...params}
-//         label="Branch Name"
-//         variant="outlined"
-//         name="branchName"
-        
-//       />
-//     )}
-//   />
-// </FormControl>
-            ): role == 3 ? (
-              <FormControl
-              variant="outlined"
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-            >
-              <TextField
-              key={"parent"}
-              label={"Parent Name"}
-              variant="outlined"
-              name="parentName"
-              value={formData["parentName"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <AbcIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"phone"}
-              label={"Phone Number"}
-              variant="outlined"
-              name="phone"
-              value={formData["phone"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneInTalkIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"email"}
-              label={"Parent's Email"}
-              variant="outlined"
-              name="email"
-              value={formData["email"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <MailIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <TextField
-              key={"password"}
-              label={"Password"}
-              variant="outlined"
-              name="password"
-              value={formData["password"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PasswordIcon />  {/* Add Face6Icon in the input field */}
-                  </InputAdornment>
-                ),
-              }}
-            />
-            </FormControl> ): null}
-            {/* <FormControl
-  variant="outlined"
-  sx={{ marginBottom: "10px" }}
-  fullWidth
->
-  <InputLabel>{"Bus Name"}</InputLabel>
-  
-  <Select
-    value={formData["deviceId"] || ""}  // Select based on deviceId
-    onChange={handleBusChange}
-    name="deviceId"  // Name reflects deviceId for posting
-    label={"Bus Name"}
-  >
-    {buses?.map((option) => (
-      <MenuItem key={option.deviceId} value={option.deviceId}>
-        {option.deviceName}  
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl> */}
- {/* <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-  <InputLabel>{"Bus Name"}</InputLabel>
-  <Select
-    value={formData["deviceId"] || ""}
-    onChange={handleBusChange}
-    name="deviceId"
-    label={"Bus Name"}
-  >
-    {buses?.map((option) => (
-      <MenuItem key={option.deviceId} value={option.deviceId}>
-        {option.deviceName}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl> */}
-{/* <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-  <Autocomplete
-    id="searchable-bus-select"
-    options={Array.isArray(buses) ? buses : []} // Ensure buses is an array
-    getOptionLabel={(option) => option.deviceName || ""} // Display bus name
-    value={Array.isArray(buses) ? buses.find(bus => bus.deviceId === formData["deviceId"]) : null} // Safely find the selected bus
-    onChange={(event, newValue) => {
-      handleBusChange({
-        target: { name: "deviceId", value: newValue?.deviceId || "" },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Bus Name"
-        variant="outlined"
-        name="deviceId"
-      />
-    )}
-  />
-</FormControl> */}
-
-{/* Geofences display based on selected Bus */}
-{/* <FormControl fullWidth sx={{ marginBottom: "10px" }}>
-  <InputLabel id="geofence-id-label">Select Geofence</InputLabel>
-  <Select
-    labelId="geofence-id-label"
-    name="pickupPoint"
-    value={formData["pickupPoint"] || ""}
-    onChange={handleInputChange}
-  >
-    {filteredGeofences.length > 0 ? (
-      filteredGeofences.map(geofence => (
-        <MenuItem key={geofence._id} value={geofence.name}>
-          {geofence.name} 
-        </MenuItem>
-      ))
-    ) : (
-      <MenuItem disabled>No geofences available</MenuItem>
-    )}
-  </Select>
-</FormControl> */}
-
-{/* <FormControl fullWidth sx={{ marginBottom: "10px" }}>
-  <Autocomplete
-    id="geofence-autocomplete"
-    options={filteredGeofences || []} // List of geofence objects
-    getOptionLabel={(option) => option.name || ""} // Display geofence name
-    value={filteredGeofences.find(geofence => geofence.name === formData["pickupPoint"]) || null} // Find the selected geofence
-    onChange={(event, newValue) => {
-      handleInputChange({
-        target: { name: "pickupPoint", value: newValue?.name || "" },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Select Geofence"
-        variant="outlined"
-        name="pickupPoint"
-      />
-    )}
-  />
-</FormControl> */}
-
-
-            
-          {/* <FormControl fullWidth sx={{ marginBottom: "10px" }}>
-  <InputLabel id="device-id-label">Select Device</InputLabel>
-  <Select
-    labelId="device-id-label"
-    name="deviceId"
-    value={selectedDeviceId}
-    onChange={handleInputChange}
-  >
-    {pickupPointsData.map((item) => (
-      <MenuItem key={item.deviceId} value={item.deviceId}>
-        {item.deviceId} 
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
-{filteredGeofences.length > 0 && (
-  <div>
-    <h3>Geofences for Device {selectedDeviceId}:</h3>
-    <ul>
-      {filteredGeofences.map(geofence => (
-        <li key={geofence._id}>{geofence.name}</li> // Display geofence name
-      ))}
-    </ul>
-  </div>
-)} */}
-
-
-
-            {/* <TextField
-              key={"fcmToken"}
-              label={"fcm Token"}
-              variant="outlined"
-              name="fcmToken"
-              value={formData["fcmToken"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-            /> */}
             <Button
               variant="contained"
               color="primary"
@@ -4271,7 +3779,8 @@ const lastThirdColumn = columns[columns.length - 3];
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <DriveFileRenameOutlineIcon/>  {/* Add Face6Icon in the input field */}
+                    <DriveFileRenameOutlineIcon />{" "}
+                    {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
@@ -4325,7 +3834,7 @@ const lastThirdColumn = columns[columns.length - 3];
 
               <TextField
                 key={"childAge"}
-                label={ "Date of Birth"}
+                label={"Date of Birth"}
                 type="date"
                 placeholder="Date of Birth"
                 variant="outlined"
@@ -4339,7 +3848,8 @@ const lastThirdColumn = columns[columns.length - 3];
                     <InputAdornment position="start">
                       <CakeIcon />
                     </InputAdornment>
-                  ),}}
+                  ),
+                }}
               />
             </FormControl>
 
@@ -4354,74 +3864,53 @@ const lastThirdColumn = columns[columns.length - 3];
               fullWidth
             /> */}
             <TextField
-        key={"childAge"}
-        label={"Student Age"}
-        variant="outlined"
-        name="childAge"
-        value={formData.childAge || ""}
-        sx={{ marginBottom: "10px" }}
-        fullWidth
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Face6Icon />  {/* Add Face6Icon in the input field */}
-            </InputAdornment>
-          ),
-        }}
-        // disabled // Disable the field since the age is calculated automatically
-      />
+              key={"childAge"}
+              label={"Student Age"}
+              variant="outlined"
+              name="childAge"
+              value={formData.childAge || ""}
+              sx={{ marginBottom: "10px" }}
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Face6Icon /> {/* Add Face6Icon in the input field */}
+                  </InputAdornment>
+                ),
+              }}
+              // disabled // Disable the field since the age is calculated automatically
+            />
 
-            {/* <FormControl fullWidth sx={{ marginBottom: "10px" }}>
-              <InputLabel id="demo-simple-select-label">Class</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                name="class"
-                value={formData["class"] || ""}
-                label="Class"
-                onChange={handleInputChange}
-              >
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={2}>2</MenuItem>
-                <MenuItem value={3}>3</MenuItem>
-                <MenuItem value={4}>4</MenuItem>
-                <MenuItem value={5}>5</MenuItem>
-                <MenuItem value={6}>6</MenuItem>
-                <MenuItem value={7}>7</MenuItem>
-                <MenuItem value={8}>8</MenuItem>
-                <MenuItem value={9}>9</MenuItem>
-                <MenuItem value={10}>10</MenuItem>
-              </Select>
-            </FormControl> */}
-<FormControl fullWidth sx={{ marginBottom: "10px" }}>
-  <Autocomplete
-    id="searchable-select"
-    options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}  // Array of values to choose from
-    getOptionLabel={(option) => option.toString()}  // Convert numeric values to string for display
-    value={formData["class"] || null}
-    onChange={(event, newValue) => {
-      handleInputChange({
-        target: { name: "class", value: newValue },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Class"
-        variant="outlined"
-        name="class"
-        InputProps={{
-          ...params.InputProps,
-          startAdornment: (
-            <InputAdornment position="start">
-              <ClassIcon />  {/* Add SchoolIcon in the input field */}
-            </InputAdornment>
-          ),
-        }}
-      />
-    )}
-  />
-</FormControl>
+            <FormControl fullWidth sx={{ marginBottom: "10px" }}>
+              <Autocomplete
+                id="searchable-select"
+                options={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]} // Array of values to choose from
+                getOptionLabel={(option) => option.toString()} // Convert numeric values to string for display
+                value={formData["class"] || null}
+                onChange={(event, newValue) => {
+                  handleInputChange({
+                    target: { name: "class", value: newValue },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Class"
+                    variant="outlined"
+                    name="class"
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <ClassIcon />{" "}
+                          {/* Add SchoolIcon in the input field */}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              />
+            </FormControl>
             <TextField
               key={"roleno"}
               label={"Roll No"}
@@ -4434,7 +3923,7 @@ const lastThirdColumn = columns[columns.length - 3];
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PinIcon/>  {/* Add Face6Icon in the input field */}
+                    <PinIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
@@ -4451,114 +3940,105 @@ const lastThirdColumn = columns[columns.length - 3];
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <HolidayVillageIcon />  {/* Add Face6Icon in the input field */}
+                    <HolidayVillageIcon />{" "}
+                    {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
             />
             {role == 1 ? (
               <>
-                {/* <FormControl
+                <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
                   fullWidth
                 >
-                  <InputLabel>{"School Name"}</InputLabel>
+                  <Autocomplete
+                    id="searchable-school-select"
+                    options={schools || []} // Ensure schools is an array
+                    getOptionLabel={(option) => option.schoolName || ""} // Display school name
+                    value={
+                      Array.isArray(schools)
+                        ? schools.find(
+                            (school) =>
+                              school.schoolName === formData["schoolName"]
+                          )
+                        : null
+                    } // Safely find the selected school
+                    onChange={(event, newValue) => {
+                      handleInputChange({
+                        target: {
+                          name: "schoolName",
+                          value: newValue?.schoolName || "",
+                        },
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="School Name"
+                        variant="outlined"
+                        name="schoolName"
+                        InputProps={{
+                          ...params.InputProps,
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <SchoolIcon />{" "}
+                              {/* Add SchoolIcon in the input field */}
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    )}
+                  />
+                </FormControl>
 
-                  <Select
-                    value={formData["schoolName"] || ""}
-                    onChange={handleInputChange}
-                    name="schoolName"
-                    label={"School Name"}
-                  >
-                    {schools?.map((option) => (
-                      <MenuItem key={option._id} value={option.schoolName}>
-                        {option.schoolName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl> */}
-                <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-  <Autocomplete
-    id="searchable-school-select"
-    options={schools || []} // Ensure schools is an array
-    getOptionLabel={(option) => option.schoolName || ""} // Display school name
-    value={Array.isArray(schools) ? schools.find(school => school.schoolName === formData["schoolName"]) : null} // Safely find the selected school
-    onChange={(event, newValue) => {
-      handleInputChange({
-        target: { name: "schoolName", value: newValue?.schoolName || "" },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="School Name"
-        variant="outlined"
-        name="schoolName"
-        InputProps={{
-          ...params.InputProps,
-          startAdornment: (
-            <InputAdornment position="start">
-              <SchoolIcon />  {/* Add SchoolIcon in the input field */}
-            </InputAdornment>
-          ),
-        }}
-      />
-    )}
-  />
-</FormControl>
-                {/* <FormControl
+                <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
                   fullWidth
                 >
-                  <InputLabel>{"Branch Name"}</InputLabel>
-
-                  <Select
-                    value={formData["branchName"] || ""}
-                    onChange={handleInputChange}
-                    name="branchName"
-                    label={"Branch Name"}
-                  >
-                    {branches?.map((option) => (
-                      <MenuItem key={option.branchId} value={option.branchName}>
-                        {option.branchName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl> */}
-                 <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-  <Autocomplete
-    id="searchable-branch-select"
-    options={Array.isArray(branches) ? branches : []} // Ensure branches is an array
-    getOptionLabel={(option) => option.branchName || ""} // Display branch name
-    value={Array.isArray(branches) ? branches.find(branch => branch.branchName === formData["branchName"]) : null} // Safely find the selected branch
-    onChange={(event, newValue) => {
-      handleInputChange({
-        target: { name: "branchName", value: newValue?.branchName || "" },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Branch Name"
-        variant="outlined"
-        name="branchName"
-        InputProps={{
-          ...params.InputProps,
-          startAdornment: (
-            <InputAdornment position="start">
-              <AccountTreeIcon />  {/* Add SchoolIcon in the input field */}
-            </InputAdornment>
-          ),
-        }}
-      />
-    )}
-  />
-</FormControl>
+                  <Autocomplete
+                    id="searchable-branch-select"
+                    options={Array.isArray(branches) ? branches : []} // Ensure branches is an array
+                    getOptionLabel={(option) => option.branchName || ""} // Display branch name
+                    value={
+                      Array.isArray(branches)
+                        ? branches.find(
+                            (branch) =>
+                              branch.branchName === formData["branchName"]
+                          )
+                        : null
+                    } // Safely find the selected branch
+                    onChange={(event, newValue) => {
+                      handleInputChange({
+                        target: {
+                          name: "branchName",
+                          value: newValue?.branchName || "",
+                        },
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Branch Name"
+                        variant="outlined"
+                        name="branchName"
+                        InputProps={{
+                          ...params.InputProps,
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <AccountTreeIcon />{" "}
+                              {/* Add SchoolIcon in the input field */}
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    )}
+                  />
+                </FormControl>
               </>
-            ): role == 4 ? (
-             
+            ) : role == 4 ? (
               <FormControl
                 variant="outlined"
                 sx={{ marginBottom: "10px" }}
@@ -4594,7 +4074,8 @@ const lastThirdColumn = columns[columns.length - 3];
                         ...params.InputProps,
                         startAdornment: (
                           <InputAdornment position="start">
-                            <AccountTreeIcon />  {/* Add SchoolIcon in the input field */}
+                            <AccountTreeIcon />{" "}
+                            {/* Add SchoolIcon in the input field */}
                           </InputAdornment>
                         ),
                       }}
@@ -4603,193 +4084,131 @@ const lastThirdColumn = columns[columns.length - 3];
                 />
               </FormControl>
             ) : role == 2 ? (
-              // <FormControl
-              //   variant="outlined"
-              //   sx={{ marginBottom: "10px" }}
-              //   fullWidth
-              // >
-              //   <InputLabel>{"Branch Name"}</InputLabel>
-
-              //   <Select
-              //     value={formData["branchName"] || ""}
-              //     onChange={handleInputChange}
-              //     name="branchName"
-              //     label={"Branch Name"}
-              //   >
-              //     {branches?.map((option) => (
-              //       <MenuItem key={option.branchId} value={option.branchName}>
-              //         {option.branchName}
-              //       </MenuItem>
-              //     ))}
-              //   </Select>
-              // </FormControl>
-            //   <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-            //   <Autocomplete
-            //     id="searchable-branch-select"
-            //     options={branches || []} // List of branch objects
-            //     getOptionLabel={(option) => option.branchName || ""} // Display branch name
-            //     value={branches.find(branch => branch.branchName === formData["branchName"]) || null} // Find the selected branch
-            //     onChange={(event, newValue) => {
-            //       handleInputChange({
-            //         target: { name: "branchName", value: newValue?.branchName || "" },
-            //       });
-            //     }}
-            //     renderInput={(params) => (
-            //       <TextField
-            //         {...params}
-            //         label="Branch Name"
-            //         variant="outlined"
-            //         name="branchName"
-            //       />
-            //     )}
-            //   />
-            // </FormControl>
-            <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-  <Autocomplete
-    id="searchable-branch-select"
-    options={branches || []} // List of branch objects
-    getOptionLabel={(option) => option.branchName || ""} // Display branch name
-    value={Array.isArray(branches) ? branches.find(branch => branch.branchName === formData["branchName"]) || null : null} // Ensure branches is an array before calling find
-    onChange={(event, newValue) => {
-      handleInputChange({
-        target: { name: "branchName", value: newValue?.branchName || "" },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Branch Name"
-        variant="outlined"
-        name="branchName"
-        InputProps={{
-          ...params.InputProps,
-          startAdornment: (
-            <InputAdornment position="start">
-              <AccountTreeIcon />  {/* Add SchoolIcon in the input field */}
-            </InputAdornment>
-          ),
-        }}
-      />
-    )}
-  />
-</FormControl>
-
+              <FormControl
+                variant="outlined"
+                sx={{ marginBottom: "10px" }}
+                fullWidth
+              >
+                <Autocomplete
+                  id="searchable-branch-select"
+                  options={branches || []} // List of branch objects
+                  getOptionLabel={(option) => option.branchName || ""} // Display branch name
+                  value={
+                    Array.isArray(branches)
+                      ? branches.find(
+                          (branch) =>
+                            branch.branchName === formData["branchName"]
+                        ) || null
+                      : null
+                  } // Ensure branches is an array before calling find
+                  onChange={(event, newValue) => {
+                    handleInputChange({
+                      target: {
+                        name: "branchName",
+                        value: newValue?.branchName || "",
+                      },
+                    });
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Branch Name"
+                      variant="outlined"
+                      name="branchName"
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <AccountTreeIcon />{" "}
+                            {/* Add SchoolIcon in the input field */}
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  )}
+                />
+              </FormControl>
             ) : null}
-            {/* <FormControl
-  variant="outlined"
-  sx={{ marginBottom: "10px" }}
-  fullWidth
->
-  <InputLabel>{"Bus Name"}</InputLabel>
-  
-  <Select
-    value={formData["deviceId"] || ""}  // Select based on deviceId
-    onChange={handleBusChange}
-    name="deviceId"  // Name reflects deviceId for posting
-    label={"Bus Name"}
-  >
-    {buses?.map((option) => (
-      <MenuItem key={option.deviceId} value={option.deviceId}>
-        {option.deviceName}  
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl> */}
- {/* <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-  <InputLabel>{"Bus Name"}</InputLabel>
-  <Select
-    value={formData["deviceId"] || ""}
-    onChange={handleBusChange}
-    name="deviceId"
-    label={"Bus Name"}
-  >
-    {buses?.map((option) => (
-      <MenuItem key={option.deviceId} value={option.deviceId}>
-        {option.deviceName}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl> */}
-<FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-  <Autocomplete
-    id="searchable-bus-select"
-    options={Array.isArray(buses) ? buses : []} // Ensure buses is an array
-    getOptionLabel={(option) => option.deviceName || ""} // Display bus name
-    value={Array.isArray(buses) ? buses.find(bus => bus.deviceId === formData["deviceId"]) : null} // Safely find the selected bus
-    onChange={(event, newValue) => {
-      handleBusChange({
-        target: { name: "deviceId", value: newValue?.deviceId || "" },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Bus Name"
-        variant="outlined"
-        name="deviceId"
-        InputProps={{
-          ...params.InputProps,
-          startAdornment: (
-            <InputAdornment position="start">
-              <DirectionsBusIcon />  {/* Add SchoolIcon in the input field */}
-            </InputAdornment>
-          ),
-        }}
-      />
-    )}
-  />
-</FormControl>
-{/* Geofences display based on selected Bus */}
-{/* <FormControl fullWidth sx={{ marginBottom: "10px" }}>
-  <InputLabel id="geofence-id-label">Select Geofence</InputLabel>
-  <Select
-    labelId="geofence-id-label"
-    name="pickupPoint"
-    value={formData["pickupPoint"] || ""}
-    onChange={handleInputChange}
-  >
-    {filteredGeofences.length > 0 ? (
-      filteredGeofences.map(geofence => (
-        <MenuItem key={geofence._id} value={geofence.name}>
-          {geofence.name} 
-        </MenuItem>
-      ))
-    ) : (
-      <MenuItem disabled>No geofences available</MenuItem>
-    )}
-  </Select>
-</FormControl> */}
-<FormControl fullWidth sx={{ marginBottom: "10px" }}>
-  <Autocomplete
-    id="geofence-autocomplete"
-    options={filteredGeofences || []} // List of geofence objects
-    getOptionLabel={(option) => option.name || ""} // Display geofence name
-    value={filteredGeofences.find(geofence => geofence.name === formData["pickupPoint"]) || null} // Find the selected geofence
-    onChange={(event, newValue) => {
-      handleInputChange({
-        target: { name: "pickupPoint", value: newValue?.name || "" },
-      });
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label="Select Geofence"
-        variant="outlined"
-        name="pickupPoint"
-        InputProps={{
-          ...params.InputProps,
-          startAdornment: (
-            <InputAdornment position="start">
-              <ShareLocationIcon />  {/* Add SchoolIcon in the input field */}
-            </InputAdornment>
-          ),
-        }}
-      />
-    )}
-  />
-</FormControl>
 
+            <FormControl
+              variant="outlined"
+              sx={{ marginBottom: "10px" }}
+              fullWidth
+            >
+              <Autocomplete
+                id="searchable-bus-select"
+                options={Array.isArray(buses) ? buses : []} // Ensure buses is an array
+                getOptionLabel={(option) => option.deviceName || ""} // Display bus name
+                value={
+                  Array.isArray(buses)
+                    ? buses.find((bus) => bus.deviceId === formData["deviceId"])
+                    : null
+                } // Safely find the selected bus
+                onChange={(event, newValue) => {
+                  handleBusChange({
+                    target: {
+                      name: "deviceId",
+                      value: newValue?.deviceId || "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Bus Name"
+                    variant="outlined"
+                    name="deviceId"
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <DirectionsBusIcon />{" "}
+                          {/* Add SchoolIcon in the input field */}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              />
+            </FormControl>
 
+            <FormControl fullWidth sx={{ marginBottom: "10px" }}>
+              <Autocomplete
+                id="geofence-autocomplete"
+                options={filteredGeofences || []} // List of geofence objects
+                getOptionLabel={(option) => option.name || ""} // Display geofence name
+                value={
+                  filteredGeofences.find(
+                    (geofence) => geofence.name === formData["pickupPoint"]
+                  ) || null
+                } // Find the selected geofence
+                onChange={(event, newValue) => {
+                  handleInputChange({
+                    target: {
+                      name: "pickupPoint",
+                      value: newValue?.name || "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Select Geofence"
+                    variant="outlined"
+                    name="pickupPoint"
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <ShareLocationIcon />{" "}
+                          {/* Add SchoolIcon in the input field */}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              />
+            </FormControl>
 
             <TextField
               key={"parent"}
@@ -4803,24 +4222,26 @@ const lastThirdColumn = columns[columns.length - 3];
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <AbcIcon />  {/* Add Face6Icon in the input field */}
+                    <AbcIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
             />
             <TextField
-              key={"phone"}
-              label={"Phone Number"}
+              key="phone"
+              label="Phone Number"
               variant="outlined"
               name="phone"
               value={formData["phone"] || ""}
               onChange={handleInputChange}
               sx={{ marginBottom: "10px" }}
               fullWidth
+              error={!!errors.phone} // Show error if exists
+              helperText={errors.phone} // Display error message
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PhoneInTalkIcon />  {/* Add Face6Icon in the input field */}
+                    <PhoneInTalkIcon />
                   </InputAdornment>
                 ),
               }}
@@ -4837,66 +4258,32 @@ const lastThirdColumn = columns[columns.length - 3];
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <MailIcon />  {/* Add Face6Icon in the input field */}
+                    <MailIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
             />
             <TextField
-              key={"password"}
-              label={"Password"}
+              key="password"
+              label="Password"
               variant="outlined"
               name="password"
+              // type="password"
               value={formData["password"] || ""}
               onChange={handleInputChange}
               sx={{ marginBottom: "10px" }}
               fullWidth
+              error={!!errors.password} // Show error if exists
+              helperText={errors.password} // Display error message
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PasswordIcon />  {/* Add Face6Icon in the input field */}
+                    <PasswordIcon />
                   </InputAdornment>
                 ),
               }}
             />
-          {/* <FormControl fullWidth sx={{ marginBottom: "10px" }}>
-  <InputLabel id="device-id-label">Select Device</InputLabel>
-  <Select
-    labelId="device-id-label"
-    name="deviceId"
-    value={selectedDeviceId}
-    onChange={handleInputChange}
-  >
-    {pickupPointsData.map((item) => (
-      <MenuItem key={item.deviceId} value={item.deviceId}>
-        {item.deviceId} 
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
-{filteredGeofences.length > 0 && (
-  <div>
-    <h3>Geofences for Device {selectedDeviceId}:</h3>
-    <ul>
-      {filteredGeofences.map(geofence => (
-        <li key={geofence._id}>{geofence.name}</li> // Display geofence name
-      ))}
-    </ul>
-  </div>
-)} */}
 
-
-
-            {/* <TextField
-              key={"fcmToken"}
-              label={"fcm Token"}
-              variant="outlined"
-              name="fcmToken"
-              value={formData["fcmToken"] || ""}
-              onChange={handleInputChange}
-              sx={{ marginBottom: "10px" }}
-              fullWidth
-            /> */}
             <Button
               variant="contained"
               color="primary"

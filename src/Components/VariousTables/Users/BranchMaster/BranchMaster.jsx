@@ -1157,7 +1157,7 @@
 //         </Modal>
 //         {/* <Modal open={addModalOpen} onClose={handleModalClose}>
 //           <Box sx={style}>
-//             {/* <h2>Add Row</h2> 
+//             {/* <h2>Add Row</h2>
 //             <Box
 //               sx={{
 //                 display: "flex",
@@ -1170,7 +1170,6 @@
 //                 <CloseIcon />
 //               </IconButton>
 //             </Box>
-
 
 //             <FormControl
 //               variant="outlined"
@@ -1339,10 +1338,6 @@
 
 // export default BranchMaster;
 
-
-
-
-
 import React, { useState, useEffect, useContext, Component } from "react";
 import axios from "axios";
 import Paper from "@mui/material/Paper";
@@ -1375,8 +1370,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import CloseIcon from "@mui/icons-material/Close";
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
 import InputAdornment from "@mui/material/InputAdornment"; // Add this import
-import SchoolIcon from '@mui/icons-material/School';
-import OutlinedInput from '@mui/material/OutlinedInput';
+import SchoolIcon from "@mui/icons-material/School";
+import OutlinedInput from "@mui/material/OutlinedInput";
 import Export from "./ExportBranchMaster";
 import {
   FormControl,
@@ -1404,8 +1399,7 @@ const style = {
   flexDirection: "column",
   padding: "1rem",
 };
-const orangeBtn ={ backgroundColor: "rgb(255, 165, 0)"}
-
+const orangeBtn = { backgroundColor: "rgb(255, 165, 0)" };
 
 const BranchMaster = () => {
   const { setTotalResponses } = useContext(TotalResponsesContext); // Get the context value
@@ -1436,7 +1430,7 @@ const BranchMaster = () => {
   const [endDate, setEndDate] = useState("");
   const [schools, setSchools] = useState([]);
   const role = localStorage.getItem("role");
- 
+
   const [errors, setErrors] = useState({});
 
   const fetchData = async (startDate = "", endDate = "") => {
@@ -1473,20 +1467,20 @@ const BranchMaster = () => {
         //         schoolName: response.data.school.schoolName,
         //       }));
         const allData =
-        role == 1
-          ? response.data.schools.flatMap((school) =>
-              school.branches.map((branch) => ({
+          role == 1
+            ? response.data.schools.flatMap((school) =>
+                school.branches.map((branch) => ({
+                  ...branch,
+                  schoolName: school.schoolName,
+                  devices: branch.devices, // Make sure devices are included
+                }))
+              )
+            : response.data.school.branches.map((branch) => ({
                 ...branch,
-                schoolName: school.schoolName,
-                devices: branch.devices // Make sure devices are included
-              }))
-            )
-          : response.data.school.branches.map((branch) => ({
-              ...branch,
-              schoolName: response.data.school.schoolName,
-              devices: branch.devices // Include devices
-            }));
-      
+                schoolName: response.data.school.schoolName,
+                devices: branch.devices, // Include devices
+              }));
+
         console.log("branches data : ", allData);
 
         // Apply local date filtering if dates are provided
@@ -1567,7 +1561,7 @@ const BranchMaster = () => {
     setRowsPerPage(newRowsPerPage === -1 ? sortedData.length : newRowsPerPage); // Set to all rows if -1
     setPage(0); // Reset to the first page
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -1715,7 +1709,6 @@ const BranchMaster = () => {
     fetchData();
   };
 
-
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -1808,34 +1801,35 @@ const BranchMaster = () => {
 
     // Validation for `schoolMobile`
     if (name === "schoolMobile") {
-        if (!/^\d{0,10}$/.test(value)) return; // Allow only numbers and limit to 10 digits
-        newErrors.schoolMobile = value.length === 10 ? "" : "Phone number must be exactly 10 digits";
+      if (!/^\d{0,10}$/.test(value)) return; // Allow only numbers and limit to 10 digits
+      newErrors.schoolMobile =
+        value.length === 10 ? "" : "Phone number must be exactly 10 digits";
     }
 
     // Validation for `password`
     if (name === "password") {
-        const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
-        newErrors.password = passwordPattern.test(value)
-            ? ""
-            : "Password must have 1 uppercase, 1 special character, and be at least 8 characters long";
+      const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
+      newErrors.password = passwordPattern.test(value)
+        ? ""
+        : "Password must have 1 uppercase, 1 special character, and be at least 8 characters long";
     }
 
     setErrors(newErrors); // Update error state
 
     // Update formData based on role and conditions
     if (role == 2 && name == "branchName") {
-        setFormData({
-            ...formData,
-            schoolId: decoded.id,
-            [name]: value,
-        });
+      setFormData({
+        ...formData,
+        schoolId: decoded.id,
+        [name]: value,
+      });
     } else {
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
     }
-};
+  };
 
   const handleSchoolChange = (e) => {
     const { name, value } = e.target;
@@ -1899,7 +1893,6 @@ const BranchMaster = () => {
   //   fetchData();
   // };
 
-
   const handleEditSubmit = async () => {
     // Define the API URL and authentication token
 
@@ -1909,8 +1902,8 @@ const BranchMaster = () => {
           ? `${process.env.REACT_APP_SUPER_ADMIN_API}/edit-branch/${selectedRow._id}`
           : role == 2
           ? `${process.env.REACT_APP_SCHOOL_API}/edit-branch/${selectedRow._id}`
-          : null; 
-console.log("my edit usrl",apiUrl)
+          : null;
+      console.log("my edit usrl", apiUrl);
       const token = localStorage.getItem("token");
       // Prepare the updated data
       const updatedData = {
@@ -2032,7 +2025,7 @@ console.log("my edit usrl",apiUrl)
     };
 
     fetchSchool();
-  }, [addModalOpen,editModalOpen]);
+  }, [addModalOpen, editModalOpen]);
 
   // useEffect(() => {
   //   const fetchOtherData = async () => {
@@ -2160,54 +2153,54 @@ console.log("my edit usrl",apiUrl)
             marginBottom: "10px",
           }}
         >
-           <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Smaller width
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Set a fixed height to reduce it
-        padding: '0px', // Reduce padding to shrink height
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position
-        fontSize: '14px', // Slightly smaller label font
-      }
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
-          style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
-          }}
-        />
-      ),
-    }}
-  />
-              <Button
-  onClick={() => setModalOpen(true)}
-  sx={{
-    backgroundColor: "rgb(85, 85, 85)",
-    color: "white",
-    fontWeight: "bold",
-    marginRight: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    "&:hover": {
-      fontWeight: "bolder", // Make text even bolder on hover
-      backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
-    },
-  }}
->
-  <ImportExportIcon />
-  Column Visibility
-</Button>
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Smaller width
+              "& .MuiOutlinedInput-root": {
+                height: "36px", // Set a fixed height to reduce it
+                padding: "0px", // Reduce padding to shrink height
+              },
+              "& .MuiInputLabel-root": {
+                top: "-6px", // Adjust label position
+                fontSize: "14px", // Slightly smaller label font
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
+          <Button
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              "&:hover": {
+                fontWeight: "bolder", // Make text even bolder on hover
+                backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
+          </Button>
           <Button
             variant="contained"
             color="error"
@@ -2243,8 +2236,15 @@ console.log("my edit usrl",apiUrl)
           >
             Import
           </Button> */}
-                    <Export orangeBtn={orangeBtn} columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"BRANCH MASTER"} pdfFilename={"BranchMaster.pdf"} excelFilename={"BranchMaster.xlsx"}/>
-
+          <Export
+            orangeBtn={orangeBtn}
+            columnVisibility={columnVisibility}
+            COLUMNS={COLUMNS}
+            filteredRows={filteredRows}
+            pdfTitle={"BRANCH MASTER"}
+            pdfFilename={"BranchMaster.pdf"}
+            excelFilename={"BranchMaster.xlsx"}
+          />
         </div>
         <div
           style={{
@@ -2388,46 +2388,56 @@ console.log("my edit usrl",apiUrl)
                     </TableCell>
                   </TableRow>
                 </TableHead>
-               
-                   <TableBody>
-      {sortedData.length === 0 ? (
-        <TableRow>
-          <TableCell
-            colSpan={COLUMNS().filter((col) => columnVisibility[col.accessor]).length}
-            style={{
-              textAlign: "center",
-              padding: "16px",
-              fontSize: "16px",
-              color: "#757575",
-            }}
-          >
-            <img src="emptyicon.png" alt="" />
-            <h4>No Data Available</h4>
-          </TableCell>
-        </TableRow>
-      ) : (
-        sortedData
-          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-          .map((row, index) => (
-            <TableRow
-              hover
-              role="checkbox"
-              tabIndex={-1}
-              key={row.id}
-              onClick={() => handleRowSelect(page * rowsPerPage + index)}
-              selected={row.isSelected}
-              style={{
-                backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-                borderBottom: "none",
-              }}
-            >
-              <TableCell
-                padding="checkbox"
-                style={{ borderRight: "1px solid #e0e0e0" }}
-              >
-                <Switch checked={row.isSelected} color="primary" />
-              </TableCell>
-              <TableCell
+
+                <TableBody>
+                  {sortedData.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={
+                          COLUMNS().filter(
+                            (col) => columnVisibility[col.accessor]
+                          ).length
+                        }
+                        style={{
+                          textAlign: "center",
+                          padding: "16px",
+                          fontSize: "16px",
+                          color: "#757575",
+                        }}
+                      >
+                        <img src="emptyicon.png" alt="" />
+                        <h4>No Data Available</h4>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    sortedData
+                      .slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((row, index) => (
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={row.id}
+                          onClick={() =>
+                            handleRowSelect(page * rowsPerPage + index)
+                          }
+                          selected={row.isSelected}
+                          style={{
+                            backgroundColor:
+                              index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                            borderBottom: "none",
+                          }}
+                        >
+                          <TableCell
+                            padding="checkbox"
+                            style={{ borderRight: "1px solid #e0e0e0" }}
+                          >
+                            <Switch checked={row.isSelected} color="primary" />
+                          </TableCell>
+                          <TableCell
                             style={{
                               minWidth: 70, // Adjust width if needed
                               borderRight: "1px solid #e0e0e0",
@@ -2444,102 +2454,113 @@ console.log("my edit usrl",apiUrl)
                             {page * rowsPerPage + index + 1}{" "}
                             {/* Serial number starts from 1 */}
                           </TableCell>
-              {COLUMNS()
-                .filter((col) => columnVisibility[col.accessor])
-                .map((column) => {
-                  const value = row[column.accessor];
-                  return (
-                    <TableCell
-                      key={column.accessor}
-                      align={column.align}
-                      style={{
-                        borderRight: "1px solid #e0e0e0",
-                        paddingTop: "4px",
-                        paddingBottom: "4px",
-                        borderBottom: "none",
-                        backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-                        fontSize: "smaller",
-                      }}
-                    >
-                      {column.format && typeof value === "number"
-                        ? column.format(value)
-                        : value}
-                    </TableCell>
-                  );
-                })}
-              {/* Dropdown for devices */}
-              <TableCell
-  style={{
-    borderRight: "1px solid #e0e0e0",
-    paddingTop: "4px",
-    paddingBottom: "4px",
-    borderBottom: "none",
-    backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-    fontSize: "smaller",
-  }}
->
-  <Select
-    value={selectedValues[row.id] || ""} // Use state per row
-    onChange={handleSelectChange(row.id)} // Update the selected value for this row
-    displayEmpty
-    fullWidth
-    variant="outlined"
-    style={{ fontSize: "smaller" }}
-  >
-    <MenuItem value="" >
-      All Devices
-    </MenuItem>
+                          {COLUMNS()
+                            .filter((col) => columnVisibility[col.accessor])
+                            .map((column) => {
+                              const value = row[column.accessor];
+                              return (
+                                <TableCell
+                                  key={column.accessor}
+                                  align={column.align}
+                                  style={{
+                                    borderRight: "1px solid #e0e0e0",
+                                    paddingTop: "4px",
+                                    paddingBottom: "4px",
+                                    borderBottom: "none",
+                                    backgroundColor:
+                                      index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                                    fontSize: "smaller",
+                                  }}
+                                >
+                                  {column.format && typeof value === "number"
+                                    ? column.format(value)
+                                    : value}
+                                </TableCell>
+                              );
+                            })}
+                          {/* Dropdown for devices */}
+                          <TableCell
+                            style={{
+                              borderRight: "1px solid #e0e0e0",
+                              paddingTop: "4px",
+                              paddingBottom: "4px",
+                              borderBottom: "none",
+                              backgroundColor:
+                                index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                              fontSize: "smaller",
+                            }}
+                          >
+                            <Select
+                              value={selectedValues[row.id] || ""} // Use state per row
+                              onChange={handleSelectChange(row.id)} // Update the selected value for this row
+                              displayEmpty
+                              fullWidth
+                              variant="outlined"
+                              style={{ fontSize: "smaller" }}
+                            >
+                              <MenuItem value="">All Devices</MenuItem>
 
-    {/* Access row.devices */}
-    {row?.devices?.map((device) => (
-      <MenuItem key={device.deviceId} value={device.deviceId} disabled>
-        {device.deviceName}
-      </MenuItem>
-    ))}
-  </Select>
-</TableCell>
-
-            </TableRow>
-          ))
-      )}
-    </TableBody>
+                              {/* Access row.devices */}
+                              {row?.devices?.map((device) => (
+                                <MenuItem
+                                  key={device.deviceId}
+                                  value={device.deviceId}
+                                  disabled
+                                >
+                                  {device.deviceName}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                  )}
+                </TableBody>
               </Table>
             </TableContainer>
             <StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[
+                  { label: "All", value: -1 },
+                  10,
+                  25,
+                  100,
+                  1000,
+                ]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={
+                  rowsPerPage === sortedData.length ? -1 : rowsPerPage
+                }
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
-         <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -2549,7 +2570,6 @@ console.log("my edit usrl",apiUrl)
                 />
                 {col.Header}
               </div>
-              
             ))}
           </Box>
         </Modal>
@@ -2580,7 +2600,7 @@ console.log("my edit usrl",apiUrl)
                   value={formData["schoolId"] || ""}
                   onChange={handleSchoolChange}
                   name="schoolName"
-                  label={"School Name"}      
+                  label={"School Name"}
                   input={
                     <OutlinedInput
                       startAdornment={
@@ -2590,7 +2610,7 @@ console.log("my edit usrl",apiUrl)
                       }
                       label="School Name"
                     />
-                  }          
+                  }
                 >
                   {schools.map((option) => (
                     <MenuItem key={option._id} value={option._id}>
@@ -2601,6 +2621,43 @@ console.log("my edit usrl",apiUrl)
               </FormControl>
             ) : null}
             {COLUMNS().map((col) => (
+              // <TextField
+              //   key={col.accessor}
+              //   label={col.Header}
+              //   variant="outlined"
+              //   name={col.accessor}
+              //   value={formData[col.accessor] || ""}
+              //   onChange={handleInputChange}
+              //   sx={{ marginBottom: "10px" }}
+              //   fullWidth
+              //   disabled={col.Header === 'School Name'}
+              //   InputProps={{
+              //     startAdornment: (
+              //       <InputAdornment position="start">
+              //         {col.icon}  {/* Add Face6Icon in the input field */}
+              //       </InputAdornment>
+              //     ),
+              //   }}
+              // />
+              //               <TextField
+              //   key={col.accessor}
+              //   label={col.Header}
+              //   variant="outlined"
+              //   name={col.accessor}
+              //   value={formData[col.accessor] || ""}
+              //   onChange={handleInputChange}
+              //   sx={{ marginBottom: "10px" }}
+              //   fullWidth
+              //   error={Boolean(errors[col.accessor])} // Shows red border if an error exists
+              //   helperText={errors[col.accessor] || ""} // Displays error message
+              //   InputProps={{
+              //     startAdornment: (
+              //       <InputAdornment position="start">
+              //         {col.icon}  {/* Add icon if available */}
+              //       </InputAdornment>
+              //     ),
+              //   }}
+              // />
               <TextField
                 key={col.accessor}
                 label={col.Header}
@@ -2610,12 +2667,11 @@ console.log("my edit usrl",apiUrl)
                 onChange={handleInputChange}
                 sx={{ marginBottom: "10px" }}
                 fullWidth
-                disabled={col.Header === 'School Name'}
+                error={Boolean(errors[col.accessor])} // Highlight error in red
+                helperText={errors[col.accessor] || ""} // Show error message
                 InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      {col.icon}  {/* Add Face6Icon in the input field */}
-                    </InputAdornment>
+                  startAdornment: col.icon && (
+                    <InputAdornment position="start">{col.icon}</InputAdornment>
                   ),
                 }}
               />
@@ -2629,7 +2685,7 @@ console.log("my edit usrl",apiUrl)
             </Button>
           </Box>
         </Modal>
-     
+
         <Modal open={addModalOpen} onClose={handleModalClose}>
           <Box sx={style}>
             <Box
@@ -2657,7 +2713,7 @@ console.log("my edit usrl",apiUrl)
                   value={formData["schoolId"] || ""}
                   onChange={handleSchoolChange}
                   name="schoolName"
-                  label={"School Name"}      
+                  label={"School Name"}
                   input={
                     <OutlinedInput
                       startAdornment={
@@ -2667,7 +2723,7 @@ console.log("my edit usrl",apiUrl)
                       }
                       label="School Name"
                     />
-                  }          
+                  }
                 >
                   {schools.map((option) => (
                     <MenuItem key={option._id} value={option._id}>
@@ -2677,76 +2733,57 @@ console.log("my edit usrl",apiUrl)
                 </Select>
               </FormControl>
             ) : null}
-            {COLUMNS()
-              .map((col) =>
-                col.accessor === "specificAccessor" &&
-                col.Header === "Specific Header" ? (
-                  <FormControl
-                    key={col.accessor}
-                    fullWidth
-                    sx={{ marginBottom: "10px" }}
+            {COLUMNS().map((col) =>
+              col.accessor === "specificAccessor" &&
+              col.Header === "Specific Header" ? (
+                <FormControl
+                  key={col.accessor}
+                  fullWidth
+                  sx={{ marginBottom: "10px" }}
+                >
+                  <InputLabel id={`${col.accessor}-label`}>
+                    {col.Header}
+                  </InputLabel>
+                  <Select
+                    labelId={`${col.accessor}-label`}
+                    name={col.accessor}
+                    value={formData[col.accessor] || ""}
+                    onChange={handleInputChange}
+                    label={col.Header}
                   >
-                    <InputLabel id={`${col.accessor}-label`}>
-                      {col.Header}
-                    </InputLabel>
-                    <Select
-                      labelId={`${col.accessor}-label`}
+                    {otherDropdownOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ) : (
+                <>
+                  {col.Header !== "School Name" ? (
+                    <TextField
+                      key={col.accessor}
+                      label={col.Header}
+                      variant="outlined"
                       name={col.accessor}
                       value={formData[col.accessor] || ""}
                       onChange={handleInputChange}
-                      label={col.Header}
-                    >
-                      {otherDropdownOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                ) : (<>{
-                  col.Header !== 'School Name' ? (
-                    // <TextField
-                    //   key={col.accessor}
-                    //   label={col.Header}
-                    //   variant="outlined"
-                    //   name={col.accessor}
-                    //   value={formData[col.accessor] || ""}
-                    //   onChange={handleInputChange}
-                    //   sx={{ marginBottom: "10px" }}
-                    //   fullWidth
-                    //   InputProps={{
-                    //     startAdornment: (
-                    //       <InputAdornment position="start">
-                    //         {col.icon}  {/* Add Face6Icon in the input field */}
-                    //       </InputAdornment>
-                    //     ),
-                    //   }}
-                    // />
-                    <TextField
-  key={col.accessor}
-  label={col.Header}
-  variant="outlined"
-  name={col.accessor}
-  value={formData[col.accessor] || ""}
-  onChange={handleInputChange}
-  sx={{ marginBottom: "10px" }}
-  fullWidth
-  error={Boolean(errors[col.accessor])} // Shows red border if an error exists
-  helperText={errors[col.accessor] || ""} // Displays error message
-  InputProps={{
-    startAdornment: (
-      <InputAdornment position="start">
-        {col.icon}  {/* Add icon if available */}
-      </InputAdornment>
-    ),
-  }}
-/>
-
-                  ) : null
-                }</>
-                
-                )
-              )}
+                      sx={{ marginBottom: "10px" }}
+                      fullWidth
+                      error={Boolean(errors[col.accessor])} // Shows red border if an error exists
+                      helperText={errors[col.accessor] || ""} // Displays error message
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            {col.icon} {/* Add icon if available */}
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  ) : null}
+                </>
+              )
+            )}
             <Button
               variant="contained"
               color="primary"
