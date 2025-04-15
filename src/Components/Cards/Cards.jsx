@@ -766,7 +766,7 @@ export const Cards = ({
       </Box>
 
       <Box
-        onClick={() => handleClick("Devices")}
+        onClick={() => handleClick("Read Devices")}
         sx={{
           display: "flex",
           alignItems: "center",
