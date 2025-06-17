@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -23,6 +23,8 @@ import "./remove-gutter.css";
 import HistoryMap from "./HistoryMap";
 import "./HistoryReport.css";
 import Select from "react-select";
+import axios from "axios";
+import { TotalResponsesContext } from "../../../../TotalResponsesContext";
 
 export const HistoryReport = (historyDeviceId) => {
   const { deviceId: urlDeviceId, category, name } = useParams(); // Retrieve params from URL
@@ -33,6 +35,12 @@ export const HistoryReport = (historyDeviceId) => {
   );
   const [fetch, setFetch] = useState(false);
   const [historyOn, setHistoryOn] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const role = localStorage.getItem("role");
+  const [filteredRows, setFilteredRows] = useState([]);
+  const [originalRows, setOriginalRows] = useState([]);
+  const { setTotalResponses } = useContext(TotalResponsesContext); // Get the context value
+  const [devices, setDevices] = useState([]);
 
   const formatDate = (date) => {
     return date.toLocaleDateString("en-CA"); // This formats as YYYY-MM-DD
@@ -68,10 +76,150 @@ export const HistoryReport = (historyDeviceId) => {
   };
 
   const dispatch = useDispatch();
-  const { devices, loading } = useSelector((state) => state.devices);
+
+  const parseDate = (dateString) => {
+    const [day, month, year] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day); // Months are 0-indexed
+  };
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  const fetchData = async (startDate = "", endDate = "") => {
+    setLoading(true);
+    try {
+      let response;
+      if (role == 1) {
+        const token = localStorage.getItem("token");
+        response = await axios.get(
+          `${process.env.REACT_APP_SUPER_ADMIN_API}/read-devices`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 2) {
+        const token = localStorage.getItem("token");
+        response = await axios.get(
+          `${process.env.REACT_APP_SCHOOL_API}/read-devices`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 3) {
+        const token = localStorage.getItem("token");
+        response = await axios.get(
+          `${process.env.REACT_APP_BRANCH_API}/read-devices`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else if (role == 4) {
+        const token = localStorage.getItem("token");
+        response = await axios.get(
+          `http://63.142.251.13:4000/branchgroupuser/getdevicebranchgroupuser`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+
+      console.log("fetch data", response.data); // Log the entire response data
+      // fetchgeofencepoint();
+      if (response?.data) {
+        const allData =
+          role == 1
+            ? response.data.data.flatMap((school) =>
+                school.branches.flatMap((branch) =>
+                  Array.isArray(branch.devices) && branch.devices.length > 0
+                    ? branch.devices.map((device) => ({
+                        ...device,
+                        schoolName: school.schoolName,
+                        branchName: branch.branchName,
+                      }))
+                    : []
+                )
+              )
+            : role == 4
+            ? response.data.data.flatMap((school) =>
+                school.branches.flatMap((branch) =>
+                  Array.isArray(branch.devices) && branch.devices.length > 0
+                    ? branch.devices.map((device) => ({
+                        ...device,
+                        branchName: branch.branchName,
+                        schoolName: school.schoolName,
+                      }))
+                    : []
+                )
+              )
+            : role == 2
+            ? response.data.branches.flatMap((branch) =>
+                Array.isArray(branch.devices) && branch.devices.length > 0
+                  ? branch.devices.map((device) => ({
+                      ...device,
+                      branchName: branch.branchName,
+                    }))
+                  : []
+              )
+            : role == 3
+            ? response.data.devices.map((device) => ({
+                ...device,
+                schoolName: response.data.schoolName,
+                branchName: response.data.branchName,
+              }))
+            : [];
+
+        console.log(allData);
+
+        const filteredData =
+          startDate || endDate
+            ? allData.filter((row) => {
+                const registrationDate = parseDate(
+                  row.formattedRegistrationDate
+                );
+                const start = parseDate(startDate);
+                const end = parseDate(endDate);
+
+                return (
+                  (!startDate || registrationDate >= start) &&
+                  (!endDate || registrationDate <= end)
+                );
+              })
+            : allData; // If no date range, use all data
+        const reversedData = filteredData.reverse();
+        // Log the date range and filtered data
+        console.log(`Data fetched between ${startDate} and ${endDate}:`);
+        console.log(filteredData);
+        setFilteredRows(
+          reversedData.map((row) => ({ ...row, isSelected: false }))
+        );
+        setOriginalRows(allData.map((row) => ({ ...row, isSelected: false })));
+        setTotalResponses(reversedData.length);
+        // Log the date range and filtered data
+        console.log(`Data fetched between ${startDate} and ${endDate}:`);
+        console.log(filteredData);
+        setDevices(filteredData);
+      } else {
+        console.error("Expected an array but got:", response.data.children);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setLoading(false); // Set loading to false after fetching completes
+    }
+  };
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   useEffect(() => {
-    dispatch(fetchDevices());
+    // dispatch(fetchDevices());
+    fetchData();
   }, [dispatch]);
 
   // const handleDeviceChange = (event) => {
@@ -83,8 +231,8 @@ export const HistoryReport = (historyDeviceId) => {
   };
 
   const options = devices.map((device) => ({
-    value: device.id,
-    label: device.name,
+    value: device.deviceId,
+    label: device.deviceName,
   }));
 
   return (
@@ -144,36 +292,6 @@ export const HistoryReport = (historyDeviceId) => {
                       onChange={(e) => setToDateTime(e.target.value)}
                     />
                   </div>
-
-                  {/* <CFormSelect
-                    id="device-select"
-                    value={deviceId}
-                    onChange={handleDeviceChange}
-                    style={{
-                      height: "3rem",
-                      width: "12rem",
-                      marginTop: "1rem",
-                    }}
-                  >
-                    <option value="" disabled>
-                      Select a Device
-                    </option>
-                    {devices.map((device, index) => (
-                      <option key={index} value={device.id}>
-                        {device.name}
-                      </option>
-                    ))}
-                  </CFormSelect> */}
-                  {/* <div style={{ width: "20rem" }}>
-                    <CFormLabel htmlFor="device">Devices</CFormLabel>
-                    <Select
-                      id="device-select"
-                      value={deviceId}
-                      onChange={handleDeviceChange}
-                      options={devices}
-                      placeholder="Select a Device"
-                    />
-                  </div> */}
                   <Select
                     id="device-select"
                     options={options}
