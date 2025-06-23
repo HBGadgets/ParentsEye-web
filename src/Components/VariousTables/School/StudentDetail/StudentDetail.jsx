@@ -32,7 +32,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import Export from "../../Export";
 import { StyledTablePagination } from "../../PaginationCssFile/TablePaginationStyles";
 
-
 import {
   FormControlLabel,
   FormLabel,
@@ -43,24 +42,24 @@ import {
 import { MenuItem, Select, InputLabel, FormControl } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 //import { TextField } from '@mui/material';
-import { Autocomplete,Popper } from "@mui/material";
+import { Autocomplete, Popper } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment"; // Add this import
 import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
-import CakeIcon from '@mui/icons-material/Cake';
-import Face6Icon from '@mui/icons-material/Face6';  // Import Face6Icon
-import PinIcon from '@mui/icons-material/Pin';
-import HolidayVillageIcon from '@mui/icons-material/HolidayVillage';
-import SchoolIcon from '@mui/icons-material/School';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-import ShareLocationIcon from '@mui/icons-material/ShareLocation';
-import AbcIcon from '@mui/icons-material/Abc';
-import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
-import MailIcon from '@mui/icons-material/Mail';
-import PasswordIcon from '@mui/icons-material/Password';
-import TripOriginIcon from '@mui/icons-material/TripOrigin';
-import ClassIcon from '@mui/icons-material/Class';
-import WcIcon from '@mui/icons-material/Wc';
+import CakeIcon from "@mui/icons-material/Cake";
+import Face6Icon from "@mui/icons-material/Face6"; // Import Face6Icon
+import PinIcon from "@mui/icons-material/Pin";
+import HolidayVillageIcon from "@mui/icons-material/HolidayVillage";
+import SchoolIcon from "@mui/icons-material/School";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import ShareLocationIcon from "@mui/icons-material/ShareLocation";
+import AbcIcon from "@mui/icons-material/Abc";
+import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
+import MailIcon from "@mui/icons-material/Mail";
+import PasswordIcon from "@mui/icons-material/Password";
+import TripOriginIcon from "@mui/icons-material/TripOrigin";
+import ClassIcon from "@mui/icons-material/Class";
+import WcIcon from "@mui/icons-material/Wc";
 const style = {
   position: "absolute",
   top: "50%",
@@ -114,14 +113,16 @@ export const StudentDetail = () => {
   const [branches, setBranches] = useState();
   const [buses, setBuses] = useState();
   const [errors, setErrors] = useState({});
+  const [pickupPointsData, setPickupPointsData] = useState([]); // Use descriptive state name
+  const [selectedDeviceId, setSelectedDeviceId] = useState("");
+  const [filteredGeofences, setFilteredGeofences] = useState([]);
 
-  
   const fetchData = async (startDate = "", endDate = "") => {
     setLoading(true);
     try {
       let response;
       const token = localStorage.getItem("token");
-  
+
       if (role == 1) {
         response = await axios.get(
           `${process.env.REACT_APP_SUPER_ADMIN_API}/read-children`,
@@ -150,11 +151,10 @@ export const StudentDetail = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-     
       }
-  
-      console.log("fetch data", response.data);
-  const myarr=[];
+
+      // console.log("fetch data", response.data);
+      const myarr = [];
       if (response?.data) {
         const allData =
           role == 1
@@ -183,15 +183,14 @@ export const StudentDetail = () => {
                 schoolName: child.schoolId?.schoolName || "N/A",
                 branchName: child.branchId?.branchName || "N/A",
                 parentName: child.parentId?.parentName || "N/A",
-                 email:child.parentId?.email || "N/A",
-                 password:child.parentId?.password || "N/A",
+                email: child.parentId?.email || "N/A",
+                password: child.parentId?.password || "N/A",
                 formattedRegistrationDate: formatDate(child.registrationDate),
-            
               }))
             : [];
-  
-        console.log("Processed allData:", allData);
-  
+
+        // console.log("Processed allData:", allData);
+
         const filteredData =
           startDate || endDate
             ? allData.filter((row) => {
@@ -200,17 +199,20 @@ export const StudentDetail = () => {
                 );
                 const start = parseDate(startDate);
                 const end = parseDate(endDate);
-  
+
                 return (
                   (!startDate || registrationDate >= start) &&
                   (!endDate || registrationDate <= end)
                 );
               })
             : allData;
-  
+
         const reversedData = filteredData.reverse();
-        console.log(`Data fetched between ${startDate} and ${endDate}:`, filteredData);
-  
+        //  console.log(
+        //   `Data fetched between ${startDate} and ${endDate}:`,
+        //   filteredData
+        // );
+
         setFilteredRows(
           reversedData.map((row) => ({ ...row, isSelected: false }))
         );
@@ -225,7 +227,7 @@ export const StudentDetail = () => {
       setLoading(false);
     }
   };
-  
+
   // Helper function to parse dates
   function formatDate(date) {
     const d = new Date(date);
@@ -234,13 +236,11 @@ export const StudentDetail = () => {
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
   }
-  
+
   function parseDate(dateString) {
     const [day, month, year] = dateString.split("-").map(Number);
     return new Date(year, month - 1, day);
   }
-  
-  
 
   const handleApplyDateRange = () => {
     const startDate = document.getElementById("startDate").value;
@@ -257,8 +257,6 @@ export const StudentDetail = () => {
       fetchData(formattedStartDate, formattedEndDate);
     }
   };
-
-  
 
   useEffect(() => {
     fetchData();
@@ -277,7 +275,7 @@ export const StudentDetail = () => {
     setRowsPerPage(newRowsPerPage === -1 ? sortedData.length : newRowsPerPage); // Set to all rows if -1
     setPage(0); // Reset to the first page
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -357,21 +355,21 @@ export const StudentDetail = () => {
 
   const handleDeleteSelected = async () => {
     // Log filteredRows to check its structure
-    console.log("Filtered rows:", filteredRows);
+    // console.log("Filtered rows:", filteredRows);
 
     // Get selected row IDs
     const selectedIds = filteredRows
       .filter((row) => row.isSelected)
       .map((row) => {
         // Log each row to check its structure
-        console.log("Processing row:", row);
-        if(role==4){
+        // console.log("Processing row:", row);
+        if (role == 4) {
           return row._id;
         }
         return row.childId; // Ensure id exists and is not undefined
       });
 
-    console.log("Selected IDs:", selectedIds);
+    // console.log("Selected IDs:", selectedIds);
 
     if (selectedIds.length === 0) {
       alert("No rows selected for deletion.");
@@ -393,7 +391,7 @@ export const StudentDetail = () => {
           ? `${process.env.REACT_APP_SUPER_ADMIN_API}/delete/child`
           : role == 2
           ? `${process.env.REACT_APP_SCHOOL_API}/delete/child`
-          : role==3
+          : role == 3
           ? `${process.env.REACT_APP_BRANCH_API}/delete/child`
           : `http://63.142.251.13:4000/branchgroupuser/deletechildbybranchgroup`;
 
@@ -446,13 +444,13 @@ export const StudentDetail = () => {
         const parsedData = XLSX.utils.sheet_to_json(sheet);
 
         // Log the parsed data for verification
-        console.log("Uploaded file data:", parsedData);
+        // console.log("Uploaded file data:", parsedData);
 
         // Now make the POST request with parsedData
         axios
           .post("http://63.142.251.13:4000/parent/import", parsedData)
           .then((response) => {
-            console.log("Data successfully posted:", response.data);
+            // console.log("Data successfully posted:", response.data);
             alert("File imported and data posted successfully!");
           })
           .catch((error) => {
@@ -490,12 +488,12 @@ export const StudentDetail = () => {
   const handleModalClose = () => {
     setEditModalOpen(false);
     setAddModalOpen(false);
-    if(role==1){
+    if (role == 1) {
       setBranches();
     }
     if (role != 3) {
-      setBuses(undefined);  // assuming you're resetting buses state to an empty array or some other value
-  }
+      setBuses(undefined); // assuming you're resetting buses state to an empty array or some other value
+    }
     setImportModalOpen(false);
     setModalOpen(false);
     setFormData({});
@@ -513,9 +511,9 @@ export const StudentDetail = () => {
         ? `${process.env.REACT_APP_SUPER_ADMIN_API}/update-child`
         : role == 2
         ? `${process.env.REACT_APP_SCHOOL_API}/update-child`
-        :role==3
+        : role == 3
         ? `${process.env.REACT_APP_BRANCH_API}/update-child`
-        :`http://63.142.251.13:4000/branchgroupuser/updatechildbybranchgroup`
+        : `http://63.142.251.13:4000/branchgroupuser/updatechildbybranchgroup`;
 
     // Prepare the updated data
     const updatedData = {
@@ -525,14 +523,19 @@ export const StudentDetail = () => {
 
     try {
       // Perform the PUT request
-      const response = await fetch(role==4?`${apiUrl}/${updatedData._id}`:`${apiUrl}/${updatedData.childId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(updatedData),
-      });
+      const response = await fetch(
+        role == 4
+          ? `${apiUrl}/${updatedData._id}`
+          : `${apiUrl}/${updatedData.childId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
 
       // Check if the response is okay (status code 200-299)
       if (!response.ok) {
@@ -541,7 +544,7 @@ export const StudentDetail = () => {
 
       // Optionally: Process the response data if needed
       const result = await response.json();
-      console.log("Update successful:", result);
+      // console.log("Update successful:", result);
       alert("Updated successfully");
 
       // Update local state after successful API call
@@ -581,14 +584,12 @@ export const StudentDetail = () => {
           // id: filteredRows.length + 1,
           // isSelected: false,
         };
-      } else if(role==4){
-        newRow={
+      } else if (role == 4) {
+        newRow = {
           ...formData,
-          schoolName:decoded.schoolName,
-        }
-      }
-      
-      else {
+          schoolName: decoded.schoolName,
+        };
+      } else {
         newRow = {
           ...formData,
           schoolName: decoded.schoolName,
@@ -596,7 +597,7 @@ export const StudentDetail = () => {
         };
       }
 
-      console.log(newRow);
+      // console.log(newRow);
 
       // POST request to the server
       const response = await fetch(
@@ -625,7 +626,7 @@ export const StudentDetail = () => {
       // Close the modal
       handleModalClose();
       fetchData();
-      console.log("error occured in post method");
+      // console.log("error occured in post method");
     } catch (error) {
       console.error("Error during POST request:", error);
       alert("unable to create record");
@@ -633,7 +634,6 @@ export const StudentDetail = () => {
     }
   };
 
-  
   const handleBusChange = (e) => {
     const { value } = e.target;
 
@@ -681,7 +681,7 @@ export const StudentDetail = () => {
       if (geofencesForSelectedDevice.length === 0) {
         console.error("No geofences found for this deviceId");
       }
-    }else if (role == 4) {
+    } else if (role == 4) {
       // Handling for role 3
       geofencesForSelectedDevice = pickupPointsData[selectedBus.deviceId] || [];
 
@@ -692,7 +692,7 @@ export const StudentDetail = () => {
 
     // Update the filtered geofences state
     setFilteredGeofences(geofencesForSelectedDevice);
-    console.log("Filtered Geofences:", geofencesForSelectedDevice);
+    // console.log("Filtered Geofences:", geofencesForSelectedDevice);
   };
 
   // const handleInputChange = (e) => {
@@ -808,81 +808,93 @@ export const StudentDetail = () => {
   //     }));
   //   }
   // };
-//! 1st use effect
+  //! 1st use effect
 
-const handleInputChange = (e) => {
-  const { name, value } = e.target;
-  let newErrors = { ...errors };
-  let updatedData = { ...formData, [name]: value };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    let newErrors = { ...errors };
+    let updatedData = { ...formData, [name]: value };
 
-  // Password Validation
-  if (name === "password") {
-    const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*])/;
-    newErrors.password = passwordPattern.test(value)
-      ? ""
-      : "Password must include 1 special character & 1 uppercase letter";
-  }
-
-  // Phone Number Validation
-  if (name === "phone") {
-    if (!/^\d*$/.test(value)) return; // Prevent non-numeric input
-    updatedData.phone = value.slice(0, 10); // Limit to 10 digits
-    newErrors.phone = updatedData.phone.length === 10 ? "" : "Phone number must be exactly 10 digits";
-  }
-
-  // School Name Selection
-  if (name === "schoolName") {
-    updatedData.branchName = ""; // Reset branch on school change
-
-    const selectedSchool = schools.find((school) => school.schoolName === value);
-    if (selectedSchool) {
-      setBranches(selectedSchool.branches.map(({ branchName, branchId }) => ({ branchName, branchId })));
-      setBuses(allDevices.filter((device) => device.schoolName === value));
-    }
-  }
-
-  // Branch Name Selection
-  if (name === "branchName") {
-    const filteredDevices = allDevices.filter((device) =>
-      role === 1
-        ? device.schoolName === formData.schoolName && device.branchName === value
-        : device.branchName === value
-    );
-    setBuses(filteredDevices);
-  }
-
-  // Device Selection
-  if (name === "deviceId") {
-    setSelectedDeviceId(value);
-    setFilteredGeofences(pickupPointsData[value] || []);
-  }
-
-  // Date of Birth & Age Calculation
-  if (name === "dateOfBirth" && value) {
-    const birthDate = new Date(value);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-
-    if (
-      today.getMonth() < birthDate.getMonth() ||
-      (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
-    ) {
-      age -= 1;
+    // Password Validation
+    if (name === "password") {
+      const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*])/;
+      newErrors.password = passwordPattern.test(value)
+        ? ""
+        : "Password must include 1 special character & 1 uppercase letter";
     }
 
-    updatedData.childAge = age;
-  }
+    // Phone Number Validation
+    if (name === "phone") {
+      if (!/^\d*$/.test(value)) return; // Prevent non-numeric input
+      updatedData.phone = value.slice(0, 10); // Limit to 10 digits
+      newErrors.phone =
+        updatedData.phone.length === 10
+          ? ""
+          : "Phone number must be exactly 10 digits";
+    }
 
-  // Update form data & errors
-  setFormData(updatedData);
-  setErrors(newErrors);
-};
+    // School Name Selection
+    if (name === "schoolName") {
+      updatedData.branchName = ""; // Reset branch on school change
 
-const [allDevices, setAllDevices] = useState([]);
+      const selectedSchool = schools.find(
+        (school) => school.schoolName === value
+      );
+      if (selectedSchool) {
+        setBranches(
+          selectedSchool.branches.map(({ branchName, branchId }) => ({
+            branchName,
+            branchId,
+          }))
+        );
+        setBuses(allDevices.filter((device) => device.schoolName === value));
+      }
+    }
+
+    // Branch Name Selection
+    if (name === "branchName") {
+      const filteredDevices = allDevices.filter((device) =>
+        role === 1
+          ? device.schoolName === formData.schoolName &&
+            device.branchName === value
+          : device.branchName === value
+      );
+      setBuses(filteredDevices);
+    }
+
+    // Device Selection
+    if (name === "deviceId") {
+      setSelectedDeviceId(value);
+      setFilteredGeofences(pickupPointsData[value] || []);
+    }
+
+    // Date of Birth & Age Calculation
+    if (name === "dateOfBirth" && value) {
+      const birthDate = new Date(value);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+
+      if (
+        today.getMonth() < birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() &&
+          today.getDate() < birthDate.getDate())
+      ) {
+        age -= 1;
+      }
+
+      updatedData.childAge = age;
+    }
+
+    // Update form data & errors
+    setFormData(updatedData);
+    setErrors(newErrors);
+  };
+
+  const [allDevices, setAllDevices] = useState([]);
 
   useEffect(() => {
     // Trigger the "onChange" behavior programmatically if a school is pre-selected
-    if (formData.schoolName && role ==1) {
+    if (formData.schoolName && role == 1) {
       const event = {
         target: {
           name: "schoolName",
@@ -903,10 +915,45 @@ const [allDevices, setAllDevices] = useState([]);
       handleInputChange(event); // Trigger fetching buses when branchName changes
     }
   }, [formData.branchName, allDevices]);
-  
 
-//! 2st use effect
- /*  useEffect(() => {
+  useEffect(() => {
+    if (!formData.deviceId) {
+      console.log("No deviceId in formData yet");
+      return;
+    }
+
+    if (!Array.isArray(buses)) {
+      console.log("Buses not loaded yet");
+      return;
+    }
+
+    if (!pickupPointsData || Object.keys(pickupPointsData).length === 0) {
+      console.log("pickupPointsData is empty or not loaded yet");
+      return;
+    }
+
+    const selectedBus = buses.find((bus) => bus.deviceId === formData.deviceId);
+    console.log("Selected Bus:", selectedBus);
+
+    if (!selectedBus) {
+      console.log("No matching bus found for deviceId:", formData.deviceId);
+      return;
+    }
+
+    const key1 = selectedBus.deviceId;
+    const key2 = `deviceId: ${selectedBus.deviceId}`;
+
+    console.log("Trying pickupPointsData keys:", Object.keys(pickupPointsData));
+    console.log("Looking for geofences using:", key1, "or", key2);
+
+    const geofences = pickupPointsData[key1] || pickupPointsData[key2] || [];
+    console.log("Resolved Geofences:", geofences);
+
+    setFilteredGeofences(geofences);
+  }, [formData.deviceId, pickupPointsData, buses, role]);
+
+  //! 2st use effect
+  /*  useEffect(() => {
     // Trigger the onChange when schoolName changes or on initial load
     if (formData.schoolName) {
       const event = {
@@ -940,8 +987,8 @@ const [allDevices, setAllDevices] = useState([]);
     }
   }, [branches, formData.branchName]); // Trigger when branches or branchName changes
    // Trigger when branches or branchName changes */
-//! 3st use effect
-/* useEffect(() => {
+  //! 3st use effect
+  /* useEffect(() => {
   if (formData.schoolName && role === 1) {
     // Find the selected school
     const selectedSchool = schools.find(
@@ -977,13 +1024,11 @@ const [allDevices, setAllDevices] = useState([]);
     }
   }
 }, [formData.schoolName, schools, role]); */
-useEffect(() => {
-  console.log("Selected School:", formData.schoolName);
-  console.log("Available Branches:", branches);
-  console.log("Selected Branch:", formData.branchName);
-}, [formData.schoolName, branches, formData.branchName]);
-
-  
+  useEffect(() => {
+    // console.log("Selected School:", formData.schoolName);
+    // console.log("Available Branches:", branches);
+    // console.log("Selected Branch:", formData.branchName);
+  }, [formData.schoolName, branches, formData.branchName]);
 
   const handleSelectChange = (event) => {
     setFormData({
@@ -1005,9 +1050,7 @@ useEffect(() => {
   const lastThirdColumn = columns[columns.length - 3];
   // const columns1 = COLUMNS();
   // const lastthirdColumn = columns1[columns1.length - 3];
-  const [pickupPointsData, setPickupPointsData] = useState([]); // Use descriptive state name
-  const [selectedDeviceId, setSelectedDeviceId] = useState("");
-  const [filteredGeofences, setFilteredGeofences] = useState([]);
+
   useEffect(() => {
     const fetchSchool = async (startDate = "", endDate = "") => {
       setLoading(true);
@@ -1023,7 +1066,7 @@ useEffect(() => {
             }
           );
 
-          console.log("School data fetched:", response.data);
+          // console.log("School data fetched:", response.data);
 
           if (Array.isArray(response.data.schools)) {
             setSchools(response.data.schools);
@@ -1045,34 +1088,34 @@ useEffect(() => {
               },
             }
           );
-          console.log("Branch data fetched:", response.data);
+          // console.log("Branch data fetched:", response.data);
           setBranches(response.data.school.branches);
-          console.log("my response",branches)
-        }
-        
-        catch (error) {
+          // console.log("my response", branches);
+        } catch (error) {
           console.error("Error fetching branches:", error);
         }
-      }else if(role==4){
+      } else if (role == 4) {
         try {
-          const token=localStorage.getItem("token");
-          const response=await axios.get(`http://63.142.251.13:4000/branchgroupuser/getdevicebranchgroupuser`,{
-            headers:{
-              Authorization:`Bearer ${token}`
+          const token = localStorage.getItem("token");
+          const response = await axios.get(
+            `http://63.142.251.13:4000/branchgroupuser/getdevicebranchgroupuser`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             }
-          })
-         const branchname= response.data.data.flatMap((newdata)=>
-          Array.isArray(newdata.branches)&&(newdata.branches.length)>0?
-            newdata.branches.map((item)=>(
-             {branchName:item.branchName}
-            )
-          ):[]
-
-        )
-        console.log("mybranch:",branchname)
-        setBranches(branchname)
+          );
+          const branchname = response.data.data.flatMap((newdata) =>
+            Array.isArray(newdata.branches) && newdata.branches.length > 0
+              ? newdata.branches.map((item) => ({
+                  branchName: item.branchName,
+                }))
+              : []
+          );
+          // console.log("mybranch:", branchname);
+          setBranches(branchname);
         } catch (error) {
-          console.log("error while fetching branch:",error)
+          // console.log("error while fetching branch:", error);
         }
       }
     };
@@ -1085,9 +1128,9 @@ useEffect(() => {
             ? `${process.env.REACT_APP_SUPER_ADMIN_API}/read-devices`
             : role == 2
             ? `${process.env.REACT_APP_SCHOOL_API}/read-devices`
-            :role==3
+            : role == 3
             ? `${process.env.REACT_APP_BRANCH_API}/read-devices`
-            :`http://63.142.251.13:4000/branchgroupuser/getdevicebranchgroupuser`
+            : `http://63.142.251.13:4000/branchgroupuser/getdevicebranchgroupuser`;
 
         const response = await axios.get(apiUrl, {
           headers: {
@@ -1130,42 +1173,40 @@ useEffect(() => {
               }))
             : [];
         }
-      //   else if(role==4){
-      //     allData=response.data.data.flatMap((item)=>
-      //     Array.isArray(item.branches)&&item.branches>0?
-      //   item.branches.flatMap((devicearray)=>(
-      //     Array.isArray(devicearray.devices)&& devicearray.length>0?
-      //     devicearray.devices.map((device)=>({
-      //       ...device
-      //     })):[]
-      //   )):[]
-      // )
-      //   }
-      else if (role == 4) {
-        allData = response.data.data.flatMap((school) =>
+        //   else if(role==4){
+        //     allData=response.data.data.flatMap((item)=>
+        //     Array.isArray(item.branches)&&item.branches>0?
+        //   item.branches.flatMap((devicearray)=>(
+        //     Array.isArray(devicearray.devices)&& devicearray.length>0?
+        //     devicearray.devices.map((device)=>({
+        //       ...device
+        //     })):[]
+        //   )):[]
+        // )
+        //   }
+        else if (role == 4) {
+          allData = response.data.data.flatMap((school) =>
             Array.isArray(school.branches) && school.branches.length > 0
-                ? school.branches.flatMap((branch) =>
-                      Array.isArray(branch.devices) && branch.devices.length > 0
-                          ? branch.devices.map((device) => ({
-                                ...device,
-                                branchName: branch.branchName,
-                                schoolName: school.schoolName,
-                            }))
-                          : []
-                  )
-                : []
-        );
-    }
-    
+              ? school.branches.flatMap((branch) =>
+                  Array.isArray(branch.devices) && branch.devices.length > 0
+                    ? branch.devices.map((device) => ({
+                        ...device,
+                        branchName: branch.branchName,
+                        schoolName: school.schoolName,
+                      }))
+                    : []
+                )
+              : []
+          );
+        }
+
         setAllDevices(allData); // Store all devices
         setBuses(allData); // Set initial buses as well
-        console.log("filter devices according to branch", allData);
+        // console.log("filter devices according to branch", allData);
       } catch (error) {
         console.error("Error fetching buses:", error);
       }
     };
-
-    
 
     const fetchGeofence = async (startDate = "", endDate = "") => {
       // setLoading(true);
@@ -1195,7 +1236,7 @@ useEffect(() => {
               headers: { Authorization: `Bearer ${token}` },
             }
           );
-        }else if (role == 4) {
+        } else if (role == 4) {
           response = await axios.get(
             `http://63.142.251.13:4000/branchgroupuser/getgeofence`,
             {
@@ -1203,7 +1244,7 @@ useEffect(() => {
             }
           );
         }
-console.log("my geofences",response.data)
+        // console.log("my geofences", response.data);
         if (response?.data) {
           let fetchedData = {};
 
@@ -1232,7 +1273,8 @@ console.log("my geofences",response.data)
                 });
               }
             });
-          } if (role == 3) {
+          }
+          if (role == 3) {
             // For role 3, handle geofences by device
             response.data.geofences.forEach((geofence) => {
               if (!fetchedData[geofence.deviceId]) {
@@ -1250,9 +1292,10 @@ console.log("my geofences",response.data)
                 schoolName: geofence.schoolName,
               });
             });
-          }if (role == 4) {
+          }
+          if (role == 4) {
             // const fetchedData = {}; // Initialize an empty object to store the data
-          
+
             response.data.branches.forEach((branch) => {
               if (branch.geofences) {
                 branch.geofences.forEach((geofence) => {
@@ -1267,17 +1310,14 @@ console.log("my geofences",response.data)
                 });
               }
             });
-          
-            console.log("Fetched Data:", fetchedData);
-          
+
+            // console.log("Fetched Data:", fetchedData);
+
             // Use fetchedData as needed in your application
           }
-          
-        
-          
 
-          console.log("role is:", role);
-          console.log("geofences are IS:", fetchedData);
+          // console.log("role is:", role);
+          // console.log("geofences are IS:", fetchedData);
           // Update the state with fetched data
           setPickupPointsData(fetchedData);
         }
@@ -1290,7 +1330,7 @@ console.log("my geofences",response.data)
     fetchSchool();
     fetchGeofence();
   }, [role]);
- 
+
   const sampleData = [
     [
       "childName",
@@ -1354,12 +1394,13 @@ console.log("my geofences",response.data)
     link.download = "StudentDetail.xlsx"; // Specify the download filename
     link.click();
   };
+
   return (
     <>
       <h1 style={{ textAlign: "center", marginTop: "80px" }}>
         Student Detail{" "}
       </h1>
-      <div >
+      <div>
         <div
           style={{
             display: "flex",
@@ -1367,56 +1408,55 @@ console.log("my geofences",response.data)
             marginBottom: "10px",
           }}
         >
-       
-           <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Smaller width
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Set a fixed height to reduce it
-        padding: '0px', // Reduce padding to shrink height
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position
-        fontSize: '14px', // Slightly smaller label font
-      }
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
-          style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
-          }}
-        />
-      ),
-    }}
-  />
-        
+          <TextField
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Smaller width
+              "& .MuiOutlinedInput-root": {
+                height: "36px", // Set a fixed height to reduce it
+                padding: "0px", // Reduce padding to shrink height
+              },
+              "& .MuiInputLabel-root": {
+                top: "-6px", // Adjust label position
+                fontSize: "14px", // Slightly smaller label font
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
+
           <Button
-  onClick={() => setModalOpen(true)}
-  sx={{
-    backgroundColor: "rgb(85, 85, 85)",
-    color: "white",
-    fontWeight: "bold",
-    marginRight: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    "&:hover": {
-      fontWeight: "bolder", // Make text even bolder on hover
-      backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
-    },
-  }}
->
-  <ImportExportIcon />
-  Column Visibility
-</Button>
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              "&:hover": {
+                fontWeight: "bolder", // Make text even bolder on hover
+                backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
+          </Button>
 
           <Button
             variant="contained"
@@ -1453,8 +1493,14 @@ console.log("my geofences",response.data)
           >
             Import
           </Button>
-          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"STUDENTS DETAIL"} pdfFilename={"StudentDetail.pdf"} excelFilename={"StudentDetail.xlsx"} />
-
+          <Export
+            columnVisibility={columnVisibility}
+            COLUMNS={COLUMNS}
+            filteredRows={filteredRows}
+            pdfTitle={"STUDENTS DETAIL"}
+            pdfFilename={"StudentDetail.pdf"}
+            excelFilename={"StudentDetail.xlsx"}
+          />
         </div>
         <div
           style={{
@@ -1686,28 +1732,32 @@ console.log("my geofences",response.data)
                 </TableBody>
               </Table>
             </TableContainer>
-           
-          
- 
-  
-  
-    <StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+
+            <StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[
+                  { label: "All", value: -1 },
+                  10,
+                  25,
+                  100,
+                  1000,
+                ]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={
+                  rowsPerPage === sortedData.length ? -1 : rowsPerPage
+                }
+                page={page}
+                onPageChange={(event, newPage) => {
+                  // console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  // console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
@@ -1715,17 +1765,17 @@ console.log("my geofences",response.data)
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -1735,12 +1785,10 @@ console.log("my geofences",response.data)
                 />
                 {col.Header}
               </div>
-              
             ))}
           </Box>
         </Modal>
         <Modal open={editModalOpen} onClose={handleModalClose}>
-         
           <Box sx={style}>
             {/* <h2>Add Row</h2> */}
             <Box
@@ -1774,41 +1822,39 @@ console.log("my geofences",response.data)
               }}
             />
 
-            
             <FormControl
-  sx={{
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: "10px",
-  }}
->
-  <FormLabel
-    id="demo-row-radio-buttons-group-label"
-    sx={{ marginRight: 4 }} // Add some space between label and radio group
-  >
-    Gender
-  </FormLabel>
-  <RadioGroup
-    row
-    aria-labelledby="demo-row-radio-buttons-group-label"
-    name="gender"
-    value={formData.gender || ""} // Bind to formData.gender
-    onChange={handleInputChange} // Update formData when selection changes
-  >
-    <FormControlLabel
-      value="female"
-      control={<Radio />}
-      label="Female"
-    />
-    <FormControlLabel
-      value="male"
-      control={<Radio />}
-      label="Male"
-    />
-  </RadioGroup>
-</FormControl>
-
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: "10px",
+              }}
+            >
+              <FormLabel
+                id="demo-row-radio-buttons-group-label"
+                sx={{ marginRight: 4 }} // Add some space between label and radio group
+              >
+                Gender
+              </FormLabel>
+              <RadioGroup
+                row
+                aria-labelledby="demo-row-radio-buttons-group-label"
+                name="gender"
+                value={formData.gender || ""} // Bind to formData.gender
+                onChange={handleInputChange} // Update formData when selection changes
+              >
+                <FormControlLabel
+                  value="female"
+                  control={<Radio />}
+                  label="Female"
+                />
+                <FormControlLabel
+                  value="male"
+                  control={<Radio />}
+                  label="Male"
+                />
+              </RadioGroup>
+            </FormControl>
 
             <FormControl
               sx={{
@@ -1839,7 +1885,8 @@ console.log("my geofences",response.data)
                     <InputAdornment position="start">
                       <CakeIcon />
                     </InputAdornment>
-                  ),}}
+                  ),
+                }}
               />
             </FormControl>
 
@@ -1855,13 +1902,12 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Face6Icon />  {/* Add Face6Icon in the input field */}
+                    <Face6Icon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
             />
 
-          
             <FormControl fullWidth sx={{ marginBottom: "10px" }}>
               <Autocomplete
                 id="searchable-select"
@@ -1883,7 +1929,8 @@ console.log("my geofences",response.data)
                       ...params.InputProps,
                       startAdornment: (
                         <InputAdornment position="start">
-                          <ClassIcon />  {/* Add SchoolIcon in the input field */}
+                          <ClassIcon />{" "}
+                          {/* Add SchoolIcon in the input field */}
                         </InputAdornment>
                       ),
                     }}
@@ -1903,7 +1950,7 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PinIcon/>  {/* Add Face6Icon in the input field */}
+                    <PinIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
@@ -1917,17 +1964,17 @@ console.log("my geofences",response.data)
               onChange={handleInputChange}
               sx={{ marginBottom: "10px" }}
               fullWidth
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <HolidayVillageIcon />  {/* Add Face6Icon in the input field */}
-                    </InputAdornment>
-                  ),
-                }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <HolidayVillageIcon />{" "}
+                    {/* Add Face6Icon in the input field */}
+                  </InputAdornment>
+                ),
+              }}
             />
             {role == 1 ? (
               <>
-             
                 <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
@@ -1963,7 +2010,8 @@ console.log("my geofences",response.data)
                           ...params.InputProps,
                           startAdornment: (
                             <InputAdornment position="start">
-                              <SchoolIcon />  {/* Add SchoolIcon in the input field */}
+                              <SchoolIcon />{" "}
+                              {/* Add SchoolIcon in the input field */}
                             </InputAdornment>
                           ),
                         }}
@@ -1971,14 +2019,14 @@ console.log("my geofences",response.data)
                     )}
                   />
                 </FormControl>
-               
+
                 <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
                   fullWidth
                 >
                   <Autocomplete
-                     key={`${formData.schoolName}-${formData.branchName}`} 
+                    key={`${formData.schoolName}-${formData.branchName}`}
                     id="searchable-branch-select"
                     options={Array.isArray(branches) ? branches : []} // Ensure branches is an array
                     getOptionLabel={(option) => option.branchName || ""} // Display branch name
@@ -2008,7 +2056,8 @@ console.log("my geofences",response.data)
                           ...params.InputProps,
                           startAdornment: (
                             <InputAdornment position="start">
-                              <AccountTreeIcon />  {/* Add SchoolIcon in the input field */}
+                              <AccountTreeIcon />{" "}
+                              {/* Add SchoolIcon in the input field */}
                             </InputAdornment>
                           ),
                         }}
@@ -2017,8 +2066,7 @@ console.log("my geofences",response.data)
                   />
                 </FormControl>
               </>
-            ): role == 4 ? (
-             
+            ) : role == 4 ? (
               <FormControl
                 variant="outlined"
                 sx={{ marginBottom: "10px" }}
@@ -2054,14 +2102,14 @@ console.log("my geofences",response.data)
                   )}
                 />
               </FormControl>
-            ):role == 2 ? (
+            ) : role == 2 ? (
               <FormControl
                 variant="outlined"
                 sx={{ marginBottom: "10px" }}
                 fullWidth
               >
                 <Autocomplete
-                  key={`${formData.schoolName}-${formData.branchName}`} 
+                  key={`${formData.schoolName}-${formData.branchName}`}
                   id="searchable-branch-select"
                   options={branches || []} // Ensure branches is at least an empty array
                   getOptionLabel={(option) => option.branchName || ""} // Display branch name
@@ -2088,7 +2136,8 @@ console.log("my geofences",response.data)
                         ...params.InputProps,
                         startAdornment: (
                           <InputAdornment position="start">
-                            <AccountTreeIcon />  {/* Add SchoolIcon in the input field */}
+                            <AccountTreeIcon />{" "}
+                            {/* Add SchoolIcon in the input field */}
                           </InputAdornment>
                         ),
                       }}
@@ -2097,8 +2146,7 @@ console.log("my geofences",response.data)
                 />
               </FormControl>
             ) : null}
-            
-           
+
             <FormControl
               variant="outlined"
               sx={{ marginBottom: "10px" }}
@@ -2131,7 +2179,8 @@ console.log("my geofences",response.data)
                       ...params.InputProps,
                       startAdornment: (
                         <InputAdornment position="start">
-                          <DirectionsBusIcon />  {/* Add SchoolIcon in the input field */}
+                          <DirectionsBusIcon />{" "}
+                          {/* Add SchoolIcon in the input field */}
                         </InputAdornment>
                       ),
                     }}
@@ -2139,14 +2188,14 @@ console.log("my geofences",response.data)
                 )}
               />
             </FormControl>
-          
+
             <FormControl fullWidth sx={{ marginBottom: "10px" }}>
               <Autocomplete
                 id="geofence-autocomplete"
                 options={filteredGeofences || []} // List of geofence objects
                 getOptionLabel={(option) => option.name || ""} // Display geofence name
                 value={
-                  (filteredGeofences||[]).find(
+                  (filteredGeofences || []).find(
                     (geofence) => geofence.name === formData["pickupPoint"]
                   ) || null
                 } // Find the selected geofence
@@ -2168,7 +2217,8 @@ console.log("my geofences",response.data)
                       ...params.InputProps,
                       startAdornment: (
                         <InputAdornment position="start">
-                          <ShareLocationIcon />  {/* Add SchoolIcon in the input field */}
+                          <ShareLocationIcon />{" "}
+                          {/* Add SchoolIcon in the input field */}
                         </InputAdornment>
                       ),
                     }}
@@ -2189,7 +2239,7 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <AbcIcon />  {/* Add Face6Icon in the input field */}
+                    <AbcIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
@@ -2211,26 +2261,25 @@ console.log("my geofences",response.data)
                 ),
               }}
             /> */}
-           <TextField
-    key="phone"
-    label="Phone Number"
-    variant="outlined"
-    name="phone"
-    value={formData["phone"] || ""}
-    onChange={handleInputChange}
-    error={Boolean(errors.phone)} // Show error state if there's an error
-    helperText={errors.phone} // Display validation error message
-    sx={{ marginBottom: "10px" }}
-    fullWidth
-    InputProps={{
-        startAdornment: (
-            <InputAdornment position="start">
-                <PhoneInTalkIcon />
-            </InputAdornment>
-        ),
-    }}
-/>
-
+            <TextField
+              key="phone"
+              label="Phone Number"
+              variant="outlined"
+              name="phone"
+              value={formData["phone"] || ""}
+              onChange={handleInputChange}
+              error={Boolean(errors.phone)} // Show error state if there's an error
+              helperText={errors.phone} // Display validation error message
+              sx={{ marginBottom: "10px" }}
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneInTalkIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
 
             <TextField
               key={"email"}
@@ -2244,7 +2293,7 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <MailIcon />  {/* Add Face6Icon in the input field */}
+                    <MailIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
@@ -2266,7 +2315,7 @@ console.log("my geofences",response.data)
                 ),
               }}
             /> */}
-              <TextField
+            <TextField
               key={"password"}
               label={"Password"}
               variant="outlined"
@@ -2280,7 +2329,7 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PasswordIcon />  {/* Add Face6Icon in the input field */}
+                    <PasswordIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
@@ -2311,7 +2360,6 @@ console.log("my geofences",response.data)
   </div>
 )} */}
 
-            
             <Button
               variant="contained"
               color="primary"
@@ -2387,8 +2435,6 @@ console.log("my geofences",response.data)
                 />
               </RadioGroup>
             </FormControl>
-           
-           
 
             <FormControl
               sx={{
@@ -2406,7 +2452,7 @@ console.log("my geofences",response.data)
 
               <TextField
                 key={"childAge"}
-                label={ "Date of Birth"}
+                label={"Date of Birth"}
                 type="date"
                 placeholder="Date of Birth"
                 variant="outlined"
@@ -2420,7 +2466,8 @@ console.log("my geofences",response.data)
                     <InputAdornment position="start">
                       <CakeIcon />
                     </InputAdornment>
-                  ),}}
+                  ),
+                }}
               />
             </FormControl>
 
@@ -2434,23 +2481,23 @@ console.log("my geofences",response.data)
               sx={{ marginBottom: "10px" }}
               fullWidth
             /> */}
- <TextField
-        key={"childAge"}
-        label={"Student Age"}
-        variant="outlined"
-        name="childAge"
-        value={formData.childAge || ""}
-        sx={{ marginBottom: "10px" }}
-        fullWidth
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Face6Icon />  {/* Add Face6Icon in the input field */}
-            </InputAdornment>
-          ),
-        }}
-        // disabled // Disable the field since the age is calculated automatically
-      />
+            <TextField
+              key={"childAge"}
+              label={"Student Age"}
+              variant="outlined"
+              name="childAge"
+              value={formData.childAge || ""}
+              sx={{ marginBottom: "10px" }}
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Face6Icon /> {/* Add Face6Icon in the input field */}
+                  </InputAdornment>
+                ),
+              }}
+              // disabled // Disable the field since the age is calculated automatically
+            />
             {/* <FormControl fullWidth sx={{ marginBottom: "10px" }}>
               <InputLabel id="demo-simple-select-label">Class</InputLabel>
               <Select
@@ -2495,7 +2542,8 @@ console.log("my geofences",response.data)
                       ...params.InputProps,
                       startAdornment: (
                         <InputAdornment position="start">
-                          <ClassIcon />  {/* Add SchoolIcon in the input field */}
+                          <ClassIcon />{" "}
+                          {/* Add SchoolIcon in the input field */}
                         </InputAdornment>
                       ),
                     }}
@@ -2503,7 +2551,7 @@ console.log("my geofences",response.data)
                 )}
               />
             </FormControl>
-             
+
             <TextField
               key={"roleno"}
               label={"Roll No"}
@@ -2511,12 +2559,12 @@ console.log("my geofences",response.data)
               name="rollno"
               value={formData["rollno"] || ""}
               onChange={handleInputChange}
-              sx={{ marginBottom: "10px" , zIndex: 1500 }}
+              sx={{ marginBottom: "10px", zIndex: 1500 }}
               fullWidth
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PinIcon/>  {/* Add Face6Icon in the input field */}
+                    <PinIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
@@ -2533,14 +2581,14 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <HolidayVillageIcon />  {/* Add Face6Icon in the input field */}
+                    <HolidayVillageIcon />{" "}
+                    {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
             />
             {role == 1 ? (
               <>
-             
                 <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
@@ -2576,7 +2624,8 @@ console.log("my geofences",response.data)
                           ...params.InputProps,
                           startAdornment: (
                             <InputAdornment position="start">
-                              <SchoolIcon />  {/* Add SchoolIcon in the input field */}
+                              <SchoolIcon />{" "}
+                              {/* Add SchoolIcon in the input field */}
                             </InputAdornment>
                           ),
                         }}
@@ -2584,7 +2633,7 @@ console.log("my geofences",response.data)
                     )}
                   />
                 </FormControl>
-               
+
                 <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
@@ -2620,7 +2669,8 @@ console.log("my geofences",response.data)
                           ...params.InputProps,
                           startAdornment: (
                             <InputAdornment position="start">
-                              <AccountTreeIcon />  {/* Add SchoolIcon in the input field */}
+                              <AccountTreeIcon />{" "}
+                              {/* Add SchoolIcon in the input field */}
                             </InputAdornment>
                           ),
                         }}
@@ -2629,8 +2679,7 @@ console.log("my geofences",response.data)
                   />
                 </FormControl>
               </>
-            ): role == 4 ? (
-             
+            ) : role == 4 ? (
               <FormControl
                 variant="outlined"
                 sx={{ marginBottom: "10px" }}
@@ -2666,7 +2715,8 @@ console.log("my geofences",response.data)
                         ...params.InputProps,
                         startAdornment: (
                           <InputAdornment position="start">
-                            <AccountTreeIcon />  {/* Add SchoolIcon in the input field */}
+                            <AccountTreeIcon />{" "}
+                            {/* Add SchoolIcon in the input field */}
                           </InputAdornment>
                         ),
                       }}
@@ -2674,8 +2724,7 @@ console.log("my geofences",response.data)
                   )}
                 />
               </FormControl>
-            ): role == 2 ? (
-             
+            ) : role == 2 ? (
               <FormControl
                 variant="outlined"
                 sx={{ marginBottom: "10px" }}
@@ -2711,7 +2760,8 @@ console.log("my geofences",response.data)
                         ...params.InputProps,
                         startAdornment: (
                           <InputAdornment position="start">
-                            <AccountTreeIcon />  {/* Add SchoolIcon in the input field */}
+                            <AccountTreeIcon />{" "}
+                            {/* Add SchoolIcon in the input field */}
                           </InputAdornment>
                         ),
                       }}
@@ -2720,7 +2770,7 @@ console.log("my geofences",response.data)
                 />
               </FormControl>
             ) : null}
-          
+
             <FormControl
               variant="outlined"
               sx={{ marginBottom: "10px" }}
@@ -2753,7 +2803,8 @@ console.log("my geofences",response.data)
                       ...params.InputProps,
                       startAdornment: (
                         <InputAdornment position="start">
-                          <DirectionsBusIcon />  {/* Add SchoolIcon in the input field */}
+                          <DirectionsBusIcon />{" "}
+                          {/* Add SchoolIcon in the input field */}
                         </InputAdornment>
                       ),
                     }}
@@ -2761,7 +2812,7 @@ console.log("my geofences",response.data)
                 )}
               />
             </FormControl>
-          
+
             <FormControl fullWidth sx={{ marginBottom: "10px" }}>
               <Autocomplete
                 id="geofence-autocomplete"
@@ -2790,7 +2841,8 @@ console.log("my geofences",response.data)
                       ...params.InputProps,
                       startAdornment: (
                         <InputAdornment position="start">
-                          <ShareLocationIcon />  {/* Add SchoolIcon in the input field */}
+                          <ShareLocationIcon />{" "}
+                          {/* Add SchoolIcon in the input field */}
                         </InputAdornment>
                       ),
                     }}
@@ -2811,7 +2863,7 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <AbcIcon />  {/* Add Face6Icon in the input field */}
+                    <AbcIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
@@ -2834,24 +2886,24 @@ console.log("my geofences",response.data)
               }}
             /> */}
             <TextField
-    key="phone"
-    label="Phone Number"
-    variant="outlined"
-    name="phone"
-    value={formData["phone"] || ""}
-    onChange={handleInputChange}
-    error={Boolean(errors.phone)} // Show error state if there's an error
-    helperText={errors.phone} // Display validation error message
-    sx={{ marginBottom: "10px" }}
-    fullWidth
-    InputProps={{
-        startAdornment: (
-            <InputAdornment position="start">
-                <PhoneInTalkIcon />
-            </InputAdornment>
-        ),
-    }}
-/>
+              key="phone"
+              label="Phone Number"
+              variant="outlined"
+              name="phone"
+              value={formData["phone"] || ""}
+              onChange={handleInputChange}
+              error={Boolean(errors.phone)} // Show error state if there's an error
+              helperText={errors.phone} // Display validation error message
+              sx={{ marginBottom: "10px" }}
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneInTalkIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
 
             <TextField
               key={"email"}
@@ -2865,7 +2917,7 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <MailIcon />  {/* Add Face6Icon in the input field */}
+                    <MailIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
@@ -2884,7 +2936,7 @@ console.log("my geofences",response.data)
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <PasswordIcon />  {/* Add Face6Icon in the input field */}
+                    <PasswordIcon /> {/* Add Face6Icon in the input field */}
                   </InputAdornment>
                 ),
               }}
@@ -2936,7 +2988,7 @@ console.log("my geofences",response.data)
               fullWidth
               
             /> */}
-            
+
             <Button
               variant="contained"
               color="primary"
@@ -2946,7 +2998,6 @@ console.log("my geofences",response.data)
             </Button>
           </Box>
         </Modal>
-        
 
         {/* <Modal open={importModalOpen} onClose={() => setImportModalOpen(false)}>
           <Box sx={style}>
