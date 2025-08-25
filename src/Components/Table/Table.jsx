@@ -85,7 +85,7 @@ export const Tablee = ({
   historyDeviceId,
   setHistoryDeviceId,
 }) => {
-  // console.log(data);
+  // //console.log(data);
   const [page, setPage] = useState(0);
   const [individualDataObj, setIndividualDataObj] = useState({});
   const [filterText, setFilterText] = useState("");
@@ -180,7 +180,7 @@ export const Tablee = ({
   });
   const currentRows = filteredData.slice(startIndex, endIndex);
   if (data) {
-    console.log("my data", data);
+    // //console.log("my data", data);
   }
   const getSortValue = (item, column) => {
     switch (column) {
@@ -253,12 +253,12 @@ export const Tablee = ({
 
   useEffect(() => {
     setLatitude(data.map((row) => row.latitude));
-    // console.log(latitude);
+    // //console.log(latitude);
   }, [data]);
 
   useEffect(() => {
     setLongitude(data.map((row) => row.longitude));
-    //  console.log(longitude);
+    //  //console.log(longitude);
   }, [data]);
 
   useEffect(() => {}, [filteredRows]);
@@ -330,7 +330,7 @@ export const Tablee = ({
 
   const handleLocationClick = (latitude, longitude, row) => {
     setIndividualMap(true);
-    console.log("I am row .........................   ", row);
+    // //console.log("I am row .........................   ", row);
     setLati(latitude);
 
     setLongi(longitude);
@@ -340,7 +340,7 @@ export const Tablee = ({
     for (let i = 0; i < data.length; i++) {
       if (data[i].latitude === dataLat && data[i].longitude === dataLng) {
         setIndividualDataObj(data[i]);
-        // console.log(data[i]);
+        // //console.log(data[i]);
       }
     }
   };
@@ -475,7 +475,7 @@ export const Tablee = ({
         longitude: selectedDevice.longitude,
       };
       setSelectedVehicle(selectedDeviceDetails);
-      console.log("Selected Device:", selectedDeviceDetails);
+      // //console.log("Selected Device:", selectedDeviceDetails);
     }
   };
   const [totalResponses, setTotalResponses] = useState(0);
@@ -489,9 +489,9 @@ export const Tablee = ({
     if (item) {
       const { latitude, longitude, name } = item;
       setCoordinates({ latitude, longitude, name });
-      console.log(
-        `Latitude: ${latitude}, Longitude: ${longitude}, deviceName: ${name}`
-      ); // Optional: Log the coordinates
+      // //console.log(
+      //   `Latitude: ${latitude}, Longitude: ${longitude}, deviceName: ${name}`
+      // ); // Optional: Log the coordinates
     }
   };
   const fetchData = async (startDate = "", endDate = "") => {
@@ -539,7 +539,7 @@ export const Tablee = ({
         );
       }
 
-      console.log("fetch data", response.data); // Log the entire response data
+      // //console.log("fetch data", response.data); // Log the entire response data
       // fetchgeofencepoint();
       if (response?.data) {
         const allData =
@@ -567,11 +567,11 @@ export const Tablee = ({
               )
             : response?.data.data;
 
-        console.log(allData);
+        //console.log(allData);
         const childNames = allData.map((child) => child.childName);
         // const childNames = response.data; // Replace this with the actual extracted childName array
         setChildrenList(childNames);
-        console.log("All Child Names:", childNames);
+        //console.log("All Child Names:", childNames);
       } else {
         console.error("Expected an array but got:", response.data.children);
       }
@@ -632,7 +632,7 @@ export const Tablee = ({
         }
 
         const data = await response.json();
-        console.log("Geofence data: ", data);
+        //console.log("Geofence data: ", data);
 
         // Transform data to create dropdown options
         setAreas(data.map((item) => item.name));
@@ -689,10 +689,10 @@ export const Tablee = ({
         );
       }
 
-      console.log("fetch data", response.data);
+      //console.log("fetch data", response.data);
 
       if (response?.data) {
-        console.log(response.data);
+        //console.log(response.data);
         const allData =
           role == 1
             ? response?.data.data.flatMap((school) =>
@@ -706,13 +706,13 @@ export const Tablee = ({
             ? response?.data.branches.flatMap((branch) => branch.drivers)
             : response?.data.drivers;
 
-        console.log("drivers : ", allData);
+        //console.log("drivers : ", allData);
 
-        console.log("this is drivers data", allData);
+        //console.log("this is drivers data", allData);
         const driverNames = allData.map((child) => child.driverName);
         // const childNames = response.data; // Replace this with the actual extracted childName array
 
-        console.log("All driver Names:", driverNames);
+        //console.log("All driver Names:", driverNames);
         setDrivers(allData); // If no date range, use all data
         setdrivername(driverNames);
       } else {
@@ -766,7 +766,7 @@ export const Tablee = ({
         );
       }
 
-      console.log("fetch data", response.data); // Log the entire response data
+      //console.log("fetch data", response.data); // Log the entire response data
 
       if (response?.data) {
         const allData =
@@ -788,7 +788,7 @@ export const Tablee = ({
               )
             : response.data.supervisors;
 
-        console.log("supervisirs", allData);
+        //console.log("supervisirs", allData);
         const SupervisorsNames = allData.map((child) => child.supervisorName);
 
         setsupervisorsNames(SupervisorsNames);
@@ -843,7 +843,7 @@ export const Tablee = ({
         );
       }
 
-      console.log("fetch data", response.data); // Log the entire response data
+      //console.log("fetch data", response.data); // Log the entire response data
 
       if (response.data) {
         const allData =
@@ -879,7 +879,7 @@ export const Tablee = ({
               )
             : response.data.parents;
 
-        console.log(allData);
+        //console.log(allData);
         const ParentsNames = allData.map((child) => child.parentName);
 
         setparentsNames(ParentsNames);
@@ -939,7 +939,7 @@ export const Tablee = ({
         );
       }
 
-      console.log("fetch data geofence", response.data);
+      //console.log("fetch data geofence", response.data);
       if (response?.data) {
         let allData;
 
@@ -972,7 +972,7 @@ export const Tablee = ({
             schoolName: response.data.schoolName, // Add schoolName from the response
           }));
 
-          console.log(allData);
+          //console.log(allData);
         } else if (role == 4) {
           allData = response?.data?.branches.flatMap(
             (branch) =>
@@ -982,7 +982,7 @@ export const Tablee = ({
                 branchName: branch.branchName, // Add branchName to each geofence
               })) || [] // Handle the case where geofences is undefined or empty
           );
-          console.log("aa", allData);
+          //console.log("aa", allData);
         }
 
         const geofencesNames = allData.map((child) => child.name);
@@ -1018,7 +1018,7 @@ export const Tablee = ({
       const response = await axios.get(
         `https://api.maptiler.com/geocoding/${longitude},${latitude}.json?key=${apiKey}`
       );
-      // console.log(response)
+      // //console.log(response)
       const address =
         response.data.features.length <= 5
           ? response.data.features[0].place_name_en
@@ -1048,7 +1048,7 @@ export const Tablee = ({
   }, [address]);
 
   useEffect(() => {
-    console.log("filtered vehicle", currentRows);
+    //console.log("filtered vehicle", currentRows);
     currentRows.forEach((vehicle) => {
       if (
         vehicle?.deviceId &&
@@ -1060,7 +1060,7 @@ export const Tablee = ({
         // fetchAddress(vehicle.deviceId, vehicle.longitude, vehicle.latitude);
       }
     });
-    // console.log(address)
+    // //console.log(address)
   }, [currentRows]);
 
   //updated by sudesh
@@ -1116,7 +1116,7 @@ export const Tablee = ({
 
   const navigate = useNavigate();
   const handleClickOnTrack = (vehicle) => {
-    console.log("trcak clicked");
+    //console.log("trcak clicked");
     navigate(
       `/salesman/${vehicle.deviceId}/${vehicle.category}/${vehicle.name}`
     );
@@ -2027,18 +2027,16 @@ export const Tablee = ({
                   1000,
                 ]}
                 component="div"
-                count={sortedData.length}
+                count={filteredData.length}
                 rowsPerPage={
-                  rowsPerPage == sortedData.length ? -1 : rowsPerPage
+                  rowsPerPage === -1 ? filteredData.length : rowsPerPage
                 }
-                page={page}
-                onPageChange={(event, newPage) => {
-                  console.log("Page changed:", newPage);
-                  handleChangePage(event, newPage);
-                }}
+                page={currentPage}
+                onPageChange={(event, newPage) => setCurrentPage(newPage)}
                 onRowsPerPageChange={(event) => {
-                  console.log("Rows per page changed:", event.target.value);
-                  handleChangeRowsPerPage(event);
+                  const newRows = parseInt(event.target.value, 10);
+                  setRowsPerPage(newRows);
+                  setCurrentPage(0); // Reset to first page
                 }}
               />
             </StyledTablePagination>

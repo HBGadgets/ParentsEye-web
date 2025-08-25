@@ -216,7 +216,7 @@ const IndividualTrack = (lat, long) => {
   useEffect(() => {
     if (!socketRef.current) {
       // Only connect if socket is not already initialized
-      socketRef.current = io(process.env.REACT_APP_Testing_Server_API, {
+      socketRef.current = io(process.env.REACT_APP_API, {
         transports: ["websocket"], // Use WebSocket for better performance
       });
 
@@ -454,7 +454,7 @@ const IndividualTrack = (lat, long) => {
       // Use template literal to properly pass deviceId into the URL
       // const response = await fetch(`https://parentseye-test-2.onrender.com/iscrossedhistory?deviceIds=${deviceId}`);
       const response = await fetch(
-        `${process.env.REACT_APP_Testing_Server_API}/iscrossedhistory?deviceIds=${deviceId}`
+        `${process.env.REACT_APP_API}/iscrossedhistory?deviceIds=${deviceId}`
       );
 
       if (!response.ok) {

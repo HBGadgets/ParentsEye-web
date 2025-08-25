@@ -41,10 +41,10 @@ import {
 } from "@mui/material";
 import { InputLabel, MenuItem, Select } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment"; // Add this import
-import SchoolIcon from '@mui/icons-material/School';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-import CircleNotificationsIcon from '@mui/icons-material/CircleNotifications';
+import SchoolIcon from "@mui/icons-material/School";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
 //import { TextField } from '@mui/material';
 
 const style = {
@@ -112,9 +112,7 @@ export const Notification = () => {
     studentAbsent: false,
     leaveRequestStatus: false,
   });
-  const [editFormData,setEditFormData]=useState({
-    
-  })
+  const [editFormData, setEditFormData] = useState({});
   const [filteredBranches, setFilteredBranches] = useState([]);
   const [devices, setDevices] = useState([]);
 
@@ -198,7 +196,7 @@ export const Notification = () => {
   //     branchName: selectedBranchName,
   //   };
 
-  //   console.log(updatedFormData); // You can now submit this updated formData
+  //   //console.log(updatedFormData); // You can now submit this updated formData
   //   // Proceed with your submit logic (e.g., API call)
   // };
 
@@ -227,7 +225,7 @@ export const Notification = () => {
       branchName: selectedBranchName,
     };
 
-    console.log("Updated form data",updatedFormData); // Check the updated form data before sending
+    //console.log("Updated form data",updatedFormData); // Check the updated form data before sending
 
     // Send the form data to the server using axios
     try {
@@ -241,7 +239,7 @@ export const Notification = () => {
         }
       );
 
-      console.log("Notification created successfully:", response.data);
+      //console.log("Notification created successfully:", response.data);
       // Optionally, you can show a success message or handle the result here
       fetchData();
       setFormData([]);
@@ -250,7 +248,6 @@ export const Notification = () => {
       // Optionally, show an error message or handle the error here
     }
     setAddModalOpen(false);
-
   };
 
   // const handleSubmit = () => {
@@ -264,7 +261,7 @@ export const Notification = () => {
   //     return;
   //   }
   //   // Save data or send it to an API
-  //   console.log("Form Data Submitted:", formData);
+  //   //console.log("Form Data Submitted:", formData);
   // };
 
   // const handleSubmit = async (event) => {
@@ -301,7 +298,7 @@ export const Notification = () => {
   //     if (response.ok) {
   //       const result = await response.json();
   //       setAddModalOpen(false);
-  //       console.log("Notification created successfully:", result);
+  //       //console.log("Notification created successfully:", result);
   //       // Optionally, reset form or handle success
   //     } else {
   //       console.error("Error creating notification:", response.statusText);
@@ -347,7 +344,7 @@ export const Notification = () => {
   //     // Handle response
   //     if (response.ok) {
   //       const result = await response.json();
-  //       console.log("Notification created successfully:", result);
+  //       //console.log("Notification created successfully:", result);
   //       // Optionally, reset form or handle success
   //     } else {
   //       console.error("Error creating notification:", response.statusText);
@@ -390,46 +387,46 @@ export const Notification = () => {
   }, [branches, formData.schoolId]);
 
   const fetchBranch = (schoolId) => {
-    console.log("Selected School ID:", schoolId);
+    //console.log("Selected School ID:", schoolId);
 
     // Find the matching school from the schools array
     const selectedSchool = schools.find((school) => school._id === schoolId);
 
     if (selectedSchool) {
-      console.log("Matching School:", selectedSchool);
+      //console.log("Matching School:", selectedSchool);
 
       // Extract the branches array from the selected school
       const branches = selectedSchool.branches || []; // Fallback to empty array if no branches
 
       // Log the branches for verification
-      console.log("Branches for the selected school:", branches);
+      //console.log("Branches for the selected school:", branches);
 
       // Store the branches in the state (assuming setBranch is the setter function)
       setBranches(branches);
     } else {
-      console.log("No school found with the selected ID");
+      //console.log("No school found with the selected ID");
     }
   };
   const fetchDevices = (branchId) => {
-    console.log("Selected Branch ID:", branchId);
+    //console.log("Selected Branch ID:", branchId);
 
     // Assuming devices are stored in a state or fetched from an API based on branchId
     // For example, let's say devices are stored in an array in the selected branch object.
     const selectedBranch = branches.find((branch) => branch._id === branchId);
 
     if (selectedBranch) {
-      console.log("Matching Branch:", selectedBranch);
+      //console.log("Matching Branch:", selectedBranch);
 
       // Assuming devices are an array within the branch object
       const devices = selectedBranch.devices || []; // Default to empty array if no devices exist
 
       // Log the devices to verify
-      console.log("Devices for the selected branch:", devices);
-      console.log("formdata", formData);
+      //console.log("Devices for the selected branch:", devices);
+      //console.log("formdata", formData);
       // Store the devices in the state (assuming setDevices is the setter function)
       setDevices(devices);
     } else {
-      console.log("No branch found with the selected ID");
+      //console.log("No branch found with the selected ID");
     }
   };
 
@@ -458,7 +455,7 @@ export const Notification = () => {
   //       },s
   //     });
 
-  //     console.log("fetch data branch devices", response.data);
+  //     //console.log("fetch data branch devices", response.data);
 
   //     // Ensure response.data is properly structured
   //     if (response?.data && Array.isArray(response.data)) {
@@ -499,7 +496,7 @@ export const Notification = () => {
   //       // Set the total number of responses
   //       setTotalResponses(reversedData.length);
 
-  //       console.log(`Data fetched between ${startDate} and ${endDate}:`, filteredData);
+  //       //console.log(`Data fetched between ${startDate} and ${endDate}:`, filteredData);
   //     } else {
   //       console.error("Expected an array but got:", response.data);
   //     }
@@ -530,12 +527,12 @@ export const Notification = () => {
           }
         );
 
-        console.log("fetch data", response.data); // Log the entire response data
+        //console.log("fetch data", response.data); // Log the entire response data
 
         if (Array.isArray(response.data.schools)) {
           const allData = response.data.schools;
           setSchools(allData);
-          console.log(allData);
+          //console.log(allData);
         } else {
           console.error("Expected an array but got:", response.data.schools);
         }
@@ -591,10 +588,10 @@ export const Notification = () => {
         );
       }
 
-      console.log("fetch data", response.data); // Log the entire response data
+      //console.log("fetch data", response.data); // Log the entire response data
       // fetchgeofencepoint();
       if (response?.data) {
-        console.log("fetch AAAAAAAA", response.data.data);
+        //console.log("fetch AAAAAAAA", response.data.data);
         // const allData = response.data.data;
         const allData = response.data.data.map((item) => ({
           ...item,
@@ -630,7 +627,7 @@ export const Notification = () => {
         //     }))
         //   : [];
 
-        console.log("final data to show", allData);
+        //console.log("final data to show", allData);
 
         const filteredData =
           startDate || endDate
@@ -649,16 +646,16 @@ export const Notification = () => {
             : allData; // If no date range, use all data
         const reversedData = filteredData.reverse();
         // Log the date range and filtered data
-        console.log(`Data fetched between ${startDate} and ${endDate}:`);
-        console.log(filteredData);
+        //console.log(`Data fetched between ${startDate} and ${endDate}:`);
+        //console.log(filteredData);
         setFilteredRows(
           reversedData.map((row) => ({ ...row, isSelected: false }))
         );
         setOriginalRows(allData.map((row) => ({ ...row, isSelected: false })));
         setTotalResponses(reversedData.length);
         // Log the date range and filtered data
-        console.log(`Data fetched between ${startDate} and ${endDate}:`);
-        console.log(filteredData);
+        //console.log(`Data fetched between ${startDate} and ${endDate}:`);
+        //console.log(filteredData);
       } else {
         console.error("Expected an array but got:", response.data.children);
       }
@@ -792,7 +789,7 @@ export const Notification = () => {
 
   // const handleDeleteSelected = async () => {
   //   // Log filteredRows to check its structure
-  //   console.log("Filtered rows:", filteredRows);
+  //   //console.log("Filtered rows:", filteredRows);
 
   //   // Get selected row IDs
   //   let selectedIds;
@@ -801,7 +798,7 @@ export const Notification = () => {
   //       .filter((row) => row.isSelected)
   //       .map((row) => {
   //         // Log each row to check its structure
-  //         console.log("Processing row:", row);
+  //         //console.log("Processing row:", row);
   //         return row.actualDeviceId; // Ensure id exists and is not undefined
   //       });
   //   } else if (role == 2) {
@@ -809,7 +806,7 @@ export const Notification = () => {
   //       .filter((row) => row.isSelected)
   //       .map((row) => {
   //         // Log each row to check its structure
-  //         console.log("Processing row:", row);
+  //         //console.log("Processing row:", row);
   //         return row.actualDeviceId; // Ensure id exists and is not undefined
   //       });
   //   } else {
@@ -817,12 +814,12 @@ export const Notification = () => {
   //       .filter((row) => row.isSelected)
   //       .map((row) => {
   //         // Log each row to check its structure
-  //         console.log("Processing row:", row);
+  //         //console.log("Processing row:", row);
   //         return row.actualDeviceId; // Ensure id exists and is not undefined
   //       });
   //   }
 
-  //   console.log("Selected IDs:", selectedIds);
+  //   //console.log("Selected IDs:", selectedIds);
 
   //   if (selectedIds.length === 0) {
   //     alert("No rows selected for deletion.");
@@ -882,8 +879,6 @@ export const Notification = () => {
   //   fetchData();
   // };
 
-
-
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -919,16 +914,16 @@ export const Notification = () => {
   // };
 
   const handleGrantAccess = () => {
-    console.log("handleGrantAccess");
+    //console.log("handleGrantAccess");
     handleOpenModal();
   };
 
   const handleEditAccess = () => {
-    console.log("handleEditAccess");
+    //console.log("handleEditAccess");
     const selected = filteredRows.find((row) => row.isSelected);
     if (selected) {
       setSelectedRow(selected);
-      console.log("Selecteeeed is trueeeee")
+      //console.log("Selecteeeed is trueeeee")
       setEditFormData({
         _id: selected._id,
         deviceId: selected.deviceId,
@@ -948,27 +943,25 @@ export const Notification = () => {
     } else {
       setSnackbarOpen(true);
     }
-    console.log("Selected",selected)
-    // console.log("Selected edit form data",editFormData)
+    //console.log("Selected",selected)
+    // //console.log("Selected edit form data",editFormData)
   };
-  useEffect(()=>{
-    console.log("Selected edit form data",editFormData)
-
-  },[editFormData])
-  
+  useEffect(() => {
+    //console.log("Selected edit form data",editFormData)
+  }, [editFormData]);
 
   const handleRevokeAccess = async () => {
-    console.log("Filtered rows:", filteredRows);
+    //console.log("Filtered rows:", filteredRows);
     const selectedIds = filteredRows
       .filter((row) => row.isSelected)
       .map((row) => {
         // Log each row to check its structure
-        console.log("Processing row:", row);
+        //console.log("Processing row:", row);
         return row.deviceId; // Ensure id exists and is not undefined
       });
 
-    console.log("Selected IDs:", selectedIds);
-    
+    //console.log("Selected IDs:", selectedIds);
+
     if (selectedIds.length === 0) {
       alert("No rows selected for deletion.");
       return;
@@ -980,43 +973,39 @@ export const Notification = () => {
       // If the user clicks "Cancel", exit the function
       return;
     }
-    try{
-       // Convert array to a comma-separated string
-    const idsString = selectedIds.join(",");
-    const url = `http://63.142.251.13:4000/deletenotification?ids=${idsString}`;
+    try {
+      // Convert array to a comma-separated string
+      const idsString = selectedIds.join(",");
+      const url = `http://63.142.251.13:4000/deletenotification?ids=${idsString}`;
 
-    console.log("Constructed URL:", url);
+      //console.log("Constructed URL:", url);
 
-    // Make the DELETE request
-    const response = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-      
-       if (!response.ok) {
+      // Make the DELETE request
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
         throw new Error(
           `Error deleting record with ID  ${response.statusText}`
         );
-        }
-        const result = await response.json();
-        console.log("Access revoked successfully:", result);
+      }
+      const result = await response.json();
+      //console.log("Access revoked successfully:", result);
 
-
-       const newFilteredRows = filteredRows.filter((row) => !row.isSelected);
-       setFilteredRows(newFilteredRows);
-       setSelectAll(false);
-       fetchData();
-       return response;
-
-
-
-    }catch(error){
+      const newFilteredRows = filteredRows.filter((row) => !row.isSelected);
+      setFilteredRows(newFilteredRows);
+      setSelectAll(false);
+      fetchData();
+      return response;
+    } catch (error) {
       console.error("Error during deletion:", error);
       alert("Failed to delete selected records.");
     }
-    console.log("handleRevokeAccess");
+    //console.log("handleRevokeAccess");
   };
 
   const handleModalClose = () => {
@@ -1043,7 +1032,7 @@ export const Notification = () => {
     const apiUrl = `http://63.142.251.13:4000/updatenotification/${selectedRow._id}`; // Replace with your actual API URL
     const token =
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YjRhMDdmMGRkYmVjNmM3YmMzZDUzZiIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3MjMxMTU1MjJ9.4DgAJH_zmaoanOy4gHB87elbUMod8PunDL2qzpfPXj0"; // Replace with your actual authentication token
-    console.log("URL", apiUrl);
+    //console.log("URL", apiUrl);
     // Prepare the updated data
     const updatedData = {
       ...editFormData,
@@ -1068,7 +1057,7 @@ export const Notification = () => {
 
       // Optionally: Process the response data if needed
       const result = await response.json();
-      console.log("Update successful:", result);
+      //console.log("Update successful:", result);
       alert("updated successfully");
       // Update local state after successful API call
       const updatedRows = filteredRows.map((row) =>
@@ -1089,57 +1078,13 @@ export const Notification = () => {
     fetchData();
   };
 
-  // const handleAddSubmit = async () => {
-  //   try {
-  //     const newRow = {
-  //       ...formData,
-  //       id: filteredRows.length + 1,
-  //       isSelected: false,
-  //     };
+  console.log("Devices:", devices);
 
-  //     // POST request to the server
-  //     const response = await fetch(
-  //       "https://schoolmanagement-1-hurx.onrender.com/parent/register",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify(newRow),
-  //       }
-  //     );
-  //     alert("record created successfully");
-
-  //     if (!response.ok) {
-  //       throw new Error("Network response was not ok");
-  //     }
-
-  //     // Assuming the server returns the created object
-  //     const result = await response.json();
-
-  //     // Update the state with the new row
-  //     setFilteredRows([...filteredRows, result]);
-
-  //     // Close the modal
-  //     handleModalClose();
-  //     fetchData();
-  //     console.log("error occured in post method");
-  //   } catch (error) {
-  //     console.error("Error during POST request:", error);
-  //     alert("unable to create record");
-  //     // Handle the error appropriately (e.g., show a notification to the user)
-  //   }
-  // };
-
-  // const [sortedData, setSortedData] = useState([]);
-
-  // useEffect(() => {
-  //   // Assuming data.devices contains the array of devices
-  //   setSortedData(data.devices);
-  // }, [data]);
   return (
     <>
-      <h1 style={{ textAlign: "center", marginTop: "80px" }}>Notification Access</h1>
+      <h1 style={{ textAlign: "center", marginTop: "80px" }}>
+        Notification Access
+      </h1>
       <div>
         <div
           style={{
@@ -1196,25 +1141,6 @@ export const Notification = () => {
             <ImportExportIcon />
             Column Visibility
           </Button>
-          {/* <Button
-            variant="contained"
-            color="error"
-            onClick={handleDeleteSelected}
-            sx={{ marginRight: "10px" }}
-            startIcon={<DeleteIcon />}
-          >
-            Delete
-          </Button> */}
-
-          {/* <Button
-            variant="contained"
-            color="success"
-            onClick={handleAddButtonClick}
-            sx={{ marginRight: "10px" }}
-            startIcon={<AddCircleIcon />}
-          >
-            Add
-          </Button> */}
           {role == 1 && (
             <>
               <Button
@@ -1246,17 +1172,11 @@ export const Notification = () => {
               </Button>
             </>
           )}
-
-          {/* <Button
-            variant="contained"
-            onClick={() => setImportModalOpen(true)}
-            sx={{ backgroundColor: "rgb(255, 165, 0)", marginRight: "10px" }}
-            startIcon={<CloudUploadIcon />}
-          >
-            Import
-          </Button> */}
-          <Export filteredRows={filteredRows} COLUMNS={COLUMNS} columnVisibility={columnVisibility}/>
-
+          <Export
+            filteredRows={filteredRows}
+            COLUMNS={COLUMNS}
+            columnVisibility={columnVisibility}
+          />
         </div>
         <div
           style={{
@@ -1264,47 +1184,7 @@ export const Notification = () => {
             alignItems: "center",
             marginBottom: "10px",
           }}
-        >
-          {/* <input
-            type="date"
-            id="startDate"
-            placeholder="DD-MM-YYYY"
-            style={{
-              width: "140px",
-              marginRight: "10px",
-              padding: "2px",
-              marginLeft: "3px",
-              border: " 0.1px solid black",
-              borderRadius: "3px",
-            }}
-          /> */}
-          {/* <input
-            type="date"
-            id="endDate"
-            placeholder="DD-MM-YYYY"
-            style={{
-              width: "140px",
-              marginRight: "10px",
-              padding: "2px",
-              marginLeft: "3px",
-              border: " 0.1px solid black",
-              borderRadius: "3px",
-            }}
-          /> */}
-          {/* <button
-            onClick={handleApplyDateRange}
-            style={{
-              backgroundColor: "#1976d2",
-              color: "white",
-              border: "none",
-              padding: "6px 10px",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-          >
-            Apply Date Range
-          </button> */}
-        </div>
+        ></div>
 
         {loading ? (
           <div
@@ -1378,7 +1258,7 @@ export const Notification = () => {
                           ) : null}
                         </TableCell>
                       ))}
-                      <TableCell
+                    <TableCell
                       style={{
                         minWidth: 70, // Adjust width if needed
                         borderRight: "1px solid #e0e0e0",
@@ -1388,7 +1268,7 @@ export const Notification = () => {
                         fontWeight: "bold",
                       }}
                     >
-                     Assigned Notifications
+                      Assigned Notifications
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -1461,49 +1341,62 @@ export const Notification = () => {
                                 </TableCell>
                               );
                             })}
-                            <TableCell
-  style={{
-    minWidth: 70,
-    borderRight: "1px solid #e0e0e0",
-    padding: "4px 4px",
-    textAlign: "center",
-    backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-    fontSize: "smaller",
-  }}
->
-  <Select
-    value=""
-    displayEmpty
-    fullWidth
-    variant="outlined"
-    style={{
-      textAlign: "center",
-      fontSize: "smaller",
-      backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-    }}
-  >
-    <MenuItem value="" disabled>
-      Notification Options
-    </MenuItem>
-    {/* Dynamically filter and render only true fields */}
-    {[
-      { key: "ignitionOn", label: "Ignition On" },
-      { key: "ignitionOff", label: "Ignition Off" },
-      { key: "geofenceEnter", label: "Geofence Enter" },
-      { key: "geofenceExit", label: "Geofence Exit" },
-      { key: "studentPresent", label: "Student Present" },
-      { key: "studentAbsent", label: "Student Absent" },
-      { key: "leaveRequestStatus", label: "Leave Request Status" },
-    ]
-      .filter((option) => row[option.key]) // Include only the fields with true value
-      .map((option) => (
-        <MenuItem key={option.key} value={option.key}>
-          {option.label}
-        </MenuItem>
-      ))}
-  </Select>
-</TableCell>
-
+                          <TableCell
+                            style={{
+                              minWidth: 70,
+                              borderRight: "1px solid #e0e0e0",
+                              padding: "4px 4px",
+                              textAlign: "center",
+                              backgroundColor:
+                                index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                              fontSize: "smaller",
+                            }}
+                          >
+                            <Select
+                              value=""
+                              displayEmpty
+                              fullWidth
+                              variant="outlined"
+                              style={{
+                                textAlign: "center",
+                                fontSize: "smaller",
+                                backgroundColor:
+                                  index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                              }}
+                            >
+                              <MenuItem value="" disabled>
+                                Notification Options
+                              </MenuItem>
+                              {/* Dynamically filter and render only true fields */}
+                              {[
+                                { key: "ignitionOn", label: "Ignition On" },
+                                { key: "ignitionOff", label: "Ignition Off" },
+                                {
+                                  key: "geofenceEnter",
+                                  label: "Geofence Enter",
+                                },
+                                { key: "geofenceExit", label: "Geofence Exit" },
+                                {
+                                  key: "studentPresent",
+                                  label: "Student Present",
+                                },
+                                {
+                                  key: "studentAbsent",
+                                  label: "Student Absent",
+                                },
+                                {
+                                  key: "leaveRequestStatus",
+                                  label: "Leave Request Status",
+                                },
+                              ]
+                                .filter((option) => row[option.key]) // Include only the fields with true value
+                                .map((option) => (
+                                  <MenuItem key={option.key} value={option.key}>
+                                    {option.label}
+                                  </MenuItem>
+                                ))}
+                            </Select>
+                          </TableCell>
                         </TableRow>
                       ))
                   )}
@@ -1527,16 +1420,15 @@ export const Notification = () => {
                 }
                 page={page}
                 onPageChange={(event, newPage) => {
-                  console.log("Page changed:", newPage);
+                  //console.log("Page changed:", newPage);
                   handleChangePage(event, newPage);
                 }}
                 onRowsPerPageChange={(event) => {
-                  console.log("Rows per page changed:", event.target.value);
+                  //console.log("Rows per page changed:", event.target.value);
                   handleChangeRowsPerPage(event);
                 }}
               />
             </StyledTablePagination>
-            {/* //</></div> */}
           </>
         )}
 
@@ -1556,26 +1448,6 @@ export const Notification = () => {
             </Box>
             {role == 1 ? (
               <>
-                {/* <FormControl
-                variant="outlined"
-                sx={{ marginBottom: "10px" }}
-                fullWidth
-              >
-                <InputLabel>{"School Name"}</InputLabel>
-
-                <Select
-                  value={formData["schoolId"] || ""}
-                  onChange={handleSchoolChange}
-                  name="schoolName"
-                  label={"School Name"}
-                >
-                  {schools.map((option) => (
-                    <MenuItem key={option._id} value={option._id}>
-                      {option.schoolName}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl> */}
                 <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
@@ -1599,11 +1471,11 @@ export const Notification = () => {
                       // Fetch branches with the selected schoolId
                       fetchBranch(selectedSchoolId); // Pass the selected schoolId to fetchBranch
                     }}
-                      name="schoolName"
-                      label={"School Name"}
+                    name="schoolName"
+                    label={"School Name"}
                     startAdornment={
                       <InputAdornment position="start">
-                        <SchoolIcon /> 
+                        <SchoolIcon />
                       </InputAdornment>
                     }
                   >
@@ -1620,19 +1492,6 @@ export const Notification = () => {
                   fullWidth
                 >
                   <InputLabel>{"Branch Name"}</InputLabel>
-
-                  {/* <Select
-                    value={formData["branchId"] || ""}
-                    onChange={handleSchoolChange}
-                    name="branchName"
-                    label={"Branch Name"}
-                  >
-                    {branches.map((option) => (
-                      <MenuItem key={option._id} value={option._id}>
-                        {option.branchName}
-                      </MenuItem>
-                    ))}
-                  </Select> */}
                   <Select
                     value={formData["branchId"] || ""}
                     onChange={(event) => {
@@ -1654,7 +1513,7 @@ export const Notification = () => {
                     label={"Branch Name"}
                     startAdornment={
                       <InputAdornment position="start">
-                        <AccountTreeIcon /> 
+                        <AccountTreeIcon />
                       </InputAdornment>
                     }
                   >
@@ -1666,88 +1525,6 @@ export const Notification = () => {
                   </Select>
                 </FormControl>
 
-                {/* <FormControl
-                  variant="outlined"
-                  sx={{ marginBottom: "10px" }}
-                  fullWidth
-                >
-                  <InputLabel>{"Devices"}</InputLabel>
-
-                  <Select
-                  value={formData["deviceId"] || ""}
-                  onChange={(event) => {
-                    const selectedDeviceId = event.target.value;
-
-                    // Handle device change (if you need additional logic, e.g., validation or setting state)
-                    // handleDeviceChange(event);
-
-                    // Update the formData with the selected deviceId
-                    setFormData((prevData) => ({
-                      ...prevData,
-                      deviceId: selectedDeviceId,
-                    }));
-
-                    // Fetch device details with the selected deviceId (or any further data you need)
-                    // fetchDeviceDetails(selectedDeviceId); // Pass the selected deviceId to fetch device details
-                  }}
-                  name="deviceName"
-                  label={"Device Name"}
-                >
-                  {devices.map((option) => (
-                    <MenuItem key={option._id} value={option._id}>
-                      {option.deviceName}
-                    </MenuItem>
-                  ))}
-                </Select>
-                </FormControl> */}
-                {/* <FormControl
-                  variant="outlined"
-                  sx={{ marginBottom: "10px" }}
-                  fullWidth
-                >
-                  <InputLabel>{"Devices"}</InputLabel>
-
-                  <Select
-                    multiple // Allow multiple selections
-                    value={formData["deviceId"] || []} // Handle an array of selected devices
-                    onChange={(event) => {
-                      const selectedDeviceIds = event.target.value; // Array of selected device IDs
-
-                      // Update the formData with the selected deviceIds
-                      setFormData((prevData) => ({
-                        ...prevData,
-                        deviceId: selectedDeviceIds, // Store array of selected device IDs
-                      }));
-
-                      // Optionally, you can fetch device details based on the selected devices
-                      // fetchDeviceDetails(selectedDeviceIds);
-                    }}
-                    name="deviceName"
-                    label={"Device Name"}
-                    renderValue={(selected) => {
-                      // This function customizes how the selected values are displayed
-                      return selected
-                        .map((deviceId) => {
-                          const device = devices.find(
-                            (device) => device._id === deviceId
-                          );
-                          return device ? device.deviceName : "";
-                        })
-                        .join(", "); // Join the selected device names with a comma
-                    }}
-                  >
-                    {devices.map((option) => (
-                      <MenuItem key={option._id} value={option._id}>
-                        <Checkbox
-                          checked={
-                            formData["deviceId"]?.includes(option._id) || false
-                          }
-                        />
-                        {option.deviceName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl> */}
                 <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
@@ -1756,79 +1533,75 @@ export const Notification = () => {
                   <InputLabel>{"Devices"}</InputLabel>
 
                   <Select
-                    multiple // Allow multiple selections
-                    value={formData["deviceId"] || []} // Ensure this is an array of deviceId
+                    multiple
+                    value={formData.deviceId || []}
                     onChange={(event) => {
-                      const selectedDeviceIds = event.target.value; // Array of selected deviceIds
+                      const value = event.target.value;
 
-                      // Update the formData with the selected deviceIds (not _id)
+                      // Prevent accidental inclusion of "__select_all__"
+                      if (value.includes("__select_all__")) return;
+
                       setFormData((prevData) => ({
                         ...prevData,
-                        deviceId: selectedDeviceIds, // Store array of selected deviceIds
+                        deviceId: value,
                       }));
                     }}
                     name="deviceName"
-                    label={"Device Name"}
+                    label="Device Name"
                     startAdornment={
                       <InputAdornment position="start">
-                        <DirectionsBusIcon /> 
+                        <DirectionsBusIcon />
                       </InputAdornment>
                     }
                     renderValue={(selected) => {
-                      // Custom render to display selected device names based on deviceId
                       return selected
                         .map((deviceId) => {
                           const device = devices.find(
-                            (device) => device.deviceId === deviceId // Match by deviceId instead of _id
+                            (device) => device.deviceId === deviceId
                           );
                           return device ? device.deviceName : "";
                         })
-                        .join(", "); // Join selected device names with commas
+                        .join(", ");
                     }}
                   >
-                    {/* "Select All" MenuItem */}
+                    {/* Select All MenuItem (non-selectable via value) */}
                     <MenuItem
-                      onClick={() => {
-                        const selectedDeviceIds = formData["deviceId"] || [];
+                      value="__select_all__"
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent from adding value
+                        const selected = formData.deviceId || [];
+                        const allDeviceIds = devices
+                          .map((d) => d.deviceId)
+                          .filter(Boolean); // Ensure no undefined
 
-                        if (selectedDeviceIds.length !== devices.length) {
-                          // If not all devices are selected, select all deviceIds
-                          const allDeviceIds = devices.map(
-                            (device) => device.deviceId
-                          ); // Use deviceId here
-                          setFormData((prevData) => ({
-                            ...prevData,
-                            deviceId: allDeviceIds, // Select all deviceIds
-                          }));
-                        } else {
-                          // If all devices are selected, deselect all
-                          setFormData((prevData) => ({
-                            ...prevData,
-                            deviceId: [], // Deselect all
-                          }));
-                        }
+                        const isAllSelected =
+                          selected.length === allDeviceIds.length;
+
+                        setFormData((prev) => ({
+                          ...prev,
+                          deviceId: isAllSelected ? [] : allDeviceIds,
+                        }));
                       }}
                     >
                       <Checkbox
                         checked={
-                          formData["deviceId"]?.length === devices.length
-                        } // Check if all deviceIds are selected
+                          formData.deviceId?.length === devices.length &&
+                          devices.length > 0
+                        }
                       />
                       Select All
                     </MenuItem>
 
-                    {/* Devices Menu Items */}
-                    {devices.map((option) => (
-                      <MenuItem key={option.deviceId} value={option.deviceId}>
-                        {" "}
-                        {/* Use deviceId as value */}
+                    {/* Device Items */}
+                    {devices.map((device) => (
+                      <MenuItem key={device.deviceId} value={device.deviceId}>
                         <Checkbox
                           checked={
-                            formData["deviceId"]?.includes(option.deviceId) ||
+                            formData.deviceId?.includes(device.deviceId) ||
                             false
-                          } // Check if deviceId is selected
+                          }
                         />
-                        {option.deviceName}
+                        {device.deviceName}
                       </MenuItem>
                     ))}
                   </Select>
@@ -1860,7 +1633,7 @@ export const Notification = () => {
                     label={"Notification Options"}
                     startAdornment={
                       <InputAdornment position="start">
-                        <CircleNotificationsIcon /> 
+                        <CircleNotificationsIcon />
                       </InputAdornment>
                     }
                     renderValue={(selected) => selected.join(", ")} // Render selected options
@@ -1908,72 +1681,86 @@ export const Notification = () => {
         </Modal>
 
         <Modal open={editModalOpen} onClose={handleCloseModal}>
-  <Box sx={style}>
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        marginBottom: "20px",
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Edit Access</h2>
-      <IconButton onClick={handleCloseModal}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
-        <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-          <InputLabel>{"School Name"}</InputLabel>
-          <Select 
-          value={editFormData.schoolName || ""}
-          name="schoolName"
-          label={"School Name"}
-          startAdornment={
-            <InputAdornment position="start">
-              <SchoolIcon /> {/* Add SchoolIcon as the adornment */}
-            </InputAdornment>
-          }>
-            <MenuItem value={editFormData.schoolName || ""}>
-              {editFormData.schoolName || ""}
-            </MenuItem>
-          </Select>
-        </FormControl>
+          <Box sx={style}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Edit Access</h2>
+              <IconButton onClick={handleCloseModal}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <FormControl
+              variant="outlined"
+              sx={{ marginBottom: "10px" }}
+              fullWidth
+            >
+              <InputLabel>{"School Name"}</InputLabel>
+              <Select
+                value={editFormData.schoolName || ""}
+                name="schoolName"
+                label={"School Name"}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <SchoolIcon /> {/* Add SchoolIcon as the adornment */}
+                  </InputAdornment>
+                }
+              >
+                <MenuItem value={editFormData.schoolName || ""}>
+                  {editFormData.schoolName || ""}
+                </MenuItem>
+              </Select>
+            </FormControl>
 
-        <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-          <InputLabel>{"Branch Name"}</InputLabel>
-          <Select 
-          value={editFormData.branchName || ""}
-          name="branchNames"
-          label={"Branch Name"}
-          startAdornment={
-            <InputAdornment position="start">
-              <AccountTreeIcon /> {/* Add SchoolIcon as the adornment */}
-            </InputAdornment>
-          }
-          >
-            <MenuItem value={editFormData.branchName || ""}>
-              {editFormData.branchName || ""}
-            </MenuItem>
-          </Select>
-        </FormControl>
+            <FormControl
+              variant="outlined"
+              sx={{ marginBottom: "10px" }}
+              fullWidth
+            >
+              <InputLabel>{"Branch Name"}</InputLabel>
+              <Select
+                value={editFormData.branchName || ""}
+                name="branchNames"
+                label={"Branch Name"}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <AccountTreeIcon /> {/* Add SchoolIcon as the adornment */}
+                  </InputAdornment>
+                }
+              >
+                <MenuItem value={editFormData.branchName || ""}>
+                  {editFormData.branchName || ""}
+                </MenuItem>
+              </Select>
+            </FormControl>
 
-        <FormControl variant="outlined" sx={{ marginBottom: "10px" }} fullWidth>
-          <InputLabel>{"Device Name"}</InputLabel>
-          <Select
-           value={editFormData.deviceName || ""}
-           name="deviceName"
-           label={"Device Name"}
-           startAdornment={
-            <InputAdornment position="start">
-              <DirectionsBusIcon /> {/* Add SchoolIcon as the adornment */}
-            </InputAdornment>
-          }
-           >
-            <MenuItem value={editFormData.deviceName || ""}>
-              {editFormData.deviceName || ""}
-            </MenuItem>
-          </Select>
-        </FormControl>
-        {/* <FormControl
+            <FormControl
+              variant="outlined"
+              sx={{ marginBottom: "10px" }}
+              fullWidth
+            >
+              <InputLabel>{"Device Name"}</InputLabel>
+              <Select
+                value={editFormData.deviceName || ""}
+                name="deviceName"
+                label={"Device Name"}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <DirectionsBusIcon />{" "}
+                    {/* Add SchoolIcon as the adornment */}
+                  </InputAdornment>
+                }
+              >
+                <MenuItem value={editFormData.deviceName || ""}>
+                  {editFormData.deviceName || ""}
+                </MenuItem>
+              </Select>
+            </FormControl>
+            {/* <FormControl
                   variant="outlined"
                   sx={{ marginBottom: "10px" }}
                   fullWidth
@@ -2009,53 +1796,51 @@ export const Notification = () => {
                     ))}
                   </Select>
                 </FormControl> */}
-                <FormControl
-  variant="outlined"
-  sx={{ marginBottom: "10px" }}
-  fullWidth
->
-  <InputLabel>{"Notification Options"}</InputLabel>
-  <Select
-    multiple
-    value={notificationOptions.filter(
-      (option) => editFormData[option]
-    )} // Only selected options will be included
-    onChange={(event) => {
-      const selectedValues = event.target.value; // Array of selected notification options
+            <FormControl
+              variant="outlined"
+              sx={{ marginBottom: "10px" }}
+              fullWidth
+            >
+              <InputLabel>{"Notification Options"}</InputLabel>
+              <Select
+                multiple
+                value={notificationOptions.filter(
+                  (option) => editFormData[option]
+                )} // Only selected options will be included
+                onChange={(event) => {
+                  const selectedValues = event.target.value; // Array of selected notification options
 
-      // Update editFormData directly
-      setEditFormData((prevData) => {
-        const updatedFormData = { ...prevData };
-        notificationOptions.forEach((option) => {
-          updatedFormData[option] = selectedValues.includes(option); // True for selected, false for others
-        });
-        return updatedFormData;
-      });
-    }}
-    name="notificationOptions"
-    label={"Notification Options"}
-    startAdornment={
-      <InputAdornment position="start">
-        <CircleNotificationsIcon /> 
-      </InputAdornment>
-    }
-    renderValue={(selected) => selected.join(", ")} // Render selected options
-  >
-    {/* Individual Options */}
-    {notificationOptions.map((option, index) => (
-      <MenuItem key={index} value={option}>
-        <Checkbox
-          checked={editFormData[option] || false} // Pre-check if true in editFormData
-        />
-        {option}
-      </MenuItem>
-    ))}
-  </Select>
-</FormControl>
+                  // Update editFormData directly
+                  setEditFormData((prevData) => {
+                    const updatedFormData = { ...prevData };
+                    notificationOptions.forEach((option) => {
+                      updatedFormData[option] = selectedValues.includes(option); // True for selected, false for others
+                    });
+                    return updatedFormData;
+                  });
+                }}
+                name="notificationOptions"
+                label={"Notification Options"}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <CircleNotificationsIcon />
+                  </InputAdornment>
+                }
+                renderValue={(selected) => selected.join(", ")} // Render selected options
+              >
+                {/* Individual Options */}
+                {notificationOptions.map((option, index) => (
+                  <MenuItem key={index} value={option}>
+                    <Checkbox
+                      checked={editFormData[option] || false} // Pre-check if true in editFormData
+                    />
+                    {option}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-                
-
-        {/* <Box>
+            {/* <Box>
           <h4>Notification Types</h4>
           {[
             { name: "ignitionOn", label: "Ignition On" },
@@ -2082,22 +1867,17 @@ export const Notification = () => {
             </FormControl>
           ))}
         </Box> */}
-    
 
-    <Button
-      variant="contained"
-      color="primary"
-      onClick={handleEditSubmit}
-      fullWidth
-    >
-      Submit
-    </Button>
-  </Box>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleEditSubmit}
+              fullWidth
+            >
+              Submit
+            </Button>
+          </Box>
         </Modal>
-
-
-            
-            
 
         <Snackbar
           open={snackbarOpen}

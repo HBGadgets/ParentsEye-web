@@ -83,16 +83,16 @@ export const ReadDevices = () => {
   //   try {
   //     const token = localStorage.getItem("token");
   //     const apiUrl = `${process.env.REACT_APP_BRANCH_API}/read-devices`;
-  
+
   //     // Fetch data from the API
   //     const response = await axios.get(apiUrl, {
   //       headers: {
   //         Authorization: `Bearer ${token}`,
   //       },
   //     });
-  
+
   //     console.log("fetch data branch devices", response.data);
-  
+
   //     // Ensure response.data is properly structured
   //     if (response?.data && Array.isArray(response.data)) {
   //       // Flatten the array of devices
@@ -106,32 +106,32 @@ export const ReadDevices = () => {
   //         }
   //         return []; // Return empty array if item.devices is not an array
   //       });
-  
+
   //       // Filtering logic if startDate or endDate is provided
   //       const filteredData = (startDate || endDate)
   //         ? allData.filter((row) => {
   //             const registrationDate = new Date(); // Placeholder for actual registration date logic
   //             const start = parseDate(startDate);
   //             const end = parseDate(endDate);
-  
+
   //             return (
   //               (!startDate || registrationDate >= start) &&
   //               (!endDate || registrationDate <= end)
   //             );
   //           })
   //         : allData;
-  
+
   //       const reversedData = filteredData.reverse(); // Reverse for most recent first
-  
+
   //       // Set filtered and original rows with isSelected as false by default
   //       setFilteredRows(
   //         reversedData.map((row) => ({ ...row, isSelected: false }))
   //       );
   //       setOriginalRows(allData.map((row) => ({ ...row, isSelected: false })));
-  
+
   //       // Set the total number of responses
   //       setTotalResponses(reversedData.length);
-  
+
   //       console.log(`Data fetched between ${startDate} and ${endDate}:`, filteredData);
   //     } else {
   //       console.error("Expected an array but got:", response.data);
@@ -142,16 +142,14 @@ export const ReadDevices = () => {
   //     setLoading(false);
   //   }
   // };
-  
-  
-  
+
   // Helper function for parsing dates
   // const parseDate = (dateStr) => {
   //   if (!dateStr) return null;
   //   const [month, day, year] = dateStr.split('/').map(Number); // Assuming MM/DD/YYYY format
   //   return new Date(year, month - 1, day);
   // };
-  
+
   const fetchData = async (startDate = "", endDate = "") => {
     setLoading(true);
     try {
@@ -186,7 +184,7 @@ export const ReadDevices = () => {
             },
           }
         );
-      }else if (role == 4) {
+      } else if (role == 4) {
         const token = localStorage.getItem("token");
         response = await axios.get(
           `http://63.142.251.13:4000/branchgroupuser/getdevicebranchgroupuser`,
@@ -201,85 +199,47 @@ export const ReadDevices = () => {
       console.log("fetch data", response.data); // Log the entire response data
       // fetchgeofencepoint();
       if (response?.data) {
-      //   const allData = role == 1
-      //     ? response.data.data.flatMap((school) =>
-      //         school.branches.flatMap((branch) =>
-      //           Array.isArray(branch.devices) && branch.devices.length > 0
-      //             ? branch.devices.map((device) => ({
-      //                 ...device,
-      //                 schoolName: school.schoolName,
-      //                 branchName: branch.branchName,
-      //               }))
-      //             : []
-      //         )
-      //       )
-      //       :role==4
-      //       ?response.data.data.branches.flatMap((branch)=>
-      //  Array.isArray(branch.devices)&& branch.devices.length>0?
-      //         branch.devices.map((device)=>({
-      //           ...device,
-      //           branchName:branch.branchName,
-      //         }))
-      //         :[]
-      //       )
-      //       : role ==2
-      //       ? response.data.branches.flatMap((branch) =>
-      //           Array.isArray(branch.devices) && branch.devices.length > 0
-      //             ? branch.devices.map((device) => ({
-      //                 ...device,
-      //                 branchName: branch.branchName,
-      //               }))
-      //             : []
-      //         )
-      //         :role == 3
-      //         ? response.data.devices.map((device) => ({
-      //             ...device,
-      //             schoolName: response.data.schoolName,
-      //             branchName: response.data.branchName,
-      //           }))
-      //         : []
-      const allData =
-      role == 1
-        ? response.data.data.flatMap((school) =>
-            school.branches.flatMap((branch) =>
-              Array.isArray(branch.devices) && branch.devices.length > 0
-                ? branch.devices.map((device) => ({
-                    ...device,
-                    schoolName: school.schoolName,
-                    branchName: branch.branchName,
-                  }))
-                : []
-            )
-          )
-          : role == 4
-          ? response.data.data.flatMap((school) =>
-              school.branches.flatMap((branch) =>
+        const allData =
+          role == 1
+            ? response.data.data.flatMap((school) =>
+                school.branches.flatMap((branch) =>
+                  Array.isArray(branch.devices) && branch.devices.length > 0
+                    ? branch.devices.map((device) => ({
+                        ...device,
+                        schoolName: school.schoolName,
+                        branchName: branch.branchName,
+                      }))
+                    : []
+                )
+              )
+            : role == 4
+            ? response.data.data.flatMap((school) =>
+                school.branches.flatMap((branch) =>
+                  Array.isArray(branch.devices) && branch.devices.length > 0
+                    ? branch.devices.map((device) => ({
+                        ...device,
+                        branchName: branch.branchName,
+                        schoolName: school.schoolName,
+                      }))
+                    : []
+                )
+              )
+            : role == 2
+            ? response.data.branches.flatMap((branch) =>
                 Array.isArray(branch.devices) && branch.devices.length > 0
                   ? branch.devices.map((device) => ({
                       ...device,
                       branchName: branch.branchName,
-                      schoolName: school.schoolName,
                     }))
                   : []
               )
-            )
-        : role == 2
-        ? response.data.branches.flatMap((branch) =>
-            Array.isArray(branch.devices) && branch.devices.length > 0
-              ? branch.devices.map((device) => ({
-                  ...device,
-                  branchName: branch.branchName,
-                }))
-              : []
-          )
-        : role == 3
-        ? response.data.devices.map((device) => ({
-            ...device,
-            schoolName: response.data.schoolName,
-            branchName: response.data.branchName,
-          }))
-        : [];
-    
+            : role == 3
+            ? response.data.devices.map((device) => ({
+                ...device,
+                schoolName: response.data.schoolName,
+                branchName: response.data.branchName,
+              }))
+            : [];
 
         console.log(allData);
 
@@ -310,8 +270,6 @@ export const ReadDevices = () => {
         // Log the date range and filtered data
         console.log(`Data fetched between ${startDate} and ${endDate}:`);
         console.log(filteredData);
-
-      
       } else {
         console.error("Expected an array but got:", response.data.children);
       }
@@ -321,10 +279,6 @@ export const ReadDevices = () => {
       setLoading(false); // Set loading to false after fetching completes
     }
   };
-  
-
-  
-  
 
   const parseDate = (dateString) => {
     const [day, month, year] = dateString.split("-").map(Number);
@@ -369,7 +323,7 @@ export const ReadDevices = () => {
     setRowsPerPage(newRowsPerPage === -1 ? sortedData.length : newRowsPerPage); // Set to all rows if -1
     setPage(0); // Reset to the first page
   };
-  
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -469,8 +423,7 @@ export const ReadDevices = () => {
           console.log("Processing row:", row);
           return row.actualDeviceId; // Ensure id exists and is not undefined
         });
-    }
-    else if (role == 4) {
+    } else if (role == 4) {
       selectedIds = filteredRows
         .filter((row) => row.isSelected)
         .map((row) => {
@@ -509,9 +462,9 @@ export const ReadDevices = () => {
           ? `${process.env.REACT_APP_SUPER_ADMIN_API}/delete-device`
           : role == 2
           ? `${process.env.REACT_APP_SCHOOL_API}/delete-device`
-          :role==3
+          : role == 3
           ? `${process.env.REACT_APP_BRANCH_API}/delete-device`
-          :`http://63.142.251.13:4000/branchgroupuser/deletedevicebybranchgroup`;
+          : `http://63.142.251.13:4000/branchgroupuser/deletedevicebybranchgroup`;
 
       const token = localStorage.getItem("token");
       // Send delete requests for each selected ID
@@ -549,8 +502,6 @@ export const ReadDevices = () => {
     }
     fetchData();
   };
-
-
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -706,7 +657,7 @@ export const ReadDevices = () => {
   return (
     <>
       <h1 style={{ textAlign: "center", marginTop: "80px" }}>
-       Assign devices List
+        Assign devices List
       </h1>
       <div>
         <div
@@ -714,57 +665,56 @@ export const ReadDevices = () => {
             display: "flex",
             alignItems: "center",
             marginBottom: "10px",
-            
           }}
         >
           <TextField
-    label="Search"
-    variant="outlined"
-    value={filterText}
-    onChange={handleFilterChange}
-    sx={{
-      marginRight: "10px",
-      width: "200px", // Smaller width
-      '& .MuiOutlinedInput-root': {
-        height: '36px', // Set a fixed height to reduce it
-        padding: '0px', // Reduce padding to shrink height
-      },
-      '& .MuiInputLabel-root': {
-        top: '-6px', // Adjust label position
-        fontSize: '14px', // Slightly smaller label font
-      }
-    }}
-    InputProps={{
-      startAdornment: (
-        <SearchIcon
-          style={{
-            cursor: "pointer",
-            marginLeft: "10px",
-            marginRight: "5px",
-          }}
-        />
-      ),
-    }}
-  />
+            label="Search"
+            variant="outlined"
+            value={filterText}
+            onChange={handleFilterChange}
+            sx={{
+              marginRight: "10px",
+              width: "200px", // Smaller width
+              "& .MuiOutlinedInput-root": {
+                height: "36px", // Set a fixed height to reduce it
+                padding: "0px", // Reduce padding to shrink height
+              },
+              "& .MuiInputLabel-root": {
+                top: "-6px", // Adjust label position
+                fontSize: "14px", // Slightly smaller label font
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <SearchIcon
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                    marginRight: "5px",
+                  }}
+                />
+              ),
+            }}
+          />
           <Button
-  onClick={() => setModalOpen(true)}
-  sx={{
-    backgroundColor: "rgb(85, 85, 85)",
-    color: "white",
-    fontWeight: "bold",
-    marginRight: "10px",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    "&:hover": {
-      fontWeight: "bolder", // Make text even bolder on hover
-      backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
-    },
-  }}
->
-  <ImportExportIcon />
-  Column Visibility
-</Button>
+            onClick={() => setModalOpen(true)}
+            sx={{
+              backgroundColor: "rgb(85, 85, 85)",
+              color: "white",
+              fontWeight: "bold",
+              marginRight: "10px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              "&:hover": {
+                fontWeight: "bolder", // Make text even bolder on hover
+                backgroundColor: "rgb(85, 85, 85)", // Maintain background color on hover
+              },
+            }}
+          >
+            <ImportExportIcon />
+            Column Visibility
+          </Button>
           <Button
             variant="contained"
             color="error"
@@ -800,8 +750,14 @@ export const ReadDevices = () => {
           >
             Import
           </Button> */}
-          <Export columnVisibility={columnVisibility} COLUMNS={COLUMNS} filteredRows={filteredRows} pdfTitle={"ASSIGN DEVICES LIST"} pdfFilename={"ReadDevice.pdf"} excelFilename={"ReadDevice.xlsx"}/>
-
+          <Export
+            columnVisibility={columnVisibility}
+            COLUMNS={COLUMNS}
+            filteredRows={filteredRows}
+            pdfTitle={"ASSIGN DEVICES LIST"}
+            pdfFilename={"ReadDevice.pdf"}
+            excelFilename={"ReadDevice.xlsx"}
+          />
         </div>
         <div
           style={{
@@ -863,139 +819,169 @@ export const ReadDevices = () => {
           </div>
         ) : (
           <>
-          <TableContainer
-  component={Paper}
-  sx={{
-    maxHeight: 460,
-    border: "1.5px solid black",
-    borderRadius: "7px",
-  }}
->
-  <Table stickyHeader aria-label="sticky table" style={{ border: "1px solid black" }}>
-    <TableHead>
-      <TableRow
-        style={{
-          borderBottom: "1px solid black",
-          borderTop: "1px solid black",
-        }}
-      >
-        <TableCell
-          padding="checkbox"
-          style={{
-            borderRight: "1px solid #e0e0e0",
-            borderBottom: "2px solid black",
-          }}
-        >
-          <Switch checked={selectAll} onChange={handleSelectAll} color="primary" />
-        </TableCell>
-        {COLUMNS().filter((col) => columnVisibility[col.accessor]).map((column) => (
-          <TableCell
-            key={column.accessor}
-            align={column.align}
-            style={{
-              minWidth: column.minWidth,
-              cursor: "pointer",
-              borderRight: "1px solid #e0e0e0",
-              borderBottom: "2px solid black",
-              padding: "4px 4px",
-              textAlign: "center",
-              fontWeight: "bold",
-            }}
-            onClick={() => requestSort(column.accessor)}
-          >
-            {column.Header}
-            {sortConfig.key === column.accessor ? (
-              sortConfig.direction === "ascending" ? (
-                <ArrowUpwardIcon fontSize="small" />
-              ) : (
-                <ArrowDownwardIcon fontSize="small" />
-              )
-            ) : null}
-          </TableCell>
-        ))}
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {sortedData.length === 0 ? (
-        <TableRow>
-          <TableCell
-            colSpan={COLUMNS().filter((col) => columnVisibility[col.accessor]).length}
-            style={{
-              textAlign: "center",
-              padding: "16px",
-              fontSize: "16px",
-              color: "#757575",
-            }}
-          >
-            <h4>No Data Available</h4>
-          </TableCell>
-        </TableRow>
-      ) : (
-        sortedData
-          .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-          .map((row, index) => (
-            <TableRow
-              hover
-              role="checkbox"
-              tabIndex={-1}
-              key={row.deviceId}
-              onClick={() => handleRowSelect(page * rowsPerPage + index)}
-              selected={row.isSelected}
-              style={{
-                backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-                borderBottom: "none", // White for even rows, light grey for odd rows
+            <TableContainer
+              component={Paper}
+              sx={{
+                maxHeight: 460,
+                border: "1.5px solid black",
+                borderRadius: "7px",
               }}
             >
-              <TableCell
-                padding="checkbox"
-                style={{ borderRight: "1px solid #e0e0e0" }}
+              <Table
+                stickyHeader
+                aria-label="sticky table"
+                style={{ border: "1px solid black" }}
               >
-                <Switch checked={row.isSelected} color="primary" />
-              </TableCell>
-              {COLUMNS().filter((col) => columnVisibility[col.accessor]).map((column) => {
-                const value = row[column.accessor];
-                return (
-                  <TableCell
-                    key={column.accessor}
-                    align={column.align}
+                <TableHead>
+                  <TableRow
                     style={{
-                      borderRight: "1px solid #e0e0e0",
-                      paddingTop: "4px",
-                      paddingBottom: "4px",
-                      borderBottom: "none",
-                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
-                      fontSize: "smaller",
+                      borderBottom: "1px solid black",
+                      borderTop: "1px solid black",
                     }}
                   >
-                    {value || "N/A"}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          ))
-      )}
-    </TableBody>
-  </Table>
-</TableContainer>
+                    <TableCell
+                      padding="checkbox"
+                      style={{
+                        borderRight: "1px solid #e0e0e0",
+                        borderBottom: "2px solid black",
+                      }}
+                    >
+                      <Switch
+                        checked={selectAll}
+                        onChange={handleSelectAll}
+                        color="primary"
+                      />
+                    </TableCell>
+                    {COLUMNS()
+                      .filter((col) => columnVisibility[col.accessor])
+                      .map((column) => (
+                        <TableCell
+                          key={column.accessor}
+                          align={column.align}
+                          style={{
+                            minWidth: column.minWidth,
+                            cursor: "pointer",
+                            borderRight: "1px solid #e0e0e0",
+                            borderBottom: "2px solid black",
+                            padding: "4px 4px",
+                            textAlign: "center",
+                            fontWeight: "bold",
+                          }}
+                          onClick={() => requestSort(column.accessor)}
+                        >
+                          {column.Header}
+                          {sortConfig.key === column.accessor ? (
+                            sortConfig.direction === "ascending" ? (
+                              <ArrowUpwardIcon fontSize="small" />
+                            ) : (
+                              <ArrowDownwardIcon fontSize="small" />
+                            )
+                          ) : null}
+                        </TableCell>
+                      ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sortedData.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={
+                          COLUMNS().filter(
+                            (col) => columnVisibility[col.accessor]
+                          ).length
+                        }
+                        style={{
+                          textAlign: "center",
+                          padding: "16px",
+                          fontSize: "16px",
+                          color: "#757575",
+                        }}
+                      >
+                        <h4>No Data Available</h4>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    sortedData
+                      .slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((row, index) => (
+                        <TableRow
+                          hover
+                          role="checkbox"
+                          tabIndex={-1}
+                          key={row.deviceId}
+                          onClick={() =>
+                            handleRowSelect(page * rowsPerPage + index)
+                          }
+                          selected={row.isSelected}
+                          style={{
+                            backgroundColor:
+                              index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                            borderBottom: "none", // White for even rows, light grey for odd rows
+                          }}
+                        >
+                          <TableCell
+                            padding="checkbox"
+                            style={{ borderRight: "1px solid #e0e0e0" }}
+                          >
+                            <Switch checked={row.isSelected} color="primary" />
+                          </TableCell>
+                          {COLUMNS()
+                            .filter((col) => columnVisibility[col.accessor])
+                            .map((column) => {
+                              const value = row[column.accessor];
+                              return (
+                                <TableCell
+                                  key={column.accessor}
+                                  align={column.align}
+                                  style={{
+                                    borderRight: "1px solid #e0e0e0",
+                                    paddingTop: "4px",
+                                    paddingBottom: "4px",
+                                    borderBottom: "none",
+                                    backgroundColor:
+                                      index % 2 === 0 ? "#ffffff" : "#eeeeefc2",
+                                    fontSize: "smaller",
+                                  }}
+                                >
+                                  {value || "N/A"}
+                                </TableCell>
+                              );
+                            })}
+                        </TableRow>
+                      ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-
-<StyledTablePagination>
-  <TablePagination
-    rowsPerPageOptions={[{ label: "All", value: -1 }, 10, 25, 100, 1000]}
-    component="div"
-    count={sortedData.length}
-    rowsPerPage={rowsPerPage === sortedData.length ? -1 : rowsPerPage}
-    page={page}
-    onPageChange={(event, newPage) => {
-      console.log("Page changed:", newPage);
-      handleChangePage(event, newPage);
-    }}
-    onRowsPerPageChange={(event) => {
-      console.log("Rows per page changed:", event.target.value);
-      handleChangeRowsPerPage(event);
-    }}
-  />
-</StyledTablePagination>
+            <StyledTablePagination>
+              <TablePagination
+                rowsPerPageOptions={[
+                  { label: "All", value: -1 },
+                  10,
+                  25,
+                  100,
+                  1000,
+                ]}
+                component="div"
+                count={sortedData.length}
+                rowsPerPage={
+                  rowsPerPage === sortedData.length ? -1 : rowsPerPage
+                }
+                page={page}
+                onPageChange={(event, newPage) => {
+                  console.log("Page changed:", newPage);
+                  handleChangePage(event, newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                  console.log("Rows per page changed:", event.target.value);
+                  handleChangeRowsPerPage(event);
+                }}
+              />
+            </StyledTablePagination>
             {/* //</></div> */}
           </>
         )}
@@ -1003,17 +989,17 @@ export const ReadDevices = () => {
           <Box sx={style}>
             {/* <h2></h2> */}
             <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        marginBottom: '20px',
-      }}
-    >
-      <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
-      <IconButton onClick={handleModalClose}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
+              <h2 style={{ flexGrow: 1 }}>Column Visibility</h2>
+              <IconButton onClick={handleModalClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
             {COLUMNS().map((col) => (
               <div key={col.accessor}>
                 <Switch
@@ -1023,7 +1009,6 @@ export const ReadDevices = () => {
                 />
                 {col.Header}
               </div>
-              
             ))}
           </Box>
         </Modal>
